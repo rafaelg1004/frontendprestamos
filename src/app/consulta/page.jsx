@@ -1,33 +1,39 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Search, CreditCard, Calendar, DollarSign, AlertCircle } from "lucide-react"
-import { api } from "@/lib/api"
-import toast from "react-hot-toast"
-import styles from "./Consulta.module.css"
+import { useState } from "react";
+import {
+  Search,
+  CreditCard,
+  Calendar,
+  DollarSign,
+  AlertCircle,
+} from "lucide-react";
+import api from "@/lib/api";
+import toast from "react-hot-toast";
+import styles from "./Consulta.module.css";
 
 export default function ConsultaPage() {
-  const [cedula, setCedula] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [resultados, setResultados] = useState(null)
-  const [error, setError] = useState("")
+  const [cedula, setCedula] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [resultados, setResultados] = useState(null);
+  const [error, setError] = useState("");
 
   const handleConsulta = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError("")
-    setResultados(null)
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    setResultados(null);
 
     try {
-      const response = await api.get(`/prestamos/publico/cedula/${cedula}`)
-      setResultados(response.data.data)
+      const response = await api.get(`/prestamos/publico/cedula/${cedula}`);
+      setResultados(response.data.data);
     } catch (err) {
-      setError(err.response?.data?.message || "Error al consultar préstamos")
-      toast.error("Error al consultar")
+      setError(err.response?.data?.message || "Error al consultar préstamos");
+      toast.error("Error al consultar");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className={styles.container}>
@@ -37,7 +43,9 @@ export default function ConsultaPage() {
             <Search size={48} />
           </div>
           <h1 className={styles.title}>Consulta de Préstamos</h1>
-          <p className={styles.subtitle}>Consulta tus préstamos ingresando tu cédula</p>
+          <p className={styles.subtitle}>
+            Consulta tus préstamos ingresando tu cédula
+          </p>
         </div>
 
         <form onSubmit={handleConsulta} className={styles.form}>
@@ -72,8 +80,12 @@ export default function ConsultaPage() {
           <div className={styles.resultados}>
             <div className={styles.perfil}>
               <h3>Información del Cliente</h3>
-              <p><strong>Nombre:</strong> {resultados.perfil.nombre}</p>
-              <p><strong>Teléfono:</strong> {resultados.perfil.telefono}</p>
+              <p>
+                <strong>Nombre:</strong> {resultados.perfil.nombre}
+              </p>
+              <p>
+                <strong>Teléfono:</strong> {resultados.perfil.telefono}
+              </p>
             </div>
 
             <div className={styles.prestamos}>
@@ -86,12 +98,16 @@ export default function ConsultaPage() {
                     <div key={prestamo.id} className={styles.prestamoCard}>
                       <div className={styles.prestamoHeader}>
                         <Calendar size={16} />
-                        <span>{new Date(prestamo.fecha_inicio).toLocaleDateString()}</span>
+                        <span>
+                          {new Date(prestamo.fecha_inicio).toLocaleDateString()}
+                        </span>
                       </div>
                       <div className={styles.prestamoBody}>
                         <div className={styles.prestamoField}>
                           <DollarSign size={16} />
-                          <span>Monto: ${prestamo.monto_principal.toLocaleString()}</span>
+                          <span>
+                            Monto: ${prestamo.monto_principal.toLocaleString()}
+                          </span>
                         </div>
                         <div className={styles.prestamoField}>
                           <span>Estado: {prestamo.estado}</span>
@@ -106,5 +122,5 @@ export default function ConsultaPage() {
         )}
       </div>
     </div>
-  )
+  );
 }
