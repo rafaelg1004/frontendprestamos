@@ -130,4 +130,8 @@ export const authApi = {
   setToken: (token) => {
     setCookie("auth_token", token, 7); // 7 días
   },
+  changePassword: (currentPassword, newPassword) =>
+    api.put("/auth/change-password", { currentPassword, newPassword }),
+  createAdmin: (email, password, nombre) =>
+    api.post("/auth/create-admin", { email, password, nombre }),
 };
