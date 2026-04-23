@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { CreditCard, Lock, Wallet, AlertCircle } from "lucide-react";
+import { Mail, Lock, Shield, AlertCircle } from "lucide-react";
 import { authApi } from "@/lib/api";
 import toast from "react-hot-toast";
 import styles from "./LoginView.module.css";
@@ -11,7 +11,7 @@ import styles from "./LoginView.module.css";
 export function LoginView() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [identificacion, setIdentificacion] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -32,7 +32,7 @@ export function LoginView() {
     setError("");
 
     try {
-      const response = await authApi.login(identificacion, password);
+      const response = await authApi.login(email, password);
       const token = response.data?.data?.token;
 
       if (token) {
@@ -55,10 +55,10 @@ export function LoginView() {
       <div className={styles.card}>
         <div className={styles.header}>
           <div className={styles.logo}>
-            <Wallet size={32} />
+            <Shield size={32} />
           </div>
-          <h1 className={styles.title}>Sistema de Préstamos</h1>
-          <p className={styles.subtitle}>Inicia sesión para continuar</p>
+          <h1 className={styles.title}>Panel Administrativo</h1>
+          <p className={styles.subtitle}>Inicia sesión como administrador</p>
         </div>
 
         <form onSubmit={handleSubmit} className={styles.form}>
@@ -73,14 +73,14 @@ export function LoginView() {
           {error && <div className={styles.error}>{error}</div>}
 
           <div className={styles.field}>
-            <label className={styles.label}>Identificación (Cédula)</label>
+            <label className={styles.label}>Email</label>
             <div className={styles.inputWrapper}>
-              <CreditCard className={styles.icon} />
+              <Mail className={styles.icon} />
               <input
-                type="text"
-                value={identificacion}
-                onChange={(e) => setIdentificacion(e.target.value)}
-                placeholder="1234567890"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin@prestamos.com"
                 className={styles.input}
                 required
               />

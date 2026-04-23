@@ -120,8 +120,7 @@ function deleteCookie(name) {
 
 // Auth - Cookies en lugar de localStorage
 export const authApi = {
-  login: (identificacion, password) =>
-    api.post("/auth/login", { identificacion, password }),
+  login: (email, password) => api.post("/auth/login", { email, password }),
   register: (identificacion, password) =>
     api.post("/auth/register", { identificacion, password }),
   logout: () => {
