@@ -1,8 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Modo standalone para Docker/Coolify
-  output: "standalone",
   // Deshabilitar redirección automática de trailing slash
   skipTrailingSlashRedirect: true,
   // Configurar rewrites para proxy al backend
