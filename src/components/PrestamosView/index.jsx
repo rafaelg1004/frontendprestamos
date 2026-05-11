@@ -99,82 +99,133 @@ export function PrestamosView() {
           </select>
         </div>
 
-        <div className={styles.tableContainer}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Cliente</th>
-                <th>Monto</th>
-                <th>Vencimiento</th>
-                <th>Estado</th>
-                <th style={{ textAlign: 'right' }}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredPrestamos.length === 0 ? (
+        <div className={styles.desktopView}>
+          <div className={styles.tableContainer}>
+            <table className={styles.table}>
+              <thead>
                 <tr>
-                  <td colSpan={5} className={styles.emptyState}>
-                    No se encontraron préstamos
-                  </td>
+                  <th>Cliente</th>
+                  <th>Monto</th>
+                  <th>Vencimiento</th>
+                  <th>Estado</th>
+                  <th style={{ textAlign: 'right' }}>Acciones</th>
                 </tr>
-              ) : (
-                filteredPrestamos.map((prestamo) => {
-                  const diasMora = calcularDiasMora(prestamo.fecha_vencimiento)
-                  const badge = getEstadoBadge(prestamo.estado)
-                  const isMora = diasMora > 0 && prestamo.estado === 'activo'
-                  
-                  return (
-                    <tr 
-                      key={prestamo.id} 
-                      className={isMora ? styles.moraRow : ''}
-                    >
-                      <td>
-                        <div className={styles.clientCell}>
-                          <span className={styles.clientName}>
-                            {prestamo.cliente?.nombre_completo}
-                          </span>
-                          <span className={styles.clientEmail}>
-                            {prestamo.cliente?.email}
-                          </span>
-                        </div>
-                      </td>
-                      <td>
-                        <div className={styles.montoCell}>
-                          <span className={styles.montoPrincipal}>
-                            {formatCurrency(prestamo.monto_principal)}
-                          </span>
-                          <span className={styles.tasa}>
-                            {prestamo.tasa_interes_mensual}% mensual
-                          </span>
-                        </div>
-                      </td>
-                      <td>
-                        <div className={styles.vencimientoCell}>
-                          {formatDate(prestamo.fecha_vencimiento)}
-                          {isMora && (
-                            <span className={styles.moraBadge}>
-                              <AlertTriangle size={12} />
-                              {diasMora} días mora
+              </thead>
+              <tbody>
+                {filteredPrestamos.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className={styles.emptyState}>
+                      No se encontraron préstamos
+                    </td>
+                  </tr>
+                ) : (
+                  filteredPrestamos.map((prestamo) => {
+                    const diasMora = calcularDiasMora(prestamo.fecha_vencimiento)
+                    const badge = getEstadoBadge(prestamo.estado)
+                    const isMora = diasMora > 0 && prestamo.estado === 'activo'
+                    
+                    return (
+                      <tr 
+                        key={prestamo.id} 
+                        className={isMora ? styles.moraRow : ''}
+                      >
+                        <td>
+                          <div className={styles.clientCell}>
+                            <span className={styles.clientName}>
+                              {prestamo.cliente?.nombre_completo}
                             </span>
-                          )}
-                        </div>
-                      </td>
-                      <td>
-                        <span className={`${styles.badge} ${styles[badge.className]}`}>
-                          {badge.label}
-                        </span>
-                      </td>
-                      <td className={styles.actionsCell}>
-                        <Link href={`/prestamos/${prestamo.id}`} className={styles.link}>
-                          Ver detalle →
-                        </Link>
-                      </td>
-                    </tr>
-                  )
-                })
-              )}
-            </tbody>
-          </table>
+                            <span className={styles.clientEmail}>
+                              {prestamo.cliente?.email}
+                            </span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className={styles.montoCell}>
+                            <span className={styles.montoPrincipal}>
+                              {formatCurrency(prestamo.monto_principal)}
+                            </span>
+                            <span className={styles.tasa}>
+                              {prestamo.tasa_interes_mensual}% mensual
+                            </span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className={styles.vencimientoCell}>
+                            {formatDate(prestamo.fecha_vencimiento)}
+                            {isMora && (
+                              <span className={styles.moraBadge}>
+                                <AlertTriangle size={12} />
+                                {diasMora} días mora
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td>
+                          <span className={`${styles.badge} ${styles[badge.className]}`}>
+                            {badge.label}
+                          </span>
+                        </td>
+                        <td className={styles.actionsCell}>
+                          <Link href={`/prestamos/${prestamo.id}`} className={styles.link}>
+                            Ver detalle →
+                          </Link>
+                        </td>
+                      </tr>
+                    )
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Mobile View */}
+        <div className={styles.mobileView}>
+          <div className={styles.cardGrid}>
+            {filteredPrestamos.map((prestamo) => {
+              const diasMora = calcularDiasMora(prestamo.fecha_vencimiento)
+              const badge = getEstadoBadge(prestamo.estado)
+              const isMora = diasMora > 0 && prestamo.estado === 'activo'
+              
+              return (
+                <Link key={prestamo.id} href={`/prestamos/${prestamo.id}`} className={styles.mobileCard}>
+                  <div className={styles.mobileCardHeader}>
+                    <div className={styles.mobileClientInfo}>
+                      <span className={styles.mobileClientName}>{prestamo.cliente?.nombre_completo}</span>
+                      <span className={styles.mobileDate}>{formatDate(prestamo.fecha_inicio)}</span>
+                    </div>
+                    <span className={`${styles.badge} ${styles[badge.className]}`}>
+                      {badge.label}
+                    </span>
+                  </div>
+                  
+                  <div className={styles.mobileCardBody}>
+                    <div className={styles.mobileMontoSection}>
+                      <span className={styles.mobileLabel}>Capital prestado</span>
+                      <span className={styles.mobileMonto}>{formatCurrency(prestamo.monto_principal)}</span>
+                    </div>
+                    <div className={styles.mobileDetailsGrid}>
+                      <div className={styles.mobileDetailItem}>
+                        <span className={styles.mobileSubLabel}>Interés</span>
+                        <span>{prestamo.tasa_interes_mensual}%</span>
+                      </div>
+                      <div className={styles.mobileDetailItem}>
+                        <span className={styles.mobileSubLabel}>Vence</span>
+                        <span>{formatDate(prestamo.fecha_vencimiento)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {isMora && (
+                    <div className={styles.mobileMoraAlert}>
+                      <AlertTriangle size={16} />
+                      <span>{diasMora} días de retraso</span>
+                    </div>
+                  )}
+                </Link>
+              )
+            })}
+          </div>
         </div>
       </div>
     </div>

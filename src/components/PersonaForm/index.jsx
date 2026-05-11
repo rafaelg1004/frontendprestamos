@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { perfilesApi } from "@/lib/api";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { Users, User, TrendingUp, ArrowLeft } from "lucide-react";
+import { Users, User, TrendingUp, ArrowLeft, Mail, Phone, MapPin, Fingerprint, Info } from "lucide-react";
 import styles from "./PersonaForm.module.css";
 
 export function PersonaForm({ id = null }) {
@@ -141,126 +141,137 @@ export function PersonaForm({ id = null }) {
         <form onSubmit={handleSubmit} className={styles.form}>
           {error && <div className={styles.error}>{error}</div>}
 
-          {/* Selector de Rol */}
-          <div className={styles.section}>
-            <label className={styles.label}>Tipo de Persona *</label>
-            <div className={styles.rolSelector}>
-              <label
-                className={`${styles.rolOption} ${formData.rol === "cliente" ? styles.selected : ""}`}
-              >
-                <input
-                  type="radio"
-                  name="rol"
-                  value="cliente"
-                  checked={formData.rol === "cliente"}
-                  onChange={handleChange}
-                />
-                <User size={24} />
-                <span>Cliente</span>
-                <small>Recibe préstamos</small>
-              </label>
+          {/* Selector de Rol - Estilo Premium */}
+          <div className={styles.sectionHeader}>
+            <Info size={18} />
+            <h2>Tipo de Perfil</h2>
+          </div>
+          <div className={styles.rolSelector}>
+            <label className={`${styles.rolOption} ${formData.rol === "cliente" ? styles.selectedCliente : ""}`}>
+              <input type="radio" name="rol" value="cliente" checked={formData.rol === "cliente"} onChange={handleChange} />
+              <div className={styles.rolIcon}><User size={32} /></div>
+              <div className={styles.rolInfo}>
+                <span className={styles.rolName}>Cliente</span>
+                <p>Solicita créditos y realiza pagos</p>
+              </div>
+            </label>
 
-              <label
-                className={`${styles.rolOption} ${formData.rol === "inversionista" ? styles.selected : ""}`}
-              >
-                <input
-                  type="radio"
-                  name="rol"
-                  value="inversionista"
-                  checked={formData.rol === "inversionista"}
-                  onChange={handleChange}
-                />
-                <TrendingUp size={24} />
-                <span>Inversionista</span>
-                <small>Realiza inversiones</small>
-              </label>
+            <label className={`${styles.rolOption} ${formData.rol === "inversionista" ? styles.selectedInversionista : ""}`}>
+              <input type="radio" name="rol" value="inversionista" checked={formData.rol === "inversionista"} onChange={handleChange} />
+              <div className={styles.rolIcon}><TrendingUp size={32} /></div>
+              <div className={styles.rolInfo}>
+                <span className={styles.rolName}>Inversionista</span>
+                <p>Aporta capital y recibe rendimientos</p>
+              </div>
+            </label>
+          </div>
+
+          <div className={styles.formGrid}>
+            {/* Información Personal */}
+            <div className={styles.formSection}>
+              <div className={styles.sectionTitle}>
+                <Fingerprint size={20} />
+                <h3>Datos Personales</h3>
+              </div>
+              
+              <div className={styles.field}>
+                <label className={styles.label}>Número de Documento *</label>
+                <div className={styles.inputWrapper}>
+                  <Fingerprint className={styles.inputIcon} size={18} />
+                  <input
+                    type="text"
+                    name="identificacion"
+                    value={formData.identificacion}
+                    onChange={handleChange}
+                    placeholder="Ej: 10102020"
+                    className={styles.input}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className={styles.field}>
+                <label className={styles.label}>Nombre Completo *</label>
+                <div className={styles.inputWrapper}>
+                  <User className={styles.inputIcon} size={18} />
+                  <input
+                    type="text"
+                    name="nombre_completo"
+                    value={formData.nombre_completo}
+                    onChange={handleChange}
+                    placeholder="Ej: Juan Sebastian Pérez"
+                    className={styles.input}
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Información de Contacto */}
+            <div className={styles.formSection}>
+              <div className={styles.sectionTitle}>
+                <Mail size={20} />
+                <h3>Contacto y Ubicación</h3>
+              </div>
+
+              <div className={styles.field}>
+                <label className={styles.label}>Correo Electrónico *</label>
+                <div className={styles.inputWrapper}>
+                  <Mail className={styles.inputIcon} size={18} />
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="correo@ejemplo.com"
+                    className={styles.input}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className={styles.field}>
+                <label className={styles.label}>Teléfono de Contacto</label>
+                <div className={styles.inputWrapper}>
+                  <Phone className={styles.inputIcon} size={18} />
+                  <input
+                    type="tel"
+                    name="telefono"
+                    value={formData.telefono}
+                    onChange={handleChange}
+                    placeholder="Ej: 300 123 4567"
+                    className={styles.input}
+                  />
+                </div>
+              </div>
+
+              <div className={styles.field}>
+                <label className={styles.label}>Dirección de Residencia</label>
+                <div className={styles.inputWrapper}>
+                  <MapPin className={styles.inputIcon} size={18} />
+                  <input
+                    type="text"
+                    name="direccion"
+                    value={formData.direccion}
+                    onChange={handleChange}
+                    placeholder="Ej: Calle 10 # 5-20"
+                    className={styles.input}
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Documento de Identidad - Campo Prioritario */}
-          <div className={`${styles.field} ${styles.fieldHighlight}`}>
-            <label className={styles.label}>Documento de Identidad *</label>
-            <input
-              type="text"
-              name="identificacion"
-              value={formData.identificacion}
-              onChange={handleChange}
-              placeholder="Ej: 1234567890"
-              className={`${styles.input} ${styles.inputHighlight}`}
-              required
-              autoFocus
-            />
-            <p className={styles.helper}>Número de cédula, NIT o pasaporte</p>
-          </div>
-
-          <div className={styles.field}>
-            <label className={styles.label}>Nombre completo *</label>
-            <input
-              type="text"
-              name="nombre_completo"
-              value={formData.nombre_completo}
-              onChange={handleChange}
-              placeholder="Ej: Juan Pérez"
-              className={styles.input}
-              required
-            />
-          </div>
-
-          <div className={styles.row}>
-            <div className={styles.field}>
-              <label className={styles.label}>Email *</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="ejemplo@email.com"
-                className={styles.input}
-                required
-              />
-            </div>
-
-            <div className={styles.field}>
-              <label className={styles.label}>Teléfono</label>
-              <input
-                type="tel"
-                name="telefono"
-                value={formData.telefono}
-                onChange={handleChange}
-                placeholder="Ej: 3001234567"
-                className={styles.input}
-              />
-            </div>
-          </div>
-
-          <div className={styles.field}>
-            <label className={styles.label}>Dirección</label>
-            <textarea
-              name="direccion"
-              value={formData.direccion}
-              onChange={handleChange}
-              placeholder="Dirección completa..."
-              className={styles.textarea}
-              rows={3}
-            />
-          </div>
-
-          <div className={styles.actions}>
-            <Link href="/personas" className={styles.btnSecondary}>
+          <div className={styles.formFooter}>
+            <Link href="/personas" className={styles.btnCancel}>
               Cancelar
             </Link>
             <button
               type="submit"
               disabled={loading}
-              className={styles.btnPrimary}
+              className={`${styles.btnSubmit} ${formData.rol === 'cliente' ? styles.btnCliente : styles.btnInversionista}`}
             >
-              {loading
-                ? isEdit
-                  ? "Guardando..."
-                  : "Creando..."
-                : isEdit
-                  ? "Guardar Cambios"
-                  : `Crear ${formData.rol === "cliente" ? "Cliente" : "Inversionista"}`}
+              {loading ? "Procesando..." : isEdit ? "Actualizar Perfil" : "Crear Perfil"}
             </button>
           </div>
         </form>

@@ -132,66 +132,135 @@ export function PersonasView() {
       {/* Table */}
       {loading ? (
         <div className={styles.loading}>Cargando...</div>
-      ) : personasFiltradas.length === 0 ? (
-        <div className={styles.empty}>
+      ) : personas.length === 0 ? (
+        <div className={styles.emptyState}>
           <Users size={48} />
-          <p>No hay personas registradas</p>
-          <Link href="/personas/nueva" className={styles.btnSecondary}>
-            Crear primera persona
+          <p>No se encontraron personas</p>
+          <Link href="/personas/nuevo" className={styles.btnPrimary}>
+            Crear la primera persona
           </Link>
         </div>
       ) : (
-        <div className={styles.tableContainer}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th>Email</th>
-                <th>Teléfono</th>
-                <th>Rol</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
+        <>
+          {/* Vista de Tabla para Desktop */}
+          <div className={styles.desktopView}>
+            <div className="table-container">
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Identificación</th>
+                    <th>Contacto</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {personasFiltradas.map((persona) => (
+                    <tr key={persona.id}>
+                      <td>
+                        <div className={styles.nameCell}>
+                          <div className={styles.avatar}>
+                            {persona.nombre_completo?.charAt(0).toUpperCase()}
+                          </div>
+                          <span>{persona.nombre_completo}</span>
+                        </div>
+                      </td>
+                      <td>{persona.identificacion}</td>
+                      <td>
+                        <div className={styles.contactCell}>
+                          <span className={styles.email}>{persona.email}</span>
+                          <span className={styles.phone}>{persona.telefono}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <span className={`${styles.roleBadge} ${styles[persona.rol]}`}>
+                          {persona.rol === 'cliente' ? 'Cliente' : 'Inversionista'}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`${styles.statusBadge} ${styles.activo}`}>
+                          Activo
+                        </span>
+                      </td>
+                      <td>
+                        <div className={styles.actions}>
+                          <Link href={`/personas/${persona.id}`} className={styles.btnView} title="Ver detalles">
+                            Detalle
+                          </Link>
+                          <Link href={`/personas/${persona.id}/editar`} className={styles.btnEdit} title="Editar">
+                            <Edit size={16} />
+                          </Link>
+                          <button 
+                            onClick={() => handleDelete(persona.id, persona.nombre_completo)}
+                            className={styles.btnDelete}
+                            title="Eliminar"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Vista de Tarjetas para Móvil */}
+          <div className={styles.mobileView}>
+            <div className={styles.cardGrid}>
               {personasFiltradas.map((persona) => (
-                <tr key={persona.id}>
-                  <td>
-                    <div className={styles.personaInfo}>
-                      <div className={styles.avatar}>
-                        {persona.nombre_completo?.charAt(0).toUpperCase()}
-                      </div>
-                      <span className={styles.nombre}>{persona.nombre_completo}</span>
+                <div key={persona.id} className={styles.mobileCard}>
+                  <div className={styles.cardHeader}>
+                    <div className={styles.cardInfo}>
+                      <h3>{persona.nombre_completo}</h3>
+                      <span className={`${styles.roleBadge} ${styles[persona.rol]}`}>
+                        {persona.rol === 'cliente' ? 'Cliente' : 'Inversionista'}
+                      </span>
                     </div>
-                  </td>
-                  <td>{persona.email}</td>
-                  <td>{persona.telefono || '-'}</td>
-                  <td>
-                    <span className={`${styles.rol} ${styles[persona.rol]}`}>
-                      {persona.rol === 'cliente' ? 'Cliente' : 'Inversionista'}
-                    </span>
-                  </td>
-                  <td>
-                    <div className={styles.actions}>
-                      <Link href={`/personas/${persona.id}`} className={styles.btnView} title="Ver detalles">
-                        Detalle
-                      </Link>
-                      <Link href={`/personas/${persona.id}/editar`} className={styles.btnEdit} title="Editar">
-                        <Edit size={16} />
+                    <div className={styles.cardStatus}>
+                      <span className={`${styles.statusBadge} ${styles.activo}`}>Activo</span>
+                    </div>
+                  </div>
+                  
+                  <div className={styles.cardBody}>
+                    <div className={styles.cardItem}>
+                      <span className={styles.itemLabel}>Identificación:</span>
+                      <span className={styles.itemValue}>{persona.identificacion}</span>
+                    </div>
+                    <div className={styles.cardItem}>
+                      <span className={styles.itemLabel}>Email:</span>
+                      <span className={styles.itemValue}>{persona.email}</span>
+                    </div>
+                    <div className={styles.cardItem}>
+                      <span className={styles.itemLabel}>Teléfono:</span>
+                      <span className={styles.itemValue}>{persona.telefono}</span>
+                    </div>
+                  </div>
+
+                  <div className={styles.cardActions}>
+                    <Link href={`/personas/${persona.id}`} className={styles.btnView}>
+                      Detalles
+                    </Link>
+                    <div className={styles.actionGroup}>
+                      <Link href={`/personas/${persona.id}/editar`} className={styles.btnEdit}>
+                        <Edit size={18} />
                       </Link>
                       <button 
                         onClick={() => handleDelete(persona.id, persona.nombre_completo)}
                         className={styles.btnDelete}
-                        title="Eliminar"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={18} />
                       </button>
                     </div>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </div>
+          </div>
+        </>
       )}
     </div>
   )

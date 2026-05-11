@@ -162,13 +162,11 @@
   color: #1f2937;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .sidebar {
-    transform: translateX(-100%);
+    display: none;
   }
-
-  .sidebar.open {
-    transform: translateX(0);
+  .toggleButton {
+    display: none;
   }
 }

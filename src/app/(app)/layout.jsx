@@ -3,6 +3,7 @@
 import { useState } from "react";
 import "../globals.css";
 import { Sidebar } from "@/components/Sidebar";
+import { BottomNav } from "@/components/BottomNav";
 
 export default function AppLayout({ children }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -13,15 +14,10 @@ export default function AppLayout({ children }) {
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
-      <main
-        className="main-content"
-        style={{
-          marginLeft: sidebarCollapsed ? "4rem" : "16rem",
-          transition: "margin-left 0.3s ease",
-        }}
-      >
+      <main className={`main-content ${sidebarCollapsed ? 'collapsed' : ''}`}>
         {children}
       </main>
+      <BottomNav />
     </div>
   );
 }

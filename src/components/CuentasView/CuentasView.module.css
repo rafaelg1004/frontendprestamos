@@ -1,0 +1,205 @@
+.container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-sm);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.iconWrapper {
+  width: 48px;
+  height: 48px;
+  background: var(--bg-hover);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+}
+
+.btnDelete {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+
+.btnDelete:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.accountName {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.accountType {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  text-transform: capitalize;
+  margin: 0.25rem 0 1rem;
+}
+
+.balance {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 0;
+}
+
+.btnPrimary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btnPrimary:hover {
+  opacity: 0.9;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  width: 90%;
+  max-width: 400px;
+  box-shadow: var(--shadow-lg);
+}
+
+.field {
+  margin-bottom: 1.5rem;
+}
+
+.field label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.field input, .field select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.modalActions button:first-child {
+  background: transparent;
+  border: none;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+}
+
+.loading {
+  padding: 4rem;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .btnPrimary {
+    width: 100%;
+    justify-content: center;
+  }
+  .title {
+    font-size: 1.5rem;
+  }
+}

@@ -17,6 +17,19 @@ export function formatNumber(num) {
   return new Intl.NumberFormat('es-CO').format(num)
 }
 
+// Limpiar formato de puntos (1.000.000 -> 1000000)
+export function parseNumber(value) {
+  if (!value) return 0;
+  return parseFloat(value.toString().replace(/\./g, '').replace(/,/g, '')) || 0;
+}
+
+// Formatear para input mientras se escribe
+export function formatInputNumber(value) {
+  if (value === null || value === undefined || value === '') return '';
+  const cleanValue = value.toString().replace(/\D/g, '');
+  return new Intl.NumberFormat('es-CO').format(cleanValue);
+}
+
 // Formatear fecha
 export function formatDate(date) {
   if (!date) return '-'

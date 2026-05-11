@@ -94,6 +94,15 @@ export const inversionesApi = {
   devolver: (id, data) => api.post(`/inversiones/${id}/devolver`, data),
 };
 
+// Cuentas
+export const cuentasApi = {
+  getAll: () => api.get("/cuentas"),
+  getById: (id) => api.get(`/cuentas/${id}`),
+  create: (data) => api.post("/cuentas", data),
+  update: (id, data) => api.put(`/cuentas/${id}`, data),
+  delete: (id) => api.delete(`/cuentas/${id}`),
+};
+
 // Movimientos
 export const movimientosApi = {
   getAll: (params = {}) => api.get("/movimientos", { params }),

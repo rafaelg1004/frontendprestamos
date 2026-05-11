@@ -11,6 +11,7 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
+  Wallet,
 } from "lucide-react";
 import { authApi } from "@/lib/api";
 import styles from "./Sidebar.module.css";
@@ -20,6 +21,7 @@ const menuItems = [
   { href: "/personas", icon: Users, label: "Personas" },
   { href: "/prestamos", icon: Banknote, label: "Préstamos" },
   { href: "/inversiones", icon: TrendingUp, label: "Inversiones" },
+  { href: "/cuentas", icon: Wallet, label: "Cuentas" },
   { href: "/movimientos", icon: ArrowLeftRight, label: "Movimientos" },
 ];
 

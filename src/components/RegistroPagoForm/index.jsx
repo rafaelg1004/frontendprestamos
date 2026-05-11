@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { movimientosApi } from "@/lib/api";
+import { parseNumber, formatInputNumber } from "@/lib/utils";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import styles from "./RegistroPagoForm.module.css";
@@ -21,7 +22,11 @@ export function RegistroPagoForm({ prestamoId, clienteId, tipo = "prestamo" }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === 'monto_capital' || name === 'monto_interes') {
+      setFormData((prev) => ({ ...prev, [name]: formatInputNumber(value) }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -30,8 +35,8 @@ export function RegistroPagoForm({ prestamoId, clienteId, tipo = "prestamo" }) {
     setError("");
 
     try {
-      const montoCapital = parseFloat(formData.monto_capital) || 0;
-      const montoInteres = parseFloat(formData.monto_interes) || 0;
+      const montoCapital = parseNumber(formData.monto_capital);
+      const montoInteres = parseNumber(formData.monto_interes);
 
       if (montoCapital === 0 && montoInteres === 0) {
         setError("Debe ingresar al menos un monto (capital o interés)");
@@ -83,8 +88,8 @@ export function RegistroPagoForm({ prestamoId, clienteId, tipo = "prestamo" }) {
   };
 
   const total =
-    (parseFloat(formData.monto_capital) || 0) +
-    (parseFloat(formData.monto_interes) || 0);
+    parseNumber(formData.monto_capital) +
+    parseNumber(formData.monto_interes);
 
   return (
     <div className={styles.container}>
@@ -103,13 +108,12 @@ export function RegistroPagoForm({ prestamoId, clienteId, tipo = "prestamo" }) {
             <div className={styles.field}>
               <label className={styles.label}>Monto Capital ($)</label>
               <input
-                type="number"
+                type="text"
                 name="monto_capital"
                 value={formData.monto_capital}
                 onChange={handleChange}
-                placeholder="Ej: 500000"
+                placeholder="Ej: 500.000"
                 className={styles.input}
-                min="0"
               />
               <p className={styles.helper}>Dejar en 0 si no aplica</p>
             </div>
@@ -117,13 +121,12 @@ export function RegistroPagoForm({ prestamoId, clienteId, tipo = "prestamo" }) {
             <div className={styles.field}>
               <label className={styles.label}>Monto Interés ($)</label>
               <input
-                type="number"
+                type="text"
                 name="monto_interes"
                 value={formData.monto_interes}
                 onChange={handleChange}
-                placeholder="Ej: 50000"
+                placeholder="Ej: 50.000"
                 className={styles.input}
-                min="0"
               />
               <p className={styles.helper}>Dejar en 0 si no aplica</p>
             </div>

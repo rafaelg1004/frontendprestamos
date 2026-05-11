@@ -211,35 +211,128 @@
   color: #991b1b;
 }
 
-.actionsCell {
-  text-align: right;
+/* View Toggling */
+.mobileView {
+  display: none;
 }
 
-.link {
-  color: #2563eb;
+.desktopView {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .desktopView {
+    display: none;
+  }
+  .mobileView {
+    display: block;
+  }
+}
+
+/* Mobile Cards */
+.cardGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.mobileCard {
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+
+.mobileCard:active {
+  background: var(--bg-hover);
+  transform: scale(0.98);
+}
+
+.mobileCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.mobileClientInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.mobileClientName {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.mobileDate {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.mobileCardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg-hover);
+  border-radius: 0.75rem;
+}
+
+.mobileMontoSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.mobileLabel {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
   font-weight: 500;
-  font-size: 0.875rem;
 }
 
-.link:hover {
-  color: #1d4ed8;
+.mobileMonto {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary);
 }
 
-.emptyState {
-  text-align: center;
-  padding: 3rem;
-  color: #6b7280;
+.mobileDetailsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
 }
 
-.loadingSkeleton {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  background: #e5e7eb;
+.mobileDetailItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.mobileSubLabel {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.mobileMoraAlert {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: #fef2f2;
+  color: #dc2626;
   border-radius: 0.5rem;
-  height: 4rem;
-  margin-bottom: 0.5rem;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: .5; }
+  font-size: 0.875rem;
+  font-weight: 700;
 }

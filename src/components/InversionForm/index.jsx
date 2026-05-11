@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { inversionesApi, perfilesApi } from "@/lib/api";
+import { inversionesApi, perfilesApi, cuentasApi } from "@/lib/api";
+import { formatCurrency, parseNumber, formatInputNumber } from "@/lib/utils";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import styles from "../PrestamoForm/PrestamoForm.module.css";
@@ -12,34 +13,55 @@ export function InversionForm() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [inversionistas, setInversionistas] = useState([]);
+  const [cuentas, setCuentas] = useState([]);
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     perfil_id: "",
     monto: "",
     tasa_interes_mensual: "2",
     fecha_inicio: new Date().toISOString().split("T")[0],
+    cuenta_id: "",
     observaciones: "",
   });
 
   // Cargar inversionistas
   useEffect(() => {
-    const fetchInversionistas = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await perfilesApi.getAll({ rol: "inversionista" });
-        setInversionistas(response.data?.data || []);
+        const [invRes, cuentasRes] = await Promise.all([
+          perfilesApi.getAll({ rol: "inversionista" }),
+          cuentasApi.getAll()
+        ]);
+        setInversionistas(invRes.data?.data || []);
+        setCuentas(cuentasRes.data?.data || []);
       } catch (err) {
-        toast.error("Error al cargar inversionistas");
+        toast.error("Error al cargar datos");
       } finally {
         setLoading(false);
       }
     };
-    fetchInversionistas();
+    fetchData();
   }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
+    // Validar que la tasa de interés no sea mayor a 100
+    if (name === 'tasa_interes_mensual' && parseFloat(value) > 100) {
+      setFormData((prev) => ({ ...prev, [name]: '100' }));
+      return;
+    }
+
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleMontoChange = (e) => {
+    const { value } = e.target;
+    setFormData((prev) => ({ 
+      ...prev, 
+      monto: formatInputNumber(value) 
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -51,8 +73,9 @@ export function InversionForm() {
       // Mapear campos para el backend
       const dataToSend = {
         inversionista_id: formData.perfil_id,
-        monto_invertido: parseFloat(formData.monto) * 1000,
+        monto_invertido: parseNumber(formData.monto) * 1000,
         tasa_interes_pactada: parseFloat(formData.tasa_interes_mensual),
+        cuenta_id: formData.cuenta_id,
         notas: formData.observaciones,
       };
 
@@ -117,13 +140,12 @@ export function InversionForm() {
               <div className={styles.field}>
                 <label className={styles.label}>Monto ($) *</label>
                 <input
-                  type="number"
+                  type="text"
                   name="monto"
                   value={formData.monto}
-                  onChange={handleChange}
-                  placeholder="Ej: 10000000"
+                  onChange={handleMontoChange}
+                  placeholder="Ej: 10.000.000"
                   className={styles.input}
-                  min="1"
                   required
                 />
                 <p className={styles.helper}>En pesos colombianos</p>
@@ -145,6 +167,28 @@ export function InversionForm() {
                   required
                 />
               </div>
+            </div>
+          </div>
+
+          <div className={styles.section}>
+            <h2 className={styles.sectionTitle}>Tesorería</h2>
+            <div className={styles.field}>
+              <label className={styles.label}>Cuenta de Destino *</label>
+              <select
+                name="cuenta_id"
+                value={formData.cuenta_id}
+                onChange={handleChange}
+                className={styles.select}
+                required
+              >
+                <option value="">Seleccione dónde se recibe el dinero</option>
+                {cuentas.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nombre} (Saldo: {formatCurrency(c.saldo_actual)})
+                  </option>
+                ))}
+              </select>
+              <p className={styles.helper}>El dinero se sumará al saldo de esta cuenta</p>
             </div>
           </div>
 
