@@ -27,8 +27,10 @@ export function Sidebar({ collapsed = false, onToggle }) {
   const pathname = usePathname();
 
   const handleLogout = async () => {
-    await authApi.logout();
-    window.location.href = "/login";
+    if (window.confirm("¿Estás seguro de que deseas cerrar sesión?")) {
+      await authApi.logout();
+      window.location.href = "/login";
+    }
   };
 
   return (

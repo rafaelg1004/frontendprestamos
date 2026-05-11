@@ -1,16 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { perfilesApi } from "@/lib/api";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { Users, User, TrendingUp } from "lucide-react";
+import { Users, User, TrendingUp, ArrowLeft } from "lucide-react";
 import styles from "./PersonaForm.module.css";
 
-export function PersonaForm() {
+export function PersonaForm({ id = null }) {
   const router = useRouter();
+  const isEdit = !!id;
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(isEdit);
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     nombre_completo: "",
@@ -20,6 +22,34 @@ export function PersonaForm() {
     rol: "cliente", // Default a cliente
     identificacion: "",
   });
+
+  // Cargar datos si es edición
+  useEffect(() => {
+    if (isEdit) {
+      const fetchPersona = async () => {
+        try {
+          const response = await perfilesApi.getById(id);
+          if (response.data?.success) {
+            const persona = response.data.data;
+            setFormData({
+              nombre_completo: persona.nombre_completo || "",
+              email: persona.email || "",
+              telefono: persona.telefono || "",
+              direccion: persona.direccion || "",
+              rol: persona.rol || "cliente",
+              identificacion: persona.identificacion || "",
+            });
+          }
+        } catch (error) {
+          toast.error("Error al cargar los datos de la persona");
+          router.push("/personas");
+        } finally {
+          setInitialLoading(false);
+        }
+      };
+      fetchPersona();
+    }
+  }, [id, isEdit, router]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,20 +62,27 @@ export function PersonaForm() {
     setError("");
 
     try {
-      const response = await perfilesApi.create(formData);
+      let response;
+      if (isEdit) {
+        response = await perfilesApi.update(id, formData);
+      } else {
+        response = await perfilesApi.create(formData);
+      }
 
       if (response.data?.success) {
         const tipo = formData.rol === "cliente" ? "Cliente" : "Inversionista";
-        toast.success(`${tipo} creado exitosamente`);
+        const accion = isEdit ? "actualizado" : "creado";
+        toast.success(`${tipo} ${accion} exitosamente`);
         router.push("/personas");
       } else {
-        setError("Error al crear la persona");
+        setError(`Error al ${isEdit ? "actualizar" : "crear"} la persona`);
       }
     } catch (err) {
       const code = err.response?.data?.code;
       const backendMessage = err.response?.data?.message;
 
-      let message = backendMessage || "Error al crear la persona";
+      let message =
+        backendMessage || `Error al ${isEdit ? "actualizar" : "crear"} la persona`;
 
       switch (code) {
         case "IDENTIFICACION_EXISTS":
@@ -78,14 +115,26 @@ export function PersonaForm() {
     }
   };
 
+  if (initialLoading) {
+    return <div className={styles.loading}>Cargando datos...</div>;
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1>
-          <Users size={28} />
-          Nueva Persona
-        </h1>
-        <p className={styles.subtitle}>Crea un cliente o inversionista</p>
+        <div className={styles.titleSection}>
+          <Link href="/personas" className={styles.btnBack}>
+            <ArrowLeft size={20} />
+          </Link>
+          <h1>
+            <Users size={28} />
+            {isEdit ? "Editar Persona" : "Nueva Persona"}
+          </h1>
+        </div>
+        <p className={styles.subtitle}>
+          {isEdit ? "Actualiza la información de" : "Crea"} un cliente o
+          inversionista
+        </p>
       </div>
 
       <div className={styles.card}>
@@ -206,8 +255,12 @@ export function PersonaForm() {
               className={styles.btnPrimary}
             >
               {loading
-                ? "Creando..."
-                : `Crear ${formData.rol === "cliente" ? "Cliente" : "Inversionista"}`}
+                ? isEdit
+                  ? "Guardando..."
+                  : "Creando..."
+                : isEdit
+                  ? "Guardar Cambios"
+                  : `Crear ${formData.rol === "cliente" ? "Cliente" : "Inversionista"}`}
             </button>
           </div>
         </form>

@@ -5,10 +5,31 @@ import { dashboardApi } from "@/lib/api";
 import {
   formatCurrency,
   formatNumber,
+  formatDate,
   formatDateTime,
   getTipoMovimientoLabel,
   calcularDiasMora,
 } from "@/lib/utils";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title as ChartTitle,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+
+// Registrar componentes de Chart.js
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ChartTitle,
+  Tooltip,
+  Legend
+);
 import {
   Users,
   Banknote,
@@ -26,20 +47,23 @@ export function DashboardView() {
   const [stats, setStats] = useState(null);
   const [movements, setMovements] = useState([]);
   const [alerts, setAlerts] = useState([]);
+  const [chartData, setChartData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [statsRes, movementsRes, alertsRes] = await Promise.all([
+        const [statsRes, movementsRes, alertsRes, chartRes] = await Promise.all([
           dashboardApi.getResumen(),
           dashboardApi.getMovimientosRecientes(5),
           dashboardApi.getAlertasVencimientos(),
+          dashboardApi.getFlujoCajaHistorico(),
         ]);
 
         setStats(statsRes.data.data);
         setMovements(movementsRes.data.data || []);
         setAlerts(alertsRes.data.data || []);
+        setChartData(chartRes.data.data || []);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {
@@ -210,7 +234,96 @@ export function DashboardView() {
         </div>
       </div>
 
-      {/* Two Column Layout */}
+      {/* Charts Section */}
+      <div className={styles.grid2Cols}>
+        <div className={styles.card}>
+          <h3 className={styles.cardTitle}>Evolución de Flujo de Caja</h3>
+          <div className={styles.chartContainer}>
+            {chartData && (
+              <Bar 
+                data={{
+                  labels: chartData.map(d => d.nombre_mes),
+                  datasets: [
+                    {
+                      label: 'Entradas (Cobros)',
+                      data: chartData.map(d => d.entradas / 1000), // En miles
+                      backgroundColor: 'rgba(34, 197, 94, 0.6)',
+                      borderColor: 'rgb(34, 197, 94)',
+                      borderWidth: 1,
+                    },
+                    {
+                      label: 'Salidas (Pagos)',
+                      data: chartData.map(d => d.salidas / 1000), // En miles
+                      backgroundColor: 'rgba(239, 68, 68, 0.6)',
+                      borderColor: 'rgb(239, 68, 68)',
+                      borderWidth: 1,
+                    }
+                  ]
+                }}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                      callbacks: {
+                        label: (context) => {
+                          let label = context.dataset.label || '';
+                          if (label) label += ': ';
+                          if (context.parsed.y !== null) {
+                            label += new Intl.NumberFormat('es-CO', { 
+                              style: 'currency', 
+                              currency: 'COP',
+                              maximumFractionDigits: 0 
+                            }).format(context.parsed.y * 1000);
+                          }
+                          return label;
+                        }
+                      }
+                    }
+                  },
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      ticks: {
+                        callback: (value) => `$${value}k`
+                      }
+                    }
+                  }
+                }}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Global Net Balance */}
+        <div className={styles.card}>
+          <h3 className={styles.cardTitle}>Resumen Financiero Global</h3>
+          <div className={styles.balanceGrid}>
+            <div className={styles.balanceItem}>
+              <p className={styles.balanceLabel}>Total Activos (Por Recaudar)</p>
+              <p className={`${styles.balanceValue} ${styles.textGreen}`}>
+                {formatCurrency(stats.balance_general.activos)}
+              </p>
+            </div>
+            <div className={styles.balanceItem}>
+              <p className={styles.balanceLabel}>Total Pasivos (Deuda Inversionistas)</p>
+              <p className={`${styles.balanceValue} ${styles.textRed}`}>
+                {formatCurrency(stats.balance_general.pasivos)}
+              </p>
+            </div>
+            <div className={styles.balanceDivider}></div>
+            <div className={styles.balanceItem}>
+              <p className={styles.balanceLabel}>Patrimonio Neto Estimado</p>
+              <p className={`${styles.balanceValue} ${styles.textBlue}`}>
+                {formatCurrency(stats.balance_general.patrimonio_neto)}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Two Column Layout (Movements and Alerts) */}
       <div className={styles.grid2Cols}>
         {/* Recent Movements */}
         <div className={styles.card}>

@@ -218,17 +218,57 @@
 
 .btnView {
   padding: 0.5rem 0.75rem;
-  background: #eff6ff;
-  color: #2563eb;
-  font-size: 0.875rem;
-  font-weight: 500;
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
   border-radius: 0.375rem;
-  text-decoration: none;
-  transition: background 0.2s;
+  font-size: 0.875rem;
+  transition: all 0.2s;
 }
 
 .btnView:hover {
-  background: #dbeafe;
+  background-color: var(--border-color);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btnEdit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 0.375rem;
+  background-color: #fef3c7;
+  color: #d97706;
+  transition: all 0.2s;
+}
+
+.btnEdit:hover {
+  background-color: #fde68a;
+  transform: translateY(-1px);
+}
+
+.btnDelete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 0.375rem;
+  background-color: #fee2e2;
+  color: #dc2626;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnDelete:hover {
+  background-color: #fecaca;
+  transform: translateY(-1px);
 }
 
 /* Empty State */

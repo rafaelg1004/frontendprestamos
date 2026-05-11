@@ -59,6 +59,7 @@ export const dashboardApi = {
   getAlertasVencimientos: () => api.get("/dashboard/alertas/vencimientos"),
   getMovimientosRecientes: (limit = 10) =>
     api.get(`/dashboard/movimientos/recientes?limit=${limit}`),
+  getFlujoCajaHistorico: () => api.get("/dashboard/flujo-caja-historico"),
 };
 
 // Perfiles

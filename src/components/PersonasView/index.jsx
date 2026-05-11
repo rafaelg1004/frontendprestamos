@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { perfilesApi } from '@/lib/api'
-import { Users, Plus, Search, User, TrendingUp, Filter } from 'lucide-react'
+import { Users, Plus, Search, User, TrendingUp, Filter, Edit, Trash2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import styles from './PersonasView.module.css'
 
@@ -29,6 +29,18 @@ export function PersonasView() {
       toast.error('Error al cargar personas')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleDelete = async (id, nombre) => {
+    if (window.confirm(`¿Estás seguro de que deseas eliminar a ${nombre}? Esta acción no se puede deshacer.`)) {
+      try {
+        await perfilesApi.delete(id)
+        toast.success('Persona eliminada exitosamente')
+        fetchPersonas()
+      } catch (error) {
+        toast.error('Error al eliminar la persona')
+      }
     }
   }
 
@@ -159,9 +171,21 @@ export function PersonasView() {
                     </span>
                   </td>
                   <td>
-                    <Link href={`/personas/${persona.id}`} className={styles.btnView}>
-                      Ver detalle
-                    </Link>
+                    <div className={styles.actions}>
+                      <Link href={`/personas/${persona.id}`} className={styles.btnView} title="Ver detalles">
+                        Detalle
+                      </Link>
+                      <Link href={`/personas/${persona.id}/editar`} className={styles.btnEdit} title="Editar">
+                        <Edit size={16} />
+                      </Link>
+                      <button 
+                        onClick={() => handleDelete(persona.id, persona.nombre_completo)}
+                        className={styles.btnDelete}
+                        title="Eliminar"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

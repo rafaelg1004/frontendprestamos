@@ -112,6 +112,46 @@
   gap: 1.5rem;
 }
 
+.chartContainer {
+  height: 300px;
+  width: 100%;
+  margin-top: 16px;
+}
+
+.balanceGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.balanceItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.balanceLabel {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.balanceValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.balanceDivider {
+  height: 1px;
+  background-color: var(--border-color);
+  width: 100%;
+}
+
+.textGreen { color: var(--success); }
+.textRed { color: var(--danger); }
+.textBlue { color: var(--primary); }
+.textPurple { color: #8b5cf6; }
+
 @media (min-width: 1024px) {
   .grid2Cols {
     grid-template-columns: repeat(2, 1fr);
