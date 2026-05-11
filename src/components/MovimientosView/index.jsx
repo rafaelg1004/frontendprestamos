@@ -36,8 +36,8 @@ export function MovimientosView() {
     const headers = ["Fecha", "Tipo", "Persona", "Monto", "Metodo"];
     const rows = movimientos.map((m) => [
       formatDate(m.fecha_operacion),
-      getTipoMovimientoLabel(m.tipo_movimiento),
-      m.nombre_perfil,
+      getTipoMovimientoLabel(m.tipo),
+      m.perfil?.nombre_completo || 'N/A',
       m.monto_total / 1000,
       getMetodoPagoLabel(m.metodo_pago),
     ]);
@@ -165,16 +165,26 @@ export function MovimientosView() {
                   >
                     Método
                   </th>
+                  <th
+                    style={{
+                      textAlign: "left",
+                      padding: "0.75rem",
+                      fontSize: "0.75rem",
+                      color: "#6b7280",
+                    }}
+                  >
+                    Préstamo Ref.
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {movimientos.map((mov) => {
                   const isEntrada =
-                    mov.tipo_movimiento === "recibo_inversion" ||
-                    mov.tipo_movimiento === "pago_cliente";
+                    mov.tipo === "recibo_inversion" ||
+                    mov.tipo === "pago_cliente";
                   return (
                     <tr
-                      key={mov.movimiento_id}
+                      key={mov.id}
                       style={{ borderBottom: "1px solid #f3f4f6" }}
                     >
                       <td style={{ padding: "0.75rem", fontSize: "0.875rem" }}>
@@ -194,12 +204,12 @@ export function MovimientosView() {
                             <ArrowUpRight size={16} color="#dc2626" />
                           )}
                           <span style={{ fontSize: "0.875rem" }}>
-                            {getTipoMovimientoLabel(mov.tipo_movimiento)}
+                            {getTipoMovimientoLabel(mov.tipo)}
                           </span>
                         </div>
                       </td>
                       <td style={{ padding: "0.75rem", fontSize: "0.875rem" }}>
-                        {mov.nombre_perfil}
+                        {mov.perfil?.nombre_completo || 'N/A'}
                       </td>
                       <td
                         style={{
@@ -215,6 +225,14 @@ export function MovimientosView() {
                       </td>
                       <td style={{ padding: "0.75rem", fontSize: "0.875rem" }}>
                         {getMetodoPagoLabel(mov.metodo_pago)}
+                      </td>
+                      <td style={{ padding: "0.75rem", fontSize: "0.75rem", color: "#6b7280" }}>
+                        {mov.prestamo?.id ? (
+                          <div>
+                            <div>#{mov.prestamo.id.slice(0,8)}</div>
+                            <div style={{ fontSize: '0.7rem' }}>{formatCurrency(mov.prestamo.monto_principal)}</div>
+                          </div>
+                        ) : '-'}
                       </td>
                     </tr>
                   );

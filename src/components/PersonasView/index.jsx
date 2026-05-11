@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { perfilesApi } from '@/lib/api'
-import { Users, Plus, Search, User, TrendingUp, Filter, Edit, Trash2 } from 'lucide-react'
+import { Users, Plus, Search, User, TrendingUp, Filter, Edit, Trash2, Eye } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { Modal } from '../Modal'
+import { PersonaDetalleView } from '../PersonaDetalleView'
 import styles from './PersonasView.module.css'
 
 export function PersonasView() {
@@ -12,6 +14,8 @@ export function PersonasView() {
   const [loading, setLoading] = useState(true)
   const [filtroRol, setFiltroRol] = useState('') // '' = todos, 'cliente', 'inversionista'
   const [busqueda, setBusqueda] = useState('')
+  const [selectedPersonaId, setSelectedPersonaId] = useState(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
     fetchPersonas()
@@ -46,8 +50,13 @@ export function PersonasView() {
 
   const personasFiltradas = personas.filter(p => 
     p.nombre_completo?.toLowerCase().includes(busqueda.toLowerCase()) ||
-    p.email?.toLowerCase().includes(busqueda.toLowerCase())
+    p.identificacion?.includes(busqueda)
   )
+
+  const openDetalle = (id) => {
+    setSelectedPersonaId(id)
+    setIsModalOpen(true)
+  }
 
   const stats = {
     total: personas.length,
@@ -108,7 +117,7 @@ export function PersonasView() {
           <Search size={20} />
           <input
             type="text"
-            placeholder="Buscar por nombre o email..."
+            placeholder="Buscar por nombre o identificación..."
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
             className={styles.searchInput}
@@ -150,7 +159,7 @@ export function PersonasView() {
                   <tr>
                     <th>Nombre</th>
                     <th>Identificación</th>
-                    <th>Contacto</th>
+                    <th>Teléfono</th>
                     <th>Rol</th>
                     <th>Estado</th>
                     <th>Acciones</th>
@@ -168,12 +177,7 @@ export function PersonasView() {
                         </div>
                       </td>
                       <td>{persona.identificacion}</td>
-                      <td>
-                        <div className={styles.contactCell}>
-                          <span className={styles.email}>{persona.email}</span>
-                          <span className={styles.phone}>{persona.telefono}</span>
-                        </div>
-                      </td>
+                      <td className={styles.phone}>{persona.telefono || '-'}</td>
                       <td>
                         <span className={`${styles.roleBadge} ${styles[persona.rol]}`}>
                           {persona.rol === 'cliente' ? 'Cliente' : 'Inversionista'}
@@ -186,9 +190,14 @@ export function PersonasView() {
                       </td>
                       <td>
                         <div className={styles.actions}>
-                          <Link href={`/personas/${persona.id}`} className={styles.btnView} title="Ver detalles">
+                          <button 
+                            onClick={() => openDetalle(persona.id)} 
+                            className={styles.btnView} 
+                            title="Ver detalles"
+                          >
+                            <Eye size={16} />
                             Detalle
-                          </Link>
+                          </button>
                           <Link href={`/personas/${persona.id}/editar`} className={styles.btnEdit} title="Editar">
                             <Edit size={16} />
                           </Link>
@@ -231,19 +240,15 @@ export function PersonasView() {
                       <span className={styles.itemValue}>{persona.identificacion}</span>
                     </div>
                     <div className={styles.cardItem}>
-                      <span className={styles.itemLabel}>Email:</span>
-                      <span className={styles.itemValue}>{persona.email}</span>
-                    </div>
-                    <div className={styles.cardItem}>
                       <span className={styles.itemLabel}>Teléfono:</span>
                       <span className={styles.itemValue}>{persona.telefono}</span>
                     </div>
                   </div>
 
                   <div className={styles.cardActions}>
-                    <Link href={`/personas/${persona.id}`} className={styles.btnView}>
+                    <button onClick={() => openDetalle(persona.id)} className={styles.btnView}>
                       Detalles
-                    </Link>
+                    </button>
                     <div className={styles.actionGroup}>
                       <Link href={`/personas/${persona.id}/editar`} className={styles.btnEdit}>
                         <Edit size={18} />
@@ -262,6 +267,18 @@ export function PersonasView() {
           </div>
         </>
       )}
+
+      {/* Modal de Detalle */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Detalle del Perfil"
+        size="lg"
+      >
+        {selectedPersonaId && (
+          <PersonaDetalleView id={selectedPersonaId} isModal={true} />
+        )}
+      </Modal>
     </div>
   )
 }

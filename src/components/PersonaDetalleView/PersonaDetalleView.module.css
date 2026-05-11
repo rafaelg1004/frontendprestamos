@@ -275,3 +275,16 @@
 .emptySection p {
   margin: 0;
 }
+
+.modalMode {
+  padding: 0 !important;
+}
+
+.modalMode .card,
+.modalMode .section {
+  border: none !important;
+  box-shadow: none !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  border-radius: 0 !important;
+}

@@ -20,7 +20,7 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import styles from "./PrestamoDetalleView.module.css";
 
-export function PrestamoDetalleView({ id }) {
+export function PrestamoDetalleView({ id, isModal = false }) {
   const [prestamo, setPrestamo] = useState(null);
   const [cliente, setCliente] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -139,19 +139,44 @@ export function PrestamoDetalleView({ id }) {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <div className={styles.titleSection}>
-          <h1>Préstamo #{prestamo.id?.slice(0, 8)}</h1>
-          <p className={styles.subtitle}>Detalle del préstamo</p>
+    <div className={`${styles.container} ${isModal ? styles.modalMode : ""}`}>
+      {/* Header - Ocultar si es modal */}
+      {!isModal && (
+        <div className={styles.header}>
+          <div className={styles.titleSection}>
+            <h1>Préstamo #{prestamo.id?.slice(0, 8)}</h1>
+            <p className={styles.subtitle}>Detalle del préstamo</p>
+          </div>
+          <div className={styles.actions}>
+            <Link href="/prestamos" className={styles.btnSecondary}>
+              <ArrowLeft size={18} />
+              Volver
+            </Link>
+            {prestamo.estado === "activo" && (
+              <>
+                <Link
+                  href={`/prestamos/${prestamo.id}/pago`}
+                  className={styles.btnPrimary}
+                >
+                  Registrar Pago
+                </Link>
+                <Link
+                  href={`/prestamos/${prestamo.id}/liquidacion`}
+                  className={styles.btnSecondary}
+                >
+                  💰 Liquidar Préstamo
+                </Link>
+              </>
+            )}
+          </div>
         </div>
-        <div className={styles.actions}>
-          <Link href="/prestamos" className={styles.btnSecondary}>
-            <ArrowLeft size={18} />
-            Volver
-          </Link>
-          {prestamo.estado === "activo" && (
-            <>
+      )}
+
+      {/* Si es modal, mostrar una versión simplificada del header o botones de acción */}
+      {isModal && (
+        <div className={styles.modalActions}>
+           {prestamo.estado === "activo" && (
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
               <Link
                 href={`/prestamos/${prestamo.id}/pago`}
                 className={styles.btnPrimary}
@@ -162,12 +187,12 @@ export function PrestamoDetalleView({ id }) {
                 href={`/prestamos/${prestamo.id}/liquidacion`}
                 className={styles.btnSecondary}
               >
-                💰 Liquidar Préstamo
+                💰 Liquidar
               </Link>
-            </>
+            </div>
           )}
         </div>
-      </div>
+      )}
 
       {/* Info del Cliente - Primero */}
       <div className={styles.card} style={{ marginBottom: "1rem" }}>

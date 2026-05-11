@@ -4,9 +4,11 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { prestamosApi, perfilesApi, inversionesApi, cuentasApi } from "@/lib/api";
 import { formatCurrency, parseNumber, formatInputNumber } from "@/lib/utils";
-import { DollarSign, Calendar, Landmark, CreditCard, PieChart, FileText, Plus, Trash2, ArrowLeft, Info } from "lucide-react";
+import { DollarSign, Calendar, Landmark, CreditCard, PieChart, FileText, Plus, Trash2, ArrowLeft, Info, CheckCircle, Upload, X } from "lucide-react";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import { Modal } from "../Modal";
+import { prestamosApi as api } from "@/lib/api"; // Alias para evitar colisiones si fuera necesario
 import styles from "./PrestamoForm.module.css";
 
 export function PrestamoForm() {
@@ -18,6 +20,9 @@ export function PrestamoForm() {
   const [cuentas, setCuentas] = useState([]);
   const [fondos, setFondos] = useState([]); // [{ inversion_id, monto }]
   const [error, setError] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [createdPrestamoId, setCreatedPrestamoId] = useState(null);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     perfil_id: "",
     monto_principal: "",
@@ -119,8 +124,10 @@ export function PrestamoForm() {
       const response = await prestamosApi.create(dataToSend);
 
       if (response.data?.success) {
+        const newId = response.data.data.id;
+        setCreatedPrestamoId(newId);
         toast.success("Préstamo creado exitosamente");
-        router.push("/prestamos");
+        setShowSuccessModal(true);
       } else {
         setError("Error al crear el préstamo");
       }
@@ -131,6 +138,25 @@ export function PrestamoForm() {
       toast.error(message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("archivo", file);
+    formData.append("tipo_documento", "otro");
+
+    try {
+      setUploading(true);
+      await prestamosApi.subirDocumento(createdPrestamoId, formData);
+      toast.success("Documento vinculado correctamente");
+    } catch (error) {
+      toast.error("Error al subir el documento");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -361,6 +387,59 @@ export function PrestamoForm() {
           </button>
         </div>
       </form>
+
+      {/* Modal de Éxito y Carga de Documentos */}
+      <Modal
+        isOpen={showSuccessModal}
+        onClose={() => router.push("/prestamos")}
+        title="¡Préstamo Creado!"
+        size="md"
+      >
+        <div className={styles.successContent}>
+          <div className={styles.successIcon}>
+            <CheckCircle size={64} />
+          </div>
+          <h3>¡Emisión Exitosa!</h3>
+          <p>El préstamo ha sido registrado correctamente en el sistema.</p>
+          
+          <div className={styles.uploadStep}>
+            <div className={styles.uploadHeader}>
+              <FileText size={20} />
+              <span>Soportes Legales (Opcional)</span>
+            </div>
+            <p className={styles.uploadHint}>Sube la letra, pagaré o contrato ahora para dejar el registro completo.</p>
+            
+            <div className={styles.uploadActions}>
+              <input 
+                type="file" 
+                id="post-create-upload" 
+                style={{ display: 'none' }} 
+                onChange={handleFileUpload}
+                disabled={uploading}
+              />
+              <label htmlFor="post-create-upload" className={styles.btnUpload}>
+                <Upload size={20} />
+                {uploading ? "Subiendo..." : "Subir Documento"}
+              </label>
+            </div>
+          </div>
+
+          <div className={styles.modalFooter}>
+            <button 
+              onClick={() => router.push("/prestamos")} 
+              className={styles.btnFinish}
+            >
+              Terminar y volver a la lista
+            </button>
+            <button 
+              onClick={() => router.push(`/prestamos/${createdPrestamoId}`)} 
+              className={styles.btnSecondaryLink}
+            >
+              Ver detalle completo
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

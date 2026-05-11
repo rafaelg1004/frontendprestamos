@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react'
 import { prestamosApi } from '@/lib/api'
 import { formatCurrency, formatDate, calcularDiasMora, getEstadoBadge } from '@/lib/utils'
-import { Plus, Search, AlertTriangle } from 'lucide-react'
+import { Plus, Search, AlertTriangle, Eye } from 'lucide-react'
 import Link from 'next/link'
+import { Modal } from '../Modal'
+import { PrestamoDetalleView } from '../PrestamoDetalleView'
 import styles from './PrestamosView.module.css'
 
 export function PrestamosView() {
@@ -12,6 +14,8 @@ export function PrestamosView() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filtroEstado, setFiltroEstado] = useState('')
+  const [selectedPrestamoId, setSelectedPrestamoId] = useState(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
     const fetchPrestamos = async () => {
@@ -33,6 +37,11 @@ export function PrestamosView() {
   const filteredPrestamos = prestamos.filter(p => 
     p.cliente?.nombre_completo?.toLowerCase().includes(searchTerm.toLowerCase())
   )
+
+  const openDetalle = (id) => {
+    setSelectedPrestamoId(id)
+    setIsModalOpen(true)
+  }
 
   const prestamosEnMora = filteredPrestamos.filter(p => {
     const diasMora = calcularDiasMora(p.fecha_vencimiento)
@@ -134,9 +143,6 @@ export function PrestamosView() {
                             <span className={styles.clientName}>
                               {prestamo.cliente?.nombre_completo}
                             </span>
-                            <span className={styles.clientEmail}>
-                              {prestamo.cliente?.email}
-                            </span>
                           </div>
                         </td>
                         <td>
@@ -166,9 +172,13 @@ export function PrestamosView() {
                           </span>
                         </td>
                         <td className={styles.actionsCell}>
-                          <Link href={`/prestamos/${prestamo.id}`} className={styles.link}>
-                            Ver detalle →
-                          </Link>
+                          <button 
+                            onClick={() => openDetalle(prestamo.id)} 
+                            className={styles.btnView}
+                          >
+                            <Eye size={16} />
+                            Detalle
+                          </button>
                         </td>
                       </tr>
                     )
@@ -188,7 +198,7 @@ export function PrestamosView() {
               const isMora = diasMora > 0 && prestamo.estado === 'activo'
               
               return (
-                <Link key={prestamo.id} href={`/prestamos/${prestamo.id}`} className={styles.mobileCard}>
+                <div key={prestamo.id} onClick={() => openDetalle(prestamo.id)} className={styles.mobileCard}>
                   <div className={styles.mobileCardHeader}>
                     <div className={styles.mobileClientInfo}>
                       <span className={styles.mobileClientName}>{prestamo.cliente?.nombre_completo}</span>
@@ -222,12 +232,24 @@ export function PrestamosView() {
                       <span>{diasMora} días de retraso</span>
                     </div>
                   )}
-                </Link>
+                </div>
               )
             })}
           </div>
         </div>
       </div>
+
+      {/* Modal de Detalle de Préstamo */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Detalle del Préstamo"
+        size="xl"
+      >
+        {selectedPrestamoId && (
+          <PrestamoDetalleView id={selectedPrestamoId} isModal={true} />
+        )}
+      </Modal>
     </div>
   )
 }

@@ -18,7 +18,7 @@ import {
 import toast from 'react-hot-toast'
 import styles from './PersonaDetalleView.module.css'
 
-export function PersonaDetalleView({ id }) {
+export function PersonaDetalleView({ id, isModal = false }) {
   const router = useRouter()
   const [persona, setPersona] = useState(null)
   const [operaciones, setOperaciones] = useState([])
@@ -75,14 +75,16 @@ export function PersonaDetalleView({ id }) {
   const IconoRol = esCliente ? User : TrendingUp
 
   return (
-    <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <Link href="/personas" className={styles.backLink}>
-          <ArrowLeft size={20} />
-          Volver a Personas
-        </Link>
-      </div>
+    <div className={`${styles.container} ${isModal ? styles.modalMode : ''}`}>
+      {/* Header - Solo mostrar si NO es modal */}
+      {!isModal && (
+        <div className={styles.header}>
+          <Link href="/personas" className={styles.backLink}>
+            <ArrowLeft size={20} />
+            Volver a Personas
+          </Link>
+        </div>
+      )}
 
       {/* Info Card */}
       <div className={styles.card}>
