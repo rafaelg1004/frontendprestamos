@@ -10,7 +10,13 @@ import {
   Percent,
   Clock,
   DollarSign,
+  FileText,
+  Upload,
+  Trash2,
+  ExternalLink,
+  Plus
 } from "lucide-react";
+import toast from "react-hot-toast";
 import Link from "next/link";
 import styles from "./PrestamoDetalleView.module.css";
 
@@ -18,6 +24,8 @@ export function PrestamoDetalleView({ id }) {
   const [prestamo, setPrestamo] = useState(null);
   const [cliente, setCliente] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [documentos, setDocumentos] = useState([]);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -43,8 +51,55 @@ export function PrestamoDetalleView({ id }) {
       }
     };
 
+    const fetchDocumentos = async () => {
+      try {
+        const res = await prestamosApi.getDocumentos(id);
+        setDocumentos(res.data?.data || []);
+      } catch (error) {
+        console.error("Error fetching documentos:", error);
+      }
+    };
+
     fetchData();
+    fetchDocumentos();
   }, [id]);
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("archivo", file);
+    formData.append("tipo_documento", "otro"); // Podría pedirse en un prompt si se desea
+
+    try {
+      setUploading(true);
+      await prestamosApi.subirDocumento(id, formData);
+      toast.success("Documento subido correctamente");
+      // Recargar documentos
+      const res = await prestamosApi.getDocumentos(id);
+      setDocumentos(res.data?.data || []);
+    } catch (error) {
+      toast.error("Error al subir el documento");
+      console.error(error);
+    } finally {
+      setUploading(false);
+      // Reset input
+      e.target.value = null;
+    }
+  };
+
+  const handleDeleteDocumento = async (docId) => {
+    if (!confirm("¿Estás seguro de eliminar este documento?")) return;
+
+    try {
+      await prestamosApi.eliminarDocumento(docId);
+      toast.success("Documento eliminado");
+      setDocumentos(documentos.filter(d => d.id !== docId));
+    } catch (error) {
+      toast.error("Error al eliminar el documento");
+    }
+  };
 
   if (loading) {
     return (
@@ -449,6 +504,67 @@ export function PrestamoDetalleView({ id }) {
               )}
             </span>
           </div>
+        </div>
+      </div>
+
+      {/* Documentos y Respaldos */}
+      <div className={styles.card} style={{ marginTop: "1.5rem" }}>
+        <div className={styles.cardHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 className={styles.sectionTitle}>Documentos y Respaldos</h2>
+          <div className={styles.uploadBtnWrapper}>
+            <input 
+              type="file" 
+              id="doc-upload" 
+              style={{ display: 'none' }} 
+              onChange={handleFileUpload}
+              disabled={uploading}
+            />
+            <label htmlFor="doc-upload" className={styles.btnSecondary} style={{ cursor: 'pointer', margin: 0 }}>
+              <Plus size={18} />
+              {uploading ? "Subiendo..." : "Añadir Documento"}
+            </label>
+          </div>
+        </div>
+
+        <div className={styles.docsGrid}>
+          {documentos.length > 0 ? (
+            documentos.map((doc) => (
+              <div key={doc.id} className={styles.docItem}>
+                <div className={styles.docIcon}>
+                  <FileText size={24} />
+                </div>
+                <div className={styles.docInfo}>
+                  <p className={styles.docName}>{doc.nombre_archivo}</p>
+                  <p className={styles.docMeta}>
+                    {formatDate(doc.fecha_subida)} • {doc.tipo_documento}
+                  </p>
+                </div>
+                <div className={styles.docActions}>
+                  <a 
+                    href={`/api/uploads/documentos/${doc.ruta_archivo}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className={styles.docActionBtn}
+                    title="Ver documento"
+                  >
+                    <ExternalLink size={18} />
+                  </a>
+                  <button 
+                    onClick={() => handleDeleteDocumento(doc.id)}
+                    className={`${styles.docActionBtn} ${styles.deleteBtn}`}
+                    title="Eliminar"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className={styles.emptyDocs}>
+              <Upload size={40} style={{ opacity: 0.3, marginBottom: '1rem' }} />
+              <p>No hay documentos cargados (Letras, Pagarés, Cédula, etc.)</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

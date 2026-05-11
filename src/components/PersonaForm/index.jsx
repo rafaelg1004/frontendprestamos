@@ -215,7 +215,7 @@ export function PersonaForm({ id = null }) {
               </div>
 
               <div className={styles.field}>
-                <label className={styles.label}>Correo Electrónico *</label>
+                <label className={styles.label}>Correo Electrónico (Opcional)</label>
                 <div className={styles.inputWrapper}>
                   <Mail className={styles.inputIcon} size={18} />
                   <input
@@ -225,7 +225,6 @@ export function PersonaForm({ id = null }) {
                     onChange={handleChange}
                     placeholder="correo@ejemplo.com"
                     className={styles.input}
-                    required
                   />
                 </div>
               </div>

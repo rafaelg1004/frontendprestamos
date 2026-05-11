@@ -82,6 +82,12 @@ export const prestamosApi = {
   pagar: (id, data) => api.post(`/prestamos/${id}/pagar`, data),
   getMora: () => api.get("/prestamos/mora/listado"),
   calcularLiquidacion: (id) => api.get(`/prestamos/${id}/liquidacion`),
+  // Documentos
+  getDocumentos: (id) => api.get(`/prestamos/${id}/documentos`),
+  subirDocumento: (id, formData) => api.post(`/prestamos/${id}/documentos`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  eliminarDocumento: (docId) => api.delete(`/prestamos/documentos/${docId}`),
 };
 
 // Inversiones
