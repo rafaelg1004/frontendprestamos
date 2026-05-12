@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react'
 import { cuentasApi } from '@/lib/api'
 import { formatCurrency } from '@/lib/utils'
-import { Wallet, Plus, Trash2, Landmark, CreditCard, Banknote } from 'lucide-react'
+import { Wallet, Plus, Trash2, Landmark, CreditCard, Banknote, RefreshCw, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import styles from './CuentasView.module.css'
 
 export function CuentasView() {
   const [cuentas, setCuentas] = useState([])
   const [loading, setLoading] = useState(true)
+  const [syncingId, setSyncingId] = useState(null)
   const [showModal, setShowModal] = useState(false)
   const [formData, setFormData] = useState({ nombre: '', tipo: 'ahorros' })
 
@@ -26,6 +27,19 @@ export function CuentasView() {
       toast.error('Error al cargar cuentas')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleSync = async (id) => {
+    try {
+      setSyncingId(id)
+      await cuentasApi.sincronizar(id)
+      toast.success('Saldo sincronizado correctamente')
+      fetchCuentas()
+    } catch (error) {
+      toast.error('Error al sincronizar saldo')
+    } finally {
+      setSyncingId(null)
     }
   }
 
@@ -82,22 +96,42 @@ export function CuentasView() {
 
       <div className={styles.grid}>
         {cuentas.map((cuenta) => (
-          <div key={cuenta.id} className={styles.card}>
+          <div key={cuenta.id} className={`${styles.card} ${cuenta.saldo_actual < 0 ? styles.cardWarning : ''}`}>
             <div className={styles.cardHeader}>
               <div className={styles.iconWrapper}>
                 {getAccountIcon(cuenta.tipo)}
               </div>
-              <button 
-                onClick={() => handleDelete(cuenta.id, cuenta.nombre)}
-                className={styles.btnDelete}
-              >
-                <Trash2 size={18} />
-              </button>
+              <div className={styles.cardActions}>
+                <button 
+                  onClick={() => handleSync(cuenta.id)}
+                  className={`${styles.btnSync} ${syncingId === cuenta.id ? styles.spinning : ''}`}
+                  title="Sincronizar saldo con movimientos"
+                  disabled={syncingId === cuenta.id}
+                >
+                  <RefreshCw size={18} />
+                </button>
+                <button 
+                  onClick={() => handleDelete(cuenta.id, cuenta.nombre)}
+                  className={styles.btnDelete}
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
             </div>
             <div className={styles.cardBody}>
               <h3 className={styles.accountName}>{cuenta.nombre}</h3>
               <p className={styles.accountType}>{cuenta.tipo}</p>
-              <p className={styles.balance}>{formatCurrency(cuenta.saldo_actual)}</p>
+              <div className={styles.balanceSection}>
+                <p className={`${styles.balance} ${cuenta.saldo_actual < 0 ? styles.negative : ''}`}>
+                  {formatCurrency(cuenta.saldo_actual)}
+                </p>
+                {cuenta.saldo_actual < 0 && (
+                  <div className={styles.warningMessage}>
+                    <AlertCircle size={14} />
+                    Saldo inconsistente
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         ))}

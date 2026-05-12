@@ -203,3 +203,66 @@
     font-size: 1.5rem;
   }
 }
+
+.cardActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btnSync {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btnSync:hover:not(:disabled) {
+  background: #f1f5f9;
+  color: #2563eb;
+}
+
+.btnSync:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+  color: #2563eb;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.cardWarning {
+  border-color: #fecaca;
+  background: #fffafa;
+}
+
+.balanceSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.negative {
+  color: #dc2626 !important;
+}
+
+.warningMessage {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #dc2626;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}

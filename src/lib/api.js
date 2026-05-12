@@ -110,7 +110,9 @@ export const cuentasApi = {
   create: (data) => api.post("/cuentas", data),
   update: (id, data) => api.put(`/cuentas/${id}`, data),
   delete: (id) => api.delete(`/cuentas/${id}`),
+  sincronizar: (id) => api.post(`/cuentas/${id}/sincronizar`),
 };
+
 
 // Movimientos
 export const movimientosApi = {
