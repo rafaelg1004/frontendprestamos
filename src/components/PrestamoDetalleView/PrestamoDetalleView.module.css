@@ -545,3 +545,24 @@
     grid-template-columns: 1fr;
   }
 }
+.btnPaySmall {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnPaySmall:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.btnPaySmall:active {
+  transform: translateY(0);
+}

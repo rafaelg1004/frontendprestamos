@@ -91,6 +91,7 @@ export const prestamosApi = {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
   eliminarDocumento: (docId) => api.delete(`/prestamos/documentos/${docId}`),
+  pagarCuota: (id, data) => api.post(`/prestamos/cuotas/${id}/pagar`, data),
 };
 
 // Inversiones
@@ -113,6 +114,12 @@ export const cuentasApi = {
   sincronizar: (id) => api.post(`/cuentas/${id}/sincronizar`),
 };
 
+
+// Reportes
+export const reportesApi = {
+  getRentabilidad: () => api.get("/reportes/rentabilidad"),
+  getCartera: () => api.get("/reportes/cartera"),
+};
 
 // Movimientos
 export const movimientosApi = {

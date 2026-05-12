@@ -64,6 +64,28 @@ export function PrestamoDetalleView({ id, isModal = false }) {
     fetchDocumentos();
   }, [id]);
 
+  const handlePagarCuota = async (cuotaId, numero) => {
+    const confirmacion = confirm(`¿Estás seguro de registrar el pago de la cuota #${numero}? El dinero entrará a tu cuenta predeterminada.`);
+    if (!confirmacion) return;
+
+    try {
+      // Por simplicidad, usamos la primera cuenta del préstamo o una predeterminada
+      const cuenta_id = prestamo.cuenta_id; 
+      await prestamosApi.pagarCuota(cuotaId, { 
+        cuenta_id, 
+        metodo_pago: 'efectivo', 
+        notas: `Pago rápido de cuota #${numero}` 
+      });
+      toast.success(`Cuota #${numero} pagada exitosamente`);
+      
+      // Recargar datos
+      const prestamoRes = await prestamosApi.getById(id);
+      setPrestamo(prestamoRes.data?.data);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error al pagar la cuota");
+    }
+  };
+
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -450,6 +472,7 @@ export function PrestamoDetalleView({ id, isModal = false }) {
                     <th>Total</th>
                     <th>Estado</th>
                     <th>Pagado</th>
+                    <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -479,6 +502,16 @@ export function PrestamoDetalleView({ id, isModal = false }) {
                           {cuota.monto_pagado > 0
                             ? formatCurrency(cuota.monto_pagado)
                             : "-"}
+                        </td>
+                        <td>
+                          {cuota.estado === 'pendiente' && (
+                            <button 
+                              onClick={() => handlePagarCuota(cuota.id, cuota.numero_cuota)}
+                              className={styles.btnPaySmall}
+                            >
+                              Pagar
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))}

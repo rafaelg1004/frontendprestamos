@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Users, Banknote, Wallet, ArrowLeftRight } from 'lucide-react'
+import { LayoutDashboard, Users, Banknote, Wallet, ArrowLeftRight, BarChart3 } from 'lucide-react'
 import styles from './BottomNav.module.css'
 
 export function BottomNav() {
@@ -12,9 +12,11 @@ export function BottomNav() {
     { href: '/', icon: LayoutDashboard, label: 'Inicio' },
     { href: '/personas', icon: Users, label: 'Personas' },
     { href: '/prestamos', icon: Banknote, label: 'Créditos' },
+    { href: '/reportes', icon: BarChart3, label: 'Reportes' },
     { href: '/cuentas', icon: Wallet, label: 'Cuentas' },
     { href: '/movimientos', icon: ArrowLeftRight, label: 'Historial' },
   ]
+
 
   return (
     <nav className={styles.bottomNav}>

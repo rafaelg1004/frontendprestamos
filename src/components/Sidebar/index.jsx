@@ -13,7 +13,9 @@ import {
   ChevronRight,
   Wallet,
   Calculator,
+  BarChart3,
 } from "lucide-react";
+
 import { authApi } from "@/lib/api";
 import styles from "./Sidebar.module.css";
 
@@ -21,11 +23,13 @@ const menuItems = [
   { href: "/", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/personas", icon: Users, label: "Personas" },
   { href: "/prestamos", icon: Banknote, label: "Préstamos" },
+  { href: "/reportes", icon: BarChart3, label: "Reportes" },
   { href: "/simulador", icon: Calculator, label: "Simulador" },
   { href: "/inversiones", icon: TrendingUp, label: "Inversiones" },
   { href: "/cuentas", icon: Wallet, label: "Cuentas" },
   { href: "/movimientos", icon: ArrowLeftRight, label: "Movimientos" },
 ];
+
 
 export function Sidebar({ collapsed = false, onToggle }) {
   const pathname = usePathname();
