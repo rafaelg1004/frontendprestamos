@@ -50,6 +50,9 @@ export function Sidebar({ collapsed = false, onToggle }) {
       </button>
 
       <div className={styles.header}>
+        <div className={styles.logoIcon}>
+          <Banknote size={24} />
+        </div>
         <h1 className={styles.logo}>Préstamos</h1>
       </div>
 

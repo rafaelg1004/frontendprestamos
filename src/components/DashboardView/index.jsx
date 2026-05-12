@@ -86,11 +86,11 @@ export function DashboardView() {
   const getAlertIcon = (nivel) => {
     switch (nivel) {
       case "vencido":
-        return <AlertTriangle className={styles.iconRed} />;
+        return <AlertTriangle className={styles.iconRed} size={20} />;
       case "critico":
-        return <Clock className={styles.iconOrange} />;
+        return <Clock className={styles.iconOrange} size={20} />;
       default:
-        return <CheckCircle className={styles.iconYellow} />;
+        return <CheckCircle className={styles.iconYellow} size={20} />;
     }
   };
 
@@ -110,11 +110,8 @@ export function DashboardView() {
       <div className={styles.container}>
         <div className={styles.header}>
           <div>
-            <div className={`${styles.skeleton} ${styles.skeletonTitle}`}></div>
-            <div
-              className={`${styles.skeleton} ${styles.skeletonText}`}
-              style={{ width: "200px" }}
-            ></div>
+            <div className={`${styles.skeleton} ${styles.skeletonTitle}`} style={{ width: '250px' }}></div>
+            <div className={`${styles.skeleton} ${styles.skeletonText}`} style={{ width: '350px' }}></div>
           </div>
         </div>
         <div className={styles.statsGrid}>
@@ -122,13 +119,10 @@ export function DashboardView() {
             <div key={i} className={styles.statCard}>
               <div className={styles.statContent}>
                 <div className={styles.statInfo}>
-                  <div
-                    className={`${styles.skeleton} ${styles.skeletonText}`}
-                  ></div>
-                  <div
-                    className={`${styles.skeleton} ${styles.skeletonTitle}`}
-                  ></div>
+                  <div className={`${styles.skeleton} ${styles.skeletonText}`} style={{ width: '60%' }}></div>
+                  <div className={`${styles.skeleton} ${styles.skeletonTitle}`} style={{ width: '80%', height: '2rem' }}></div>
                 </div>
+                <div className={`${styles.skeleton}`} style={{ width: '3.5rem', height: '3.5rem', borderRadius: '0.75rem' }}></div>
               </div>
             </div>
           ))}
@@ -140,41 +134,87 @@ export function DashboardView() {
   if (!stats) {
     return (
       <div className={styles.container}>
-        <div className={styles.emptyState}>
-          <p>Error al cargar los datos del dashboard</p>
-          <button
-            onClick={() => window.location.reload()}
-            className={styles.btnRetry}
-          >
-            Reintentar
+        <div className={styles.card} style={{ textAlign: 'center', padding: '4rem' }}>
+          <AlertTriangle size={48} color="var(--danger)" style={{ margin: '0 auto 1rem' }} />
+          <h2 className={styles.cardTitle}>Error al cargar datos</h2>
+          <p className={styles.subtitle}>No pudimos recuperar la información del servidor.</p>
+          <button onClick={() => window.location.reload()} className={styles.link} style={{ marginTop: '1.5rem', cursor: 'pointer', border: 'none', background: 'none' }}>
+            Intentar de nuevo
           </button>
         </div>
       </div>
     );
   }
 
-  const criticalAlerts = alerts.filter(
-    (a) => a.nivel_alerta === "vencido" || a.nivel_alerta === "critico",
-  );
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: {
+          usePointStyle: true,
+          padding: 20,
+          font: { weight: '600' }
+        }
+      },
+      tooltip: {
+        backgroundColor: '#1e293b',
+        padding: 12,
+        titleFont: { size: 14, weight: '700' },
+        bodyFont: { size: 13 },
+        cornerRadius: 8,
+        displayColors: true,
+        callbacks: {
+          label: (context) => {
+            let label = context.dataset.label || '';
+            if (label) label += ': ';
+            if (context.parsed.y !== null) {
+              label += new Intl.NumberFormat('es-CO', { 
+                style: 'currency', 
+                currency: 'COP',
+                maximumFractionDigits: 0 
+              }).format(context.parsed.y * 1000);
+            }
+            return label;
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { font: { weight: '600' } }
+      },
+      y: {
+        beginAtZero: true,
+        grid: { color: 'rgba(0,0,0,0.05)' },
+        ticks: {
+          callback: (value) => `$${value}k`,
+          font: { weight: '600' }
+        }
+      }
+    }
+  };
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <div>
-          <h1 className={styles.title}>Dashboard</h1>
-          <p className={styles.subtitle}>Resumen de tu operación financiera</p>
+          <h1 className={styles.title}>Panel de Control</h1>
+          <p className={styles.subtitle}>Gestión integral de tu operación financiera</p>
         </div>
       </div>
 
-      {/* Stats Grid */}
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
           <div className={styles.statContent}>
             <div className={styles.statInfo}>
-              <p className={styles.statLabel}>Total Clientes</p>
-              <p className={styles.statValue}>
-                {formatNumber(stats.perfiles.total_clientes)}
-              </p>
+              <p className={styles.statLabel}>Clientes</p>
+              <p className={styles.statValue}>{formatNumber(stats.perfiles.total_clientes)}</p>
+              <div className={styles.statSubtext}>
+                <Users size={14} /> Total registrados
+              </div>
             </div>
             <div className={`${styles.statIcon} ${styles.iconBlue}`}>
               <Users size={24} />
@@ -185,13 +225,11 @@ export function DashboardView() {
         <div className={styles.statCard}>
           <div className={styles.statContent}>
             <div className={styles.statInfo}>
-              <p className={styles.statLabel}>Capital en la Calle</p>
-              <p className={styles.statValue}>
-                {formatCurrency(stats.prestamos.monto_activos)}
-              </p>
-              <p className={styles.statSubtext}>
-                {stats.prestamos.activos} préstamos activos
-              </p>
+              <p className={styles.statLabel}>Capital Activo</p>
+              <p className={styles.statValue}>{formatCurrency(stats.prestamos.monto_activos)}</p>
+              <div className={styles.statSubtext}>
+                <Banknote size={14} /> {stats.prestamos.activos} préstamos
+              </div>
             </div>
             <div className={`${styles.statIcon} ${styles.iconGreen}`}>
               <Banknote size={24} />
@@ -202,13 +240,11 @@ export function DashboardView() {
         <div className={styles.statCard}>
           <div className={styles.statContent}>
             <div className={styles.statInfo}>
-              <p className={styles.statLabel}>Deuda con Inversionistas</p>
-              <p className={styles.statValue}>
-                {formatCurrency(stats.inversiones.monto_activas)}
-              </p>
-              <p className={styles.statSubtext}>
-                {stats.inversiones.activas} inversiones activas
-              </p>
+              <p className={styles.statLabel}>Deuda Inversión</p>
+              <p className={styles.statValue}>{formatCurrency(stats.inversiones.monto_activas)}</p>
+              <div className={styles.statSubtext}>
+                <TrendingUp size={14} /> {stats.inversiones.activas} activas
+              </div>
             </div>
             <div className={`${styles.statIcon} ${styles.iconPurple}`}>
               <TrendingUp size={24} />
@@ -219,13 +255,13 @@ export function DashboardView() {
         <div className={styles.statCard}>
           <div className={styles.statContent}>
             <div className={styles.statInfo}>
-              <p className={styles.statLabel}>Préstamos en Mora</p>
-              <p className={styles.statValue}>{stats.prestamos.en_mora}</p>
-              <p className={styles.statSubtext}>
-                {stats.prestamos.mora_potencial > 0
-                  ? `Mora: ${formatCurrency(stats.prestamos.mora_potencial)}`
-                  : "Sin mora actual"}
+              <p className={styles.statLabel}>Mora</p>
+              <p className={`${styles.statValue} ${stats.prestamos.en_mora > 0 ? styles.textRed : ''}`}>
+                {stats.prestamos.en_mora}
               </p>
+              <div className={styles.statSubtext}>
+                <AlertTriangle size={14} /> {formatCurrency(stats.prestamos.mora_potencial)}
+              </div>
             </div>
             <div className={`${styles.statIcon} ${styles.iconRed}`}>
               <AlertTriangle size={24} />
@@ -234,10 +270,11 @@ export function DashboardView() {
         </div>
       </div>
 
-      {/* Charts Section */}
       <div className={styles.grid2Cols}>
         <div className={styles.card}>
-          <h3 className={styles.cardTitle}>Evolución de Flujo de Caja</h3>
+          <div className={styles.cardHeader}>
+            <h3 className={styles.cardTitle}>Flujo de Caja Mensual</h3>
+          </div>
           <div className={styles.chartContainer}>
             {chartData && (
               <Bar 
@@ -245,76 +282,47 @@ export function DashboardView() {
                   labels: chartData.map(d => d.nombre_mes),
                   datasets: [
                     {
-                      label: 'Entradas (Cobros)',
-                      data: chartData.map(d => d.entradas / 1000), // En miles
-                      backgroundColor: 'rgba(34, 197, 94, 0.6)',
-                      borderColor: 'rgb(34, 197, 94)',
-                      borderWidth: 1,
+                      label: 'Entradas',
+                      data: chartData.map(d => d.entradas / 1000),
+                      backgroundColor: '#10b981',
+                      borderRadius: 6,
+                      hoverBackgroundColor: '#059669',
                     },
                     {
-                      label: 'Salidas (Pagos)',
-                      data: chartData.map(d => d.salidas / 1000), // En miles
-                      backgroundColor: 'rgba(239, 68, 68, 0.6)',
-                      borderColor: 'rgb(239, 68, 68)',
-                      borderWidth: 1,
+                      label: 'Salidas',
+                      data: chartData.map(d => d.salidas / 1000),
+                      backgroundColor: '#f43f5e',
+                      borderRadius: 6,
+                      hoverBackgroundColor: '#e11d48',
                     }
                   ]
                 }}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: { position: 'top' },
-                    tooltip: {
-                      callbacks: {
-                        label: (context) => {
-                          let label = context.dataset.label || '';
-                          if (label) label += ': ';
-                          if (context.parsed.y !== null) {
-                            label += new Intl.NumberFormat('es-CO', { 
-                              style: 'currency', 
-                              currency: 'COP',
-                              maximumFractionDigits: 0 
-                            }).format(context.parsed.y * 1000);
-                          }
-                          return label;
-                        }
-                      }
-                    }
-                  },
-                  scales: {
-                    y: {
-                      beginAtZero: true,
-                      ticks: {
-                        callback: (value) => `$${value}k`
-                      }
-                    }
-                  }
-                }}
+                options={chartOptions}
               />
             )}
           </div>
         </div>
 
-        {/* Global Net Balance */}
         <div className={styles.card}>
-          <h3 className={styles.cardTitle}>Resumen Financiero Global</h3>
+          <div className={styles.cardHeader}>
+            <h3 className={styles.cardHeader}>Balance General</h3>
+          </div>
           <div className={styles.balanceGrid}>
             <div className={styles.balanceItem}>
-              <p className={styles.balanceLabel}>Total Activos (Por Recaudar)</p>
+              <p className={styles.balanceLabel}>Activos (Recaudos)</p>
               <p className={`${styles.balanceValue} ${styles.textGreen}`}>
                 {formatCurrency(stats.balance_general.activos)}
               </p>
             </div>
             <div className={styles.balanceItem}>
-              <p className={styles.balanceLabel}>Total Pasivos (Deuda Inversionistas)</p>
+              <p className={styles.balanceLabel}>Pasivos (Inversiones)</p>
               <p className={`${styles.balanceValue} ${styles.textRed}`}>
                 {formatCurrency(stats.balance_general.pasivos)}
               </p>
             </div>
             <div className={styles.balanceDivider}></div>
-            <div className={styles.balanceItem}>
-              <p className={styles.balanceLabel}>Patrimonio Neto Estimado</p>
+            <div className={styles.balanceItem} style={{ background: 'var(--primary-light)' }}>
+              <p className={styles.balanceLabel}>Patrimonio Estimado</p>
               <p className={`${styles.balanceValue} ${styles.textBlue}`}>
                 {formatCurrency(stats.balance_general.patrimonio_neto)}
               </p>
@@ -323,42 +331,30 @@ export function DashboardView() {
         </div>
       </div>
 
-      {/* Two Column Layout (Movements and Alerts) */}
       <div className={styles.grid2Cols}>
-        {/* Recent Movements */}
         <div className={styles.card}>
-          <h3 className={styles.cardTitle}>Movimientos Recientes</h3>
+          <div className={styles.cardHeader}>
+            <h3 className={styles.cardTitle}>Movimientos Recientes</h3>
+          </div>
           <div className={styles.movementList}>
             {movements.length === 0 ? (
-              <p className={styles.emptyState}>
-                No hay movimientos registrados
-              </p>
+              <p className={styles.emptyState}>No hay actividad reciente</p>
             ) : (
               movements.map((mov, index) => (
-                <div
-                  key={mov.movimiento_id || `mov-${index}`}
-                  className={styles.movementItem}
-                >
+                <div key={mov.movimiento_id || index} className={styles.movementItem}>
                   <div className={styles.movementIcon}>
                     {getFlowIcon(mov.tipo_movimiento)}
                   </div>
                   <div className={styles.movementInfo}>
-                    <p className={styles.movementType}>
-                      {getTipoMovimientoLabel(mov.tipo_movimiento)}
-                    </p>
+                    <p className={styles.movementType}>{getTipoMovimientoLabel(mov.tipo_movimiento)}</p>
                     <p className={styles.movementMeta}>
-                      {mov.nombre_perfil} •{" "}
-                      {formatDateTime(mov.fecha_operacion)}
+                      {mov.nombre_perfil} • {formatDateTime(mov.fecha_operacion)}
                     </p>
                   </div>
-                  <div
-                    className={`${styles.movementAmount} ${
-                      mov.tipo_movimiento === "recibo_inversion" ||
-                      mov.tipo_movimiento === "pago_cliente"
-                        ? styles.amountPositive
-                        : styles.amountNegative
-                    }`}
-                  >
+                  <div className={`${styles.movementAmount} ${
+                    mov.tipo_movimiento.includes('pago') || mov.tipo_movimiento.includes('recibo') 
+                    ? styles.amountPositive : styles.amountNegative
+                  }`}>
                     {formatCurrency(mov.monto_total)}
                   </div>
                 </div>
@@ -367,13 +363,12 @@ export function DashboardView() {
           </div>
         </div>
 
-        {/* Alerts */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
-            <h3 className={styles.cardTitle}>Alertas de Vencimiento</h3>
-            {criticalAlerts.length > 0 && (
+            <h3 className={styles.cardTitle}>Alertas Prioritarias</h3>
+            {alerts.filter(a => a.nivel_alerta === 'vencido').length > 0 && (
               <span className={`${styles.badge} ${styles.badgeDanger}`}>
-                {criticalAlerts.length} críticas
+                {alerts.filter(a => a.nivel_alerta === 'vencido').length} Vencidos
               </span>
             )}
           </div>
@@ -381,42 +376,27 @@ export function DashboardView() {
           <div className={styles.alertList}>
             {alerts.length === 0 ? (
               <div className={styles.emptyState}>
-                <CheckCircle
-                  size={48}
-                  className={styles.iconGreen}
-                  style={{ margin: "0 auto 12px" }}
-                />
-                <p>Sin alertas próximas</p>
+                <CheckCircle size={40} className={styles.iconGreen} style={{ margin: '0 auto 1rem' }} />
+                <p>Todo al día</p>
               </div>
             ) : (
-              alerts.slice(0, 5).map((alert, index) => (
-                <Link
-                  key={alert.prestamo_id || `alert-${index}`}
+              alerts.slice(0, 4).map((alert, index) => (
+                <Link 
+                  key={alert.prestamo_id || index} 
                   href={`/prestamos/${alert.prestamo_id}`}
                   className={`${styles.alertItem} ${getAlertClass(alert.nivel_alerta)}`}
                 >
                   <div className={styles.alertContent}>
-                    <div className={styles.alertIcon}>
-                      {getAlertIcon(alert.nivel_alerta)}
-                    </div>
+                    <div className={styles.alertIcon}>{getAlertIcon(alert.nivel_alerta)}</div>
                     <div className={styles.alertInfo}>
                       <div className={styles.alertHeader}>
                         <p className={styles.alertClient}>{alert.cliente}</p>
-                        <span
-                          className={`${styles.alertDays} ${
-                            alert.dias_restantes <= 0
-                              ? styles.alertDaysVencido
-                              : styles.alertDaysCritico
-                          }`}
-                        >
-                          {alert.dias_restantes <= 0
-                            ? `Vencido hace ${Math.abs(alert.dias_restantes)} días`
-                            : `${alert.dias_restantes} días restantes`}
+                        <span className={styles.alertDays}>
+                          {alert.dias_restantes <= 0 ? 'MORA' : `${alert.dias_restantes}d`}
                         </span>
                       </div>
                       <p className={styles.alertDetails}>
-                        Vence: {formatDate(alert.fecha_vencimiento)} • Saldo:{" "}
-                        {formatCurrency(alert.saldo_pendiente)}
+                        Saldo: {formatCurrency(alert.saldo_pendiente)} • Vence: {formatDate(alert.fecha_vencimiento)}
                       </p>
                     </div>
                   </div>
@@ -424,12 +404,9 @@ export function DashboardView() {
               ))
             )}
           </div>
-
-          {alerts.length > 5 && (
-            <div style={{ marginTop: "16px", textAlign: "center" }}>
-              <Link href="/prestamos?estado=activo" className={styles.link}>
-                Ver todas las alertas →
-              </Link>
+          {alerts.length > 4 && (
+            <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+              <Link href="/prestamos" className={styles.link}>Ver todas las alertas →</Link>
             </div>
           )}
         </div>

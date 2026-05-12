@@ -11,6 +11,10 @@ import {
   Clock,
   DollarSign,
   TrendingUp,
+  Activity,
+  ArrowUpRight,
+  PieChart,
+  Briefcase
 } from "lucide-react";
 import Link from "next/link";
 import styles from "../PrestamoDetalleView/PrestamoDetalleView.module.css";
@@ -174,10 +178,34 @@ export function InversionDetalleView({ id }) {
         )}
       </div>
 
-      {/* Info de la Inversión - Fila compacta */}
+      {/* Resumen de Fondos */}
+      <div className={styles.statsGrid} style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: '1.5rem' }}>
+        <div className={styles.statItem} style={{ borderLeft: '4px solid #3b82f6' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+            <Activity size={14} color="#3b82f6" />
+            <span className={styles.statLabel}>Disponible</span>
+          </div>
+          <p className={styles.statValue}>{formatCurrency(inversion.calculos?.disponible_en_cuenta || 0)}</p>
+        </div>
+        <div className={styles.statItem} style={{ borderLeft: '4px solid #ef4444' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+            <TrendingUp size={14} color="#ef4444" />
+            <span className={styles.statLabel}>En la Calle</span>
+          </div>
+          <p className={styles.statValue}>{formatCurrency(inversion.calculos?.monto_en_calle || 0)}</p>
+        </div>
+        <div className={styles.statItem} style={{ borderLeft: '4px solid #10b981' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+            <Calendar size={14} color="#10b981" />
+            <span className={styles.statLabel}>A Pagar (Mes)</span>
+          </div>
+          <p className={styles.statValue}>{formatCurrency(inversion.calculos?.interes_proximo_mes || 0)}</p>
+        </div>
+      </div>
+
       <div className={styles.infoBar}>
         <div className={styles.infoBarItem}>
-          <span className={styles.infoBarLabel}>Monto</span>
+          <span className={styles.infoBarLabel}>Inversión Total</span>
           <span className={styles.infoBarValue}>
             {formatCurrency(inversion.monto_invertido)}
           </span>
@@ -185,46 +213,124 @@ export function InversionDetalleView({ id }) {
         <div className={styles.infoBarSeparator}></div>
 
         <div className={styles.infoBarItem}>
-          <span className={styles.infoBarLabel}>Saldo</span>
+          <span className={styles.infoBarLabel}>Retorno Total</span>
           <span className={styles.infoBarValue}>
-            {formatCurrency(
-              inversion.saldo_pendiente || inversion.monto_invertido,
-            )}
+            {formatCurrency(inversion.calculos?.retorno_total || 0)}
           </span>
         </div>
         <div className={styles.infoBarSeparator}></div>
 
         <div className={styles.infoBarItem}>
-          <span className={styles.infoBarLabel}>Tasa</span>
+          <span className={styles.infoBarLabel}>Tasa Pactada</span>
           <span className={styles.infoBarValue}>
-            {inversion.tasa_interes_pactada || inversion.tasa_interes_mensual}%
+            {inversion.tasa_interes_pactada}%
           </span>
         </div>
         <div className={styles.infoBarSeparator}></div>
 
         <div className={styles.infoBarItem}>
-          <span className={styles.infoBarLabel}>Plazo</span>
+          <span className={styles.infoBarLabel}>Fecha Inicio</span>
           <span className={styles.infoBarValue}>
-            {inversion.plazo_meses} meses
-          </span>
-        </div>
-        <div className={styles.infoBarSeparator}></div>
-
-        <div className={styles.infoBarItem}>
-          <span className={styles.infoBarLabel}>Inicio</span>
-          <span className={styles.infoBarValue}>
-            {formatDate(inversion.fecha_inversion || inversion.fecha_inicio)}
-          </span>
-        </div>
-        <div className={styles.infoBarSeparator}></div>
-
-        <div className={styles.infoBarItem}>
-          <span className={styles.infoBarLabel}>Vence</span>
-          <span className={styles.infoBarValue}>
-            {formatDate(inversion.fecha_vencimiento)}
+            {formatDate(inversion.fecha_inversion)}
           </span>
         </div>
       </div>
+
+      {/* Préstamos Financiados (Trazabilidad) */}
+      <div className={styles.card} style={{ marginTop: "1.5rem" }}>
+        <div className={styles.cardHeader}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Briefcase size={20} color="#2563eb" />
+            <h2 className={styles.sectionTitle}>Préstamos Financiados (Trazabilidad)</h2>
+          </div>
+          <span className={styles.badge} style={{ background: '#dbeafe', color: '#1e40af' }}>
+            {inversion.prestamos_financiados?.length || 0} Préstamos
+          </span>
+        </div>
+        
+        {inversion.prestamos_financiados && inversion.prestamos_financiados.length > 0 ? (
+          <div className={styles.tableContainer}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Deudor</th>
+                  <th>Capital Aportado</th>
+                  <th>Saldo Pendiente</th>
+                  <th>Próximo Pago</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {inversion.prestamos_financiados.map((pf) => (
+                  <tr key={pf.id}>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontWeight: 600 }}>{pf.cliente.nombre_completo}</span>
+                        <span style={{ fontSize: '0.7rem', color: '#6b7280' }}>ID: {pf.id.slice(0, 8)}</span>
+                      </div>
+                    </td>
+                    <td>{formatCurrency(pf.monto_aportado)}</td>
+                    <td style={{ color: '#ef4444', fontWeight: 500 }}>
+                      {formatCurrency(pf.calculos.saldo_calle_proporcional)}
+                    </td>
+                    <td>{formatDate(pf.fecha_vencimiento)}</td>
+                    <td>
+                      <span className={`${styles.badge} ${pf.estado === 'activo' ? styles.badgeSuccess : styles.badgeWarning}`}>
+                        {pf.estado}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className={styles.emptyState}>
+            <PieChart size={40} style={{ marginBottom: '1rem', opacity: 0.2 }} />
+            <p>Este capital aún no ha sido prestado a ningún cliente.</p>
+          </div>
+        )}
+      </div>
+
+      {/* Desglose de Pagos de Deudores */}
+      {inversion.prestamos_financiados?.some(pf => pf.movimientos?.length > 0) && (
+        <div className={styles.card} style={{ marginTop: "1.5rem" }}>
+          <div className={styles.cardHeader}>
+            <h2 className={styles.sectionTitle}>Recaudos de Préstamos (Intereses/Capital)</h2>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {inversion.prestamos_financiados.flatMap(pf => 
+              pf.movimientos.map(mov => ({ ...mov, cliente: pf.cliente.nombre_completo }))
+            )
+            .sort((a, b) => new Date(b.fecha_operacion) - new Date(a.fecha_operacion))
+            .slice(0, 10) // Mostrar los últimos 10
+            .map((mov, idx) => (
+              <div key={idx} className={styles.movementItem}>
+                <div className={styles.movementIcon} style={{ background: '#eff6ff' }}>
+                  <ArrowUpRight size={16} color="#3b82f6" />
+                </div>
+                <div className={styles.movementInfo}>
+                  <p className={styles.movementTitle}>{mov.cliente}</p>
+                  <p className={styles.movementDate}>
+                    {formatDate(mov.fecha_operacion)} · {mov.metodo_pago}
+                  </p>
+                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
+                    <span style={{ fontSize: '0.7rem', background: '#f3f4f6', padding: '2px 6px', borderRadius: '4px' }}>
+                      Cap: {formatCurrency(mov.monto_capital)}
+                    </span>
+                    <span style={{ fontSize: '0.7rem', background: '#f3f4f6', padding: '2px 6px', borderRadius: '4px' }}>
+                      Int: {formatCurrency(mov.monto_interes)}
+                    </span>
+                  </div>
+                </div>
+                <div className={styles.movementAmount} style={{ color: '#2563eb' }}>
+                  {formatCurrency(mov.monto_total)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Historial de Movimientos */}
       {inversion.movimientos && inversion.movimientos.length > 0 && (

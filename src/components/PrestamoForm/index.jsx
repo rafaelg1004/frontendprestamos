@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { prestamosApi, perfilesApi, inversionesApi, cuentasApi } from "@/lib/api";
 import { formatCurrency, parseNumber, formatInputNumber } from "@/lib/utils";
-import { DollarSign, Calendar, Landmark, CreditCard, PieChart, FileText, Plus, Trash2, ArrowLeft, Info, CheckCircle, Upload, X } from "lucide-react";
+import { DollarSign, Calendar, Landmark, CreditCard, PieChart, FileText, Plus, Trash2, ArrowLeft, CheckCircle, Upload, Search, User, ChevronRight } from "lucide-react";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { Modal } from "../Modal";
@@ -23,6 +23,9 @@ export function PrestamoForm() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [createdPrestamoId, setCreatedPrestamoId] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [isInvModalOpen, setIsInvModalOpen] = useState(false);
+  const [activeFondoIndex, setActiveFondoIndex] = useState(null);
+  const [invSearch, setInvSearch] = useState("");
   const [formData, setFormData] = useState({
     perfil_id: "",
     monto_principal: "",
@@ -310,42 +313,46 @@ export function PrestamoForm() {
               </div>
               
               <div className={styles.fundList}>
-                {fondos.map((f, index) => (
-                  <div key={index} className={styles.fundItem}>
-                    <select
-                      value={f.inversion_id}
-                      onChange={(e) => {
-                        const newFondos = [...fondos];
-                        newFondos[index].inversion_id = e.target.value;
-                        setFondos(newFondos);
-                      }}
-                      className={styles.selectSmall}
-                      required
-                    >
-                      <option value="">Inversión...</option>
-                      {inversiones.map((inv) => (
-                        <option key={inv.id} value={inv.id}>
-                          {inv.inversionista.nombre_completo}
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      type="text"
-                      value={f.monto}
-                      onChange={(e) => {
-                        const newFondos = [...fondos];
-                        newFondos[index].monto = formatInputNumber(e.target.value);
-                        setFondos(newFondos);
-                      }}
-                      placeholder="Monto"
-                      className={styles.inputSmall}
-                      required
-                    />
-                    <button type="button" onClick={() => setFondos(fondos.filter((_, i) => i !== index))} className={styles.btnTrash}>
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                ))}
+                {fondos.map((f, index) => {
+                  const invSeleccionada = inversiones.find(inv => inv.id === f.inversion_id);
+                  return (
+                    <div key={index} className={styles.fundItem}>
+                      <button
+                        type="button"
+                        className={styles.selectTrigger}
+                        onClick={() => { setActiveFondoIndex(index); setInvSearch(""); setIsInvModalOpen(true); }}
+                      >
+                        {invSeleccionada ? (
+                          <span className={styles.selectTriggerFilled}>
+                            <User size={14} />
+                            <div className={styles.selectTriggerText}>
+                              <span className={styles.selectTriggerName}>{invSeleccionada.inversionista.nombre_completo}</span>
+                              <span className={styles.selectTriggerRate}>({invSeleccionada.tasa_interes_pactada}%)</span>
+                            </div>
+                          </span>
+                        ) : (
+                          <span className={styles.selectTriggerPlaceholder}>Seleccionar inversión...</span>
+                        )}
+                        <ChevronRight size={14} />
+                      </button>
+                      <input
+                        type="text"
+                        value={f.monto}
+                        onChange={(e) => {
+                          const newFondos = [...fondos];
+                          newFondos[index].monto = formatInputNumber(e.target.value);
+                          setFondos(newFondos);
+                        }}
+                        placeholder="Monto"
+                        className={styles.inputSmall}
+                        required
+                      />
+                      <button type="button" onClick={() => setFondos(fondos.filter((_, i) => i !== index))} className={styles.btnTrash}>
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
 
               <button 
@@ -437,6 +444,86 @@ export function PrestamoForm() {
             >
               Ver detalle completo
             </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Modal de Selección de Inversiones */}
+      <Modal
+        isOpen={isInvModalOpen}
+        onClose={() => setIsInvModalOpen(false)}
+        title="Seleccionar Inversión"
+        size="md"
+      >
+        <div className={styles.invModalContent}>
+          <div className={styles.invSearchWrapper}>
+            <Search size={16} className={styles.invSearchIcon} />
+            <input
+              type="text"
+              placeholder="Buscar por nombre del inversor..."
+              className={styles.invSearchInput}
+              value={invSearch}
+              onChange={(e) => setInvSearch(e.target.value)}
+              autoFocus
+            />
+          </div>
+
+          <div className={styles.invList}>
+            {inversiones
+              .filter(inv =>
+                inv.inversionista.nombre_completo
+                  .toLowerCase()
+                  .includes(invSearch.toLowerCase())
+              )
+              .map((inv) => (
+                <button
+                  key={inv.id}
+                  type="button"
+                  className={`${styles.invItem} ${
+                    fondos[activeFondoIndex]?.inversion_id === inv.id ? styles.invItemSelected : ''
+                  }`}
+                  onClick={() => {
+                    if (activeFondoIndex !== null) {
+                      const newFondos = [...fondos];
+                      newFondos[activeFondoIndex].inversion_id = inv.id;
+                      setFondos(newFondos);
+                    }
+                    setIsInvModalOpen(false);
+                  }}
+                >
+                  <div className={styles.invItemAvatar}>
+                    {inv.inversionista.nombre_completo.charAt(0).toUpperCase()}
+                  </div>
+                  <div className={styles.invItemInfo}>
+                    <span className={styles.invItemName}>{inv.inversionista.nombre_completo}</span>
+                    <div className={styles.invItemMeta}>
+                      <span className={styles.invItemAmount}>
+                        {formatCurrency(parseFloat(inv.monto_invertido))}
+                      </span>
+                      <span className={styles.invItemDot}>·</span>
+                      <span className={styles.invItemRate}>
+                        {inv.tasa_interes_pactada}% mensual
+                      </span>
+                      <span className={styles.invItemDot}>·</span>
+                      <span className={styles.invItemDate}>
+                        {new Date(inv.fecha_inversion).toLocaleDateString('es-CO', {
+                          day: '2-digit', month: 'short', year: 'numeric'
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                  <div className={styles.invItemBadge}>{inv.estado}</div>
+                </button>
+              ))
+            }
+            {inversiones.filter(inv =>
+              inv.inversionista.nombre_completo.toLowerCase().includes(invSearch.toLowerCase())
+            ).length === 0 && (
+              <div className={styles.invEmpty}>
+                <Search size={32} />
+                <p>No se encontraron inversiones</p>
+              </div>
+            )}
           </div>
         </div>
       </Modal>
