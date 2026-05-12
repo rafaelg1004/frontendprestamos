@@ -21,7 +21,6 @@ import styles from "../PrestamoDetalleView/PrestamoDetalleView.module.css";
 
 export function InversionDetalleView({ id }) {
   const [inversion, setInversion] = useState(null);
-  const [inversionista, setInversionista] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -30,15 +29,7 @@ export function InversionDetalleView({ id }) {
     const fetchData = async () => {
       try {
         const inversionRes = await inversionesApi.getById(id);
-        const inversionData = inversionRes.data?.data;
-        setInversion(inversionData);
-
-        if (inversionData?.inversionista_id) {
-          const perfilRes = await perfilesApi.getById(
-            inversionData.inversionista_id,
-          );
-          setInversionista(perfilRes.data?.data);
-        }
+        setInversion(inversionRes.data?.data);
       } catch (error) {
         console.error("Error fetching inversion:", error);
       } finally {
@@ -115,7 +106,7 @@ export function InversionDetalleView({ id }) {
           <h2 className={styles.sectionTitle}>Inversionista</h2>
         </div>
 
-        {inversionista ? (
+        {inversion.inversionista ? (
           <div>
             <div
               style={{
@@ -140,14 +131,14 @@ export function InversionDetalleView({ id }) {
                   color: "white",
                 }}
               >
-                {inversionista.nombre_completo?.charAt(0).toUpperCase()}
+                {inversion.inversionista.nombre_completo?.charAt(0).toUpperCase()}
               </div>
               <div>
                 <p style={{ margin: 0, fontWeight: 600, fontSize: "1rem" }}>
-                  {inversionista.nombre_completo}
+                  {inversion.inversionista.nombre_completo}
                 </p>
                 <Link
-                  href={`/inversionistas/${inversionista.id}`}
+                  href={`/inversionistas/${inversion.inversionista.id}`}
                   className={styles.link}
                   style={{ fontSize: "0.875rem" }}
                 >
@@ -159,13 +150,13 @@ export function InversionDetalleView({ id }) {
             <div className={styles.infoGrid}>
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>Email</span>
-                <span className={styles.infoValue}>{inversionista.email}</span>
+                <span className={styles.infoValue}>{inversion.inversionista.email}</span>
               </div>
-              {inversionista.telefono && (
+              {inversion.inversionista.telefono && (
                 <div className={styles.infoItem}>
                   <span className={styles.infoLabel}>Teléfono</span>
                   <span className={styles.infoValue}>
-                    {inversionista.telefono}
+                    {inversion.inversionista.telefono}
                   </span>
                 </div>
               )}
