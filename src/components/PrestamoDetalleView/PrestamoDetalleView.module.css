@@ -20,8 +20,24 @@
   justify-content: space-between;
   margin-bottom: 1rem;
   flex-wrap: wrap;
-  gap: 0.76rem;
+  gap: 1rem;
 }
+
+@media (max-width: 640px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .btnPrimary, .btnSecondary {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
 
 .titleSection h1 {
   font-size: 1.25rem;
@@ -89,7 +105,9 @@
   padding: 0.75rem 1rem;
   margin-bottom: 1rem;
   overflow-x: auto;
+  gap: 1rem;
 }
+
 
 .infoBarItem {
   display: flex;
@@ -122,14 +140,22 @@
 
 @media (max-width: 768px) {
   .infoBar {
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
   }
 
   .infoBarSeparator {
     display: none;
   }
 }
+
+@media (max-width: 480px) {
+  .infoBar {
+    grid-template-columns: 1fr;
+  }
+}
+
 
 .grid {
   display: grid;
@@ -584,12 +610,15 @@
 
 .modalContent {
   background: white;
-  padding: 2rem;
+  padding: 1.5rem;
   border-radius: 1rem;
-  width: 90%;
+  width: 95%;
   max-width: 500px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  max-height: 90vh;
+  overflow-y: auto;
 }
+
 
 .modalContent h3 {
   margin: 0 0 1.5rem 0;
@@ -623,6 +652,13 @@
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
+
+@media (max-width: 480px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+}
+
 
 .formActions {
   display: flex;

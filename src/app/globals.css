@@ -108,8 +108,15 @@ button {
   .main-content, .main-content.collapsed {
     padding: 1rem;
     margin-left: 0;
-    margin-bottom: 70px; /* Espacio para el BottomNav */
+    margin-bottom: 75px; /* Espacio para el BottomNav */
   }
+
+  .mobile-hide { display: none !important; }
+  .mobile-show { display: block !important; }
+}
+
+@media (min-width: 769px) {
+  .mobile-show { display: none !important; }
 }
 
 .main-content > * {
@@ -127,12 +134,12 @@ button {
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
   margin-bottom: 1.5rem;
+  -webkit-overflow-scrolling: touch;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  white-space: nowrap;
 }
 
 /* Scrollbar Moderno */
