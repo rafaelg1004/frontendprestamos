@@ -8,8 +8,8 @@ import {
   getTipoMovimientoLabel,
   getMetodoPagoLabel,
 } from "@/lib/utils";
-import { ArrowUpRight, ArrowDownLeft, Download } from "lucide-react";
-import styles from "../InversionistasView/InversionistasView.module.css";
+import { ArrowUpRight, ArrowDownLeft, Download, Search, Filter } from "lucide-react";
+import styles from "./MovimientosView.module.css";
 
 export function MovimientosView() {
   const [movimientos, setMovimientos] = useState([]);
@@ -62,15 +62,12 @@ export function MovimientosView() {
     return (
       <div className={styles.container}>
         <div className={styles.header}>
-          <div>
-            <div
-              className={styles.loadingSkeleton}
-              style={{ width: "200px" }}
-            ></div>
+          <div className={styles.titleSection}>
+            <div className={styles.loadingSkeleton} style={{ width: "200px", height: '2rem' }}></div>
           </div>
         </div>
         <div className={styles.card}>
-          {[...Array(5)].map((_, i) => (
+          {[...Array(6)].map((_, i) => (
             <div key={i} className={styles.loadingSkeleton}></div>
           ))}
         </div>
@@ -84,162 +81,113 @@ export function MovimientosView() {
         <div className={styles.titleSection}>
           <h1>Movimientos</h1>
           <p className={styles.subtitle}>
-            Historial de transacciones (solo vista)
+            Historial detallado de todas las transacciones
           </p>
         </div>
         <button 
           onClick={exportToCSV}
           className={styles.btnSecondary}
           disabled={movimientos.length === 0}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.5rem 1rem',
-            borderRadius: '0.5rem',
-            border: '1px solid #e5e7eb',
-            backgroundColor: 'white',
-            cursor: 'pointer'
-          }}
         >
           <Download size={18} />
-          Exportar CSV
+          Exportar Historial
         </button>
       </div>
 
       <div className={styles.card}>
         {movimientos.length === 0 ? (
-          <p className={styles.emptyState}>No hay movimientos registrados</p>
-        ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ borderBottom: "1px solid #e5e7eb" }}>
-                  <th
-                    style={{
-                      textAlign: "left",
-                      padding: "0.75rem",
-                      fontSize: "0.75rem",
-                      color: "#6b7280",
-                    }}
-                  >
-                    Fecha
-                  </th>
-                  <th
-                    style={{
-                      textAlign: "left",
-                      padding: "0.75rem",
-                      fontSize: "0.75rem",
-                      color: "#6b7280",
-                    }}
-                  >
-                    Tipo
-                  </th>
-                  <th
-                    style={{
-                      textAlign: "left",
-                      padding: "0.75rem",
-                      fontSize: "0.75rem",
-                      color: "#6b7280",
-                    }}
-                  >
-                    Persona
-                  </th>
-                  <th
-                    style={{
-                      textAlign: "right",
-                      padding: "0.75rem",
-                      fontSize: "0.75rem",
-                      color: "#6b7280",
-                    }}
-                  >
-                    Monto
-                  </th>
-                  <th
-                    style={{
-                      textAlign: "left",
-                      padding: "0.75rem",
-                      fontSize: "0.75rem",
-                      color: "#6b7280",
-                    }}
-                  >
-                    Método
-                  </th>
-                  <th
-                    style={{
-                      textAlign: "left",
-                      padding: "0.75rem",
-                      fontSize: "0.75rem",
-                      color: "#6b7280",
-                    }}
-                  >
-                    Préstamo Ref.
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {movimientos.map((mov) => {
-                  const isEntrada =
-                    mov.tipo === "recibo_inversion" ||
-                    mov.tipo === "pago_cliente";
-                  return (
-                    <tr
-                      key={mov.id}
-                      style={{ borderBottom: "1px solid #f3f4f6" }}
-                    >
-                      <td style={{ padding: "0.75rem", fontSize: "0.875rem" }}>
-                        {formatDate(mov.fecha_operacion)}
-                      </td>
-                      <td style={{ padding: "0.75rem" }}>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.5rem",
-                          }}
-                        >
-                          {isEntrada ? (
-                            <ArrowDownLeft size={16} color="#16a34a" />
-                          ) : (
-                            <ArrowUpRight size={16} color="#dc2626" />
-                          )}
-                          <span style={{ fontSize: "0.875rem" }}>
-                            {getTipoMovimientoLabel(mov.tipo)}
-                          </span>
-                        </div>
-                      </td>
-                      <td style={{ padding: "0.75rem", fontSize: "0.875rem" }}>
-                        {mov.perfil?.nombre_completo || 'N/A'}
-                      </td>
-                      <td
-                        style={{
-                          padding: "0.75rem",
-                          fontSize: "0.875rem",
-                          textAlign: "right",
-                          fontWeight: 600,
-                          color: isEntrada ? "#16a34a" : "#dc2626",
-                        }}
-                      >
-                        {isEntrada ? "+" : "-"}
-                        {formatCurrency(mov.monto_total)}
-                      </td>
-                      <td style={{ padding: "0.75rem", fontSize: "0.875rem" }}>
-                        {getMetodoPagoLabel(mov.metodo_pago)}
-                      </td>
-                      <td style={{ padding: "0.75rem", fontSize: "0.75rem", color: "#6b7280" }}>
-                        {mov.prestamo?.id ? (
-                          <div>
-                            <div>#{mov.prestamo.id.slice(0,8)}</div>
-                            <div style={{ fontSize: '0.7rem' }}>{formatCurrency(mov.prestamo.monto_principal)}</div>
-                          </div>
-                        ) : '-'}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className={styles.emptyState}>
+            <p>No hay movimientos registrados en el sistema</p>
           </div>
+        ) : (
+          <>
+            {/* Desktop View */}
+            <div className={styles.desktopView}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Tipo de Operación</th>
+                    <th>Participante</th>
+                    <th style={{ textAlign: 'right' }}>Monto</th>
+                    <th>Método</th>
+                    <th>Referencia</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {movimientos.map((mov) => {
+                    const isEntrada = mov.tipo === "recibo_inversion" || mov.tipo === "pago_cliente";
+                    return (
+                      <tr key={mov.id}>
+                        <td>{formatDate(mov.fecha_operacion)}</td>
+                        <td>
+                          <div className={styles.typeCell}>
+                            {isEntrada ? (
+                              <ArrowDownLeft size={16} className={styles.amountPositive} />
+                            ) : (
+                              <ArrowUpRight size={16} className={styles.amountNegative} />
+                            )}
+                            <span>{getTipoMovimientoLabel(mov.tipo)}</span>
+                          </div>
+                        </td>
+                        <td>{mov.perfil?.nombre_completo || 'Sistema'}</td>
+                        <td className={`${styles.amount} ${isEntrada ? styles.amountPositive : styles.amountNegative}`}>
+                          {isEntrada ? "+" : "-"} {formatCurrency(mov.monto_total)}
+                        </td>
+                        <td>{getMetodoPagoLabel(mov.metodo_pago)}</td>
+                        <td className={styles.refCell}>
+                          {mov.prestamo?.id ? (
+                            <span>Préstamo <span className={styles.refId}>#{mov.prestamo.id.slice(0,8)}</span></span>
+                          ) : mov.inversion?.id ? (
+                            <span>Inversión <span className={styles.refId}>#{mov.inversion.id.slice(0,8)}</span></span>
+                          ) : '-'}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile View */}
+            <div className={styles.mobileView}>
+              {movimientos.map((mov) => {
+                const isEntrada = mov.tipo === "recibo_inversion" || mov.tipo === "pago_cliente";
+                return (
+                  <div key={mov.id} className={styles.mobileCard}>
+                    <div className={styles.cardTop}>
+                      <div className={styles.cardTypeInfo}>
+                        <div className={`${styles.iconCircle} ${isEntrada ? styles.iconIn : styles.iconOut}`}>
+                          {isEntrada ? <ArrowDownLeft size={20} /> : <ArrowUpRight size={20} />}
+                        </div>
+                        <div>
+                          <div className={styles.typeLabel}>{getTipoMovimientoLabel(mov.tipo)}</div>
+                          <div className={styles.dateLabel}>{formatDate(mov.fecha_operacion)}</div>
+                        </div>
+                      </div>
+                      <div className={`${styles.cardAmount} ${isEntrada ? styles.amountPositive : styles.amountNegative}`}>
+                        {isEntrada ? "+" : "-"} {formatCurrency(mov.monto_total)}
+                      </div>
+                    </div>
+                    
+                    <div className={styles.cardBody}>
+                      <div className={styles.personInfo}>
+                        <span className={styles.personName}>{mov.perfil?.nombre_completo || 'Sistema'}</span>
+                        <span className={styles.methodBadge}>{getMetodoPagoLabel(mov.metodo_pago)}</span>
+                      </div>
+                      <div className={styles.cardRef}>
+                        {mov.prestamo?.id ? (
+                          <span>Ref: #{mov.prestamo.id.slice(0,8)}</span>
+                        ) : mov.inversion?.id ? (
+                          <span>Ref: #{mov.inversion.id.slice(0,8)}</span>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
     </div>
