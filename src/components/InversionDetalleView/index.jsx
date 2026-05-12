@@ -1,9 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import api from "@/lib/api";
 import { inversionesApi, perfilesApi } from "@/lib/api";
+
+
 import { formatDate, formatCurrency } from "@/lib/utils";
+import toast from "react-hot-toast";
 import {
+
   ArrowLeft,
   User,
   Calendar,
@@ -14,7 +19,8 @@ import {
   Activity,
   ArrowUpRight,
   PieChart,
-  Briefcase
+  Briefcase,
+  AlertTriangle
 } from "lucide-react";
 import Link from "next/link";
 import styles from "../PrestamoDetalleView/PrestamoDetalleView.module.css";
@@ -22,6 +28,17 @@ import styles from "../PrestamoDetalleView/PrestamoDetalleView.module.css";
 export function InversionDetalleView({ id }) {
   const [inversion, setInversion] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [cuentas, setCuentas] = useState([]);
+  const [paymentData, setPaymentData] = useState({
+    monto_total: 0,
+    monto_capital: 0,
+    monto_interes: 0,
+    cuenta_id: '',
+    metodo_pago: 'transferencia',
+    notas: ''
+  });
 
   useEffect(() => {
     if (!id) return;
@@ -29,7 +46,20 @@ export function InversionDetalleView({ id }) {
     const fetchData = async () => {
       try {
         const inversionRes = await inversionesApi.getById(id);
-        setInversion(inversionRes.data?.data);
+        const data = inversionRes.data?.data;
+        setInversion(data);
+        
+        // Cargar interés sugerido automáticamente
+        if (data?.calculos?.interes_sugerido) {
+          setPaymentData(prev => ({
+            ...prev,
+            monto_interes: data.calculos.interes_sugerido,
+            monto_total: data.calculos.interes_sugerido + prev.monto_capital
+          }));
+        }
+
+        const cuentasRes = await api.get('/cuentas');
+        setCuentas(cuentasRes.data?.data || []);
       } catch (error) {
         console.error("Error fetching inversion:", error);
       } finally {
@@ -40,7 +70,29 @@ export function InversionDetalleView({ id }) {
     fetchData();
   }, [id]);
 
+  const handlePayment = async (e) => {
+    e.preventDefault();
+    if (isSubmitting) return; // Evitar doble clic (Error 2)
+
+    try {
+      setIsSubmitting(true);
+      await inversionesApi.pagar(id, paymentData);
+      toast.success("Pago registrado exitosamente");
+      setShowPaymentModal(false);
+      
+      // Recargar datos
+      const inversionRes = await inversionesApi.getById(id);
+      setInversion(inversionRes.data?.data);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error al registrar el pago");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (loading) {
+
+
     return (
       <div className={styles.container}>
         <div className={styles.header}>
@@ -66,8 +118,10 @@ export function InversionDetalleView({ id }) {
 
   const getBadgeClass = (estado) => {
     switch (estado) {
+      case "activo":
       case "activa":
         return styles.badgeSuccess;
+
       case "devuelta":
         return styles.badgeWarning;
       case "cancelada":
@@ -81,7 +135,24 @@ export function InversionDetalleView({ id }) {
     <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.titleSection}>
-          <h1>Inversión #{inversion.id?.slice(0, 8)}</h1>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <h1>Inversión #{inversion.id?.slice(0, 8)}</h1>
+            <span className={styles.badge} style={{ 
+              background: inversion.calculos?.en_mora ? '#fee2e2' : '#f0fdf4', 
+              color: inversion.calculos?.en_mora ? '#dc2626' : '#16a34a',
+              border: '1px solid currentColor',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}>
+              {inversion.calculos?.en_mora ? <AlertTriangle size={14} /> : <Calendar size={14} />}
+              {inversion.calculos?.en_mora 
+                ? `Vencido hace ${Math.abs(inversion.calculos?.dias_para_pago)} días` 
+                : `Próximo pago: ${formatDate(inversion.calculos?.proxima_fecha_pago)}`}
+            </span>
+          </div>
+
           <p className={styles.subtitle}>Detalle de la inversión</p>
         </div>
         <div className={styles.actions}>
@@ -89,143 +160,173 @@ export function InversionDetalleView({ id }) {
             <ArrowLeft size={18} />
             Volver
           </Link>
-          {inversion.estado === "activa" && (
-            <Link
-              href={`/inversiones/${inversion.id}/devolucion`}
+          {(inversion.estado === "activa" || inversion.estado === "activo") && (
+            <button
+              onClick={() => setShowPaymentModal(true)}
               className={styles.btnPrimary}
             >
-              Registrar Devolución
-            </Link>
+              💸 Realizar Pago
+            </button>
           )}
         </div>
       </div>
 
-      {/* Info del Inversionista - Primero (compacto) */}
-      <div className={styles.card} style={{ marginBottom: "1rem" }}>
-        <div className={styles.cardHeader}>
-          <h2 className={styles.sectionTitle}>Inversionista</h2>
-        </div>
+      {/* Modal de Pago */}
+      {showPaymentModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <h3>Registrar Pago a Inversionista</h3>
+            <form onSubmit={handlePayment}>
+              <div className={styles.formGroup}>
+                <label>Cuenta de Salida</label>
+                <select 
+                  required
+                  value={paymentData.cuenta_id}
+                  onChange={e => setPaymentData({...paymentData, cuenta_id: e.target.value})}
+                >
+                  <option value="">Selecciona una cuenta</option>
+                  {cuentas.map(c => (
+                    <option key={c.id} value={c.id}>{c.nombre} ({formatCurrency(c.saldo_actual)})</option>
+                  ))}
+                </select>
+              </div>
 
-        {inversion.inversionista ? (
-          <div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.75rem",
-                marginBottom: "0.75rem",
-              }}
-            >
-              <div
-                style={{
-                  width: "2.5rem",
-                  height: "2.5rem",
-                  borderRadius: "50%",
-                  background:
-                    "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "1rem",
-                  fontWeight: 600,
-                  color: "white",
-                }}
-              >
-                {inversion.inversionista.nombre_completo?.charAt(0).toUpperCase()}
+              <div className={styles.row}>
+                <div className={styles.formGroup}>
+                  <label>Monto Interés</label>
+                  <input 
+                    type="number" 
+                    value={paymentData.monto_interes}
+                    onChange={e => {
+                      const mi = parseFloat(e.target.value) || 0;
+                      setPaymentData({
+                        ...paymentData, 
+                        monto_interes: mi,
+                        monto_total: mi + paymentData.monto_capital
+                      });
+                    }}
+                  />
+                  <p style={{ fontSize: '0.7rem', color: '#6b7280', marginTop: '4px' }}>
+                    Sugerido: {formatCurrency(inversion.calculos?.interes_sugerido || 0)}
+                  </p>
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Monto Capital</label>
+                  <input 
+                    type="number" 
+                    max={inversion.calculos?.capital_pendiente}
+                    value={paymentData.monto_capital}
+                    onChange={e => {
+                      const mc = parseFloat(e.target.value) || 0;
+                      setPaymentData({
+                        ...paymentData, 
+                        monto_capital: mc,
+                        monto_total: mc + paymentData.monto_interes
+                      });
+                    }}
+                  />
+                  <p style={{ fontSize: '0.7rem', color: '#6b7280', marginTop: '4px' }}>
+                    Máximo: {formatCurrency(inversion.calculos?.capital_pendiente || 0)}
+                  </p>
+                </div>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Total a Pagar</label>
+                <input type="text" readOnly value={formatCurrency(paymentData.monto_total)} />
+              </div>
+
+              <div className={styles.formActions}>
+                <button type="button" onClick={() => setShowPaymentModal(false)} className={styles.btnSecondary} disabled={isSubmitting}>Cancelar</button>
+                <button type="submit" className={styles.btnPrimary} disabled={isSubmitting}>
+                  {isSubmitting ? 'Procesando...' : 'Confirmar Pago'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Grid Superior: Inversionista + Resumen Financiero */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+        
+        {/* Card Inversionista (Compacta) */}
+        <div className={styles.card} style={{ margin: 0 }}>
+          <div className={styles.cardHeader} style={{ padding: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{ 
+                width: "2.5rem", height: "2.5rem", borderRadius: "50%", 
+                background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                color: "white", fontWeight: 600 
+              }}>
+                {inversion.inversionista?.nombre_completo?.charAt(0).toUpperCase()}
               </div>
               <div>
-                <p style={{ margin: 0, fontWeight: 600, fontSize: "1rem" }}>
-                  {inversion.inversionista.nombre_completo}
-                </p>
-                <Link
-                  href={`/inversionistas/${inversion.inversionista.id}`}
-                  className={styles.link}
-                  style={{ fontSize: "0.875rem" }}
-                >
-                  Ver perfil →
-                </Link>
+                <h3 style={{ margin: 0, fontSize: '1rem' }}>{inversion.inversionista?.nombre_completo}</h3>
+                <p style={{ margin: 0, fontSize: '0.8rem', color: '#6b7280' }}>{inversion.inversionista?.email}</p>
               </div>
             </div>
+          </div>
+          <div style={{ padding: '0 1rem 1rem 1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
+              <span style={{ color: '#6b7280' }}>Teléfono:</span>
+              <span style={{ fontWeight: 500 }}>{inversion.inversionista?.telefono || 'N/A'}</span>
+            </div>
+            <Link href={`/perfiles/${inversion.inversionista?.id}`} className={styles.link} style={{ display: 'block', marginTop: '0.5rem', fontSize: '0.8rem' }}>
+              Ver perfil completo →
+            </Link>
+          </div>
+        </div>
 
-            <div className={styles.infoGrid}>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Email</span>
-                <span className={styles.infoValue}>{inversion.inversionista.email}</span>
-              </div>
-              {inversion.inversionista.telefono && (
-                <div className={styles.infoItem}>
-                  <span className={styles.infoLabel}>Teléfono</span>
-                  <span className={styles.infoValue}>
-                    {inversion.inversionista.telefono}
-                  </span>
-                </div>
-              )}
+        {/* Resumen Financiero (Compacto) */}
+        <div className={styles.card} style={{ margin: 0 }}>
+          <div className={styles.statsGrid} style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', padding: '1rem' }}>
+            <div className={styles.statItem} style={{ padding: 0, border: 'none' }}>
+              <span className={styles.statLabel}>Capital Pendiente</span>
+              <p className={styles.statValue} style={{ fontSize: '1.25rem' }}>{formatCurrency(inversion.calculos?.capital_pendiente || 0)}</p>
+            </div>
+            <div className={styles.statItem} style={{ padding: 0, border: 'none', textAlign: 'right' }}>
+              <span className={styles.statLabel}>Interés Sugerido</span>
+              <p className={styles.statValue} style={{ fontSize: '1.25rem', color: inversion.calculos?.en_mora ? '#dc2626' : '#10b981' }}>
+                {formatCurrency(inversion.calculos?.interes_sugerido || 0)}
+              </p>
+            </div>
+            <div className={styles.statItem} style={{ padding: 0, border: 'none' }}>
+              <span className={styles.statLabel}>Inversión Original</span>
+              <p style={{ margin: 0, fontWeight: 500 }}>{formatCurrency(inversion.monto_invertido)}</p>
+            </div>
+            <div className={styles.statItem} style={{ padding: 0, border: 'none', textAlign: 'right' }}>
+              <span className={styles.statLabel}>Tasa Mensual</span>
+              <p style={{ margin: 0, fontWeight: 500 }}>{inversion.tasa_interes_pactada}%</p>
             </div>
           </div>
-        ) : (
-          <p className={styles.emptyState}>
-            Información del inversionista no disponible
-          </p>
-        )}
-      </div>
-
-      {/* Resumen de Fondos */}
-      <div className={styles.statsGrid} style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: '1.5rem' }}>
-        <div className={styles.statItem} style={{ borderLeft: '4px solid #3b82f6' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-            <Activity size={14} color="#3b82f6" />
-            <span className={styles.statLabel}>Disponible</span>
-          </div>
-          <p className={styles.statValue}>{formatCurrency(inversion.calculos?.disponible_en_cuenta || 0)}</p>
-        </div>
-        <div className={styles.statItem} style={{ borderLeft: '4px solid #ef4444' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-            <TrendingUp size={14} color="#ef4444" />
-            <span className={styles.statLabel}>En la Calle</span>
-          </div>
-          <p className={styles.statValue}>{formatCurrency(inversion.calculos?.monto_en_calle || 0)}</p>
-        </div>
-        <div className={styles.statItem} style={{ borderLeft: '4px solid #10b981' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-            <Calendar size={14} color="#10b981" />
-            <span className={styles.statLabel}>A Pagar (Mes)</span>
-          </div>
-          <p className={styles.statValue}>{formatCurrency(inversion.calculos?.interes_proximo_mes || 0)}</p>
         </div>
       </div>
 
-      <div className={styles.infoBar}>
-        <div className={styles.infoBarItem}>
-          <span className={styles.infoBarLabel}>Inversión Total</span>
-          <span className={styles.infoBarValue}>
-            {formatCurrency(inversion.monto_invertido)}
-          </span>
-        </div>
-        <div className={styles.infoBarSeparator}></div>
-
-        <div className={styles.infoBarItem}>
-          <span className={styles.infoBarLabel}>Retorno Total</span>
-          <span className={styles.infoBarValue}>
-            {formatCurrency(inversion.calculos?.retorno_total || 0)}
-          </span>
-        </div>
-        <div className={styles.infoBarSeparator}></div>
-
-        <div className={styles.infoBarItem}>
-          <span className={styles.infoBarLabel}>Tasa Pactada</span>
-          <span className={styles.infoBarValue}>
-            {inversion.tasa_interes_pactada}%
-          </span>
-        </div>
-        <div className={styles.infoBarSeparator}></div>
-
+      {/* Barra de métricas secundaria (Más compacta) */}
+      <div className={styles.infoBar} style={{ padding: '0.75rem 1rem', borderRadius: '0.75rem', marginBottom: '1.5rem' }}>
         <div className={styles.infoBarItem}>
           <span className={styles.infoBarLabel}>Fecha Inicio</span>
-          <span className={styles.infoBarValue}>
-            {formatDate(inversion.fecha_inversion)}
-          </span>
+          <span className={styles.infoBarValue} style={{ fontSize: '0.9rem' }}>{formatDate(inversion.fecha_inversion)}</span>
+        </div>
+        <div className={styles.infoBarSeparator}></div>
+        <div className={styles.infoBarItem}>
+          <span className={styles.infoBarLabel}>En la Calle</span>
+          <span className={styles.infoBarValue} style={{ fontSize: '0.9rem' }}>{formatCurrency(inversion.calculos?.monto_en_calle || 0)}</span>
+        </div>
+        <div className={styles.infoBarSeparator}></div>
+        <div className={styles.infoBarItem}>
+          <span className={styles.infoBarLabel}>Disponible</span>
+          <span className={styles.infoBarValue} style={{ fontSize: '0.9rem' }}>{formatCurrency(inversion.calculos?.disponible_en_cuenta || 0)}</span>
+        </div>
+        <div className={styles.infoBarSeparator}></div>
+        <div className={styles.infoBarItem}>
+          <span className={styles.infoBarLabel}>Retorno Total</span>
+          <span className={styles.infoBarValue} style={{ fontSize: '0.9rem' }}>{formatCurrency(inversion.calculos?.retorno_total || 0)}</span>
         </div>
       </div>
+
 
       {/* Préstamos Financiados (Trazabilidad) */}
       <div className={styles.card} style={{ marginTop: "1.5rem" }}>

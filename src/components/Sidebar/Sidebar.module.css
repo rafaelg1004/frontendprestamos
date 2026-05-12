@@ -180,3 +180,11 @@
     display: none;
   }
 }
+
+.label {
+  transition: opacity var(--transition-fast);
+}
+
+.sidebar.collapsed .label {
+  display: none;
+}

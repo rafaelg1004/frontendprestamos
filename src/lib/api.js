@@ -101,8 +101,9 @@ export const inversionesApi = {
   create: (data) => api.post("/inversiones", data),
   update: (id, data) => api.put(`/inversiones/${id}`, data),
   delete: (id) => api.delete(`/inversiones/${id}`),
-  devolver: (id, data) => api.post(`/inversiones/${id}/devolver`, data),
+  pagar: (id, data) => api.post(`/inversiones/${id}/pagar`, data),
 };
+
 
 // Cuentas
 export const cuentasApi = {
