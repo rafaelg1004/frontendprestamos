@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { prestamosApi, perfilesApi, inversionesApi, cuentasApi } from "@/lib/api";
 import { formatCurrency, parseNumber, formatInputNumber } from "@/lib/utils";
-import { DollarSign, Calendar, Landmark, CreditCard, PieChart, FileText, Plus, Trash2, ArrowLeft, CheckCircle, Upload, Search, User, ChevronRight } from "lucide-react";
+import { DollarSign, Calendar, Landmark, CreditCard, PieChart, FileText, Plus, Trash2, ArrowLeft, CheckCircle, Upload, Search, User, ChevronRight, TrendingUp } from "lucide-react";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { Modal } from "../Modal";
@@ -29,15 +29,17 @@ export function PrestamoForm() {
   const [formData, setFormData] = useState({
     perfil_id: "",
     monto_principal: "",
-    tasa_interes_mensual: "3",
-    plazo_meses: "12",
+    tasa_interes_mensual: "20",
+    plazo_meses: "30",
     fecha_inicio: new Date().toISOString().split("T")[0],
     fecha_vencimiento: "",
-    frecuencia_pago: "mensual",
+    frecuencia_pago: "diario",
+    tipo_amortizacion: "frances",
     metodo_pago: "efectivo",
     cuenta_id: "",
     observaciones: "",
   });
+  const [previewTable, setPreviewTable] = useState([]);
 
   // Cargar clientes
   useEffect(() => {
@@ -116,6 +118,9 @@ export function PrestamoForm() {
         cuenta_id: formData.cuenta_id,
         fondos: fondos.map(f => ({ ...f, monto: parseNumber(f.monto) * 1000 })),
         notas: formData.observaciones,
+        plazo_meses: parseInt(formData.plazo_meses),
+        frecuencia_pago: formData.frecuencia_pago,
+        tipo_amortizacion: formData.tipo_amortizacion,
       };
 
       // Validar que la suma de fondos coincida con el principal
@@ -142,6 +147,67 @@ export function PrestamoForm() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handlePreviewTable = () => {
+    const p = parseNumber(formData.monto_principal);
+    const tasaMensual = parseFloat(formData.tasa_interes_mensual) / 100;
+    const n = parseInt(formData.plazo_meses);
+    
+    if (!p || !n) {
+      toast.error("Ingresa monto y duración para previsualizar");
+      return;
+    }
+
+    // Multiplicador solo para la TASA
+    let multiplier = 1;
+    if (formData.frecuencia_pago === "diario") multiplier = 30;
+    else if (formData.frecuencia_pago === "semanal") multiplier = 4;
+    else if (formData.frecuencia_pago === "quincenal") multiplier = 2;
+
+    const r = tasaMensual / multiplier;
+
+    let table = [];
+    if (formData.tipo_amortizacion === "frances") {
+      const cuotaMonto = Math.round((p * (r * Math.pow(1 + r, n))) / (Math.pow(1 + r, n) - 1) / 1000) * 1000;
+      let saldo = p;
+      for (let i = 1; i <= n; i++) {
+        const interes = Math.round((saldo * r) / 1000) * 1000;
+        let capital = cuotaMonto - interes;
+        if (i === n) capital = saldo;
+        saldo -= capital;
+        table.push({ numero: i, capital, interes, total: capital + interes, saldo: Math.max(0, saldo) });
+      }
+    } else if (formData.tipo_amortizacion === "flat") {
+      const totalInteresPlan = Math.round((p * tasaMensual * (n / multiplier)) / 1000) * 1000;
+      const interesCuotaBase = Math.round((totalInteresPlan / n) / 1000) * 1000;
+      const capitalCuotaBase = Math.round((p / n) / 1000) * 1000;
+      
+      let saldoCapital = p;
+      let saldoInteres = totalInteresPlan;
+
+      for (let i = 1; i <= n; i++) {
+        let currentCapital = capitalCuotaBase;
+        let currentInteres = interesCuotaBase;
+
+        if (i === n) {
+          currentCapital = saldoCapital;
+          currentInteres = saldoInteres;
+        } else {
+          currentCapital = Math.min(currentCapital, saldoCapital);
+          currentInteres = Math.min(currentInteres, saldoInteres);
+        }
+
+        saldoCapital -= currentCapital;
+        saldoInteres -= currentInteres;
+        table.push({ numero: i, capital: currentCapital, interes: currentInteres, total: currentCapital + currentInteres, saldo: Math.max(0, saldoCapital) });
+      }
+    } else {
+      // Al vencimiento
+      const interesTotal = Math.round((p * tasaMensual * (n / multiplier)) / 1000) * 1000;
+      table = [{ numero: 1, capital: p, interes: interesTotal, total: p + interesTotal, saldo: 0 }];
+    }
+    setPreviewTable(table);
   };
 
   const handleFileUpload = async (e) => {
@@ -243,7 +309,12 @@ export function PrestamoForm() {
               </div>
               <div className={styles.inputGroup}>
                 <div className={styles.field}>
-                  <label className={styles.label}>Plazo (Meses) *</label>
+                  <label className={styles.label}>
+                    {formData.frecuencia_pago === "diario" ? "Duración (Días)" : 
+                     formData.frecuencia_pago === "semanal" ? "Duración (Semanas)" :
+                     formData.frecuencia_pago === "quincenal" ? "Duración (Quincenas)" :
+                     "Duración (Meses)"} *
+                  </label>
                   <input
                     type="number"
                     name="plazo_meses"
@@ -263,6 +334,51 @@ export function PrestamoForm() {
                   </select>
                 </div>
               </div>
+              <div className={styles.field}>
+                <label className={styles.label}>Sistema de Amortización</label>
+                <select 
+                  name="tipo_amortizacion" 
+                  value={formData.tipo_amortizacion} 
+                  onChange={handleChange} 
+                  className={styles.select}
+                >
+                  <option value="frances">Francés (Cuota Fija)</option>
+                  <option value="flat">Flat (Interés Fijo)</option>
+                  <option value="final">Al Vencimiento (Un solo pago)</option>
+                </select>
+              </div>
+
+              <button type="button" onClick={handlePreviewTable} className={styles.btnPreview}>
+                <TrendingUp size={16} /> Previsualizar Tabla de Cuotas
+              </button>
+
+              {previewTable.length > 0 && (
+                <div className={styles.previewSection}>
+                  <h3 className={styles.previewTitle}>Desglose de Cuotas Proyectado</h3>
+                  <div className={styles.previewTableContainer}>
+                    <table className={styles.previewTable}>
+                      <thead>
+                        <tr>
+                          <th>N°</th>
+                          <th>Capital</th>
+                          <th>Interés</th>
+                          <th>Total</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {previewTable.map(c => (
+                          <tr key={c.numero}>
+                            <td>{c.numero}</td>
+                            <td>{formatCurrency(c.capital * 1000)}</td>
+                            <td>{formatCurrency(c.interes * 1000)}</td>
+                            <td style={{ fontWeight: 700 }}>{formatCurrency(c.total * 1000)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Sección: Fechas */}

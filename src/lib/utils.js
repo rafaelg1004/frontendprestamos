@@ -1,13 +1,13 @@
 // Formatear cantidad en milunidades a moneda
 export function formatCurrency(amount) {
-  if (amount === null || amount === undefined) return '$0.00'
+  if (amount === null || amount === undefined) return '$ 0'
   // Convertir de milunidades a unidades
   const value = amount / 1000
   return new Intl.NumberFormat('es-CO', {
     style: 'currency',
     currency: 'COP',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
   }).format(value)
 }
 

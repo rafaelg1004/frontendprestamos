@@ -40,7 +40,11 @@ import {
   Clock,
   CheckCircle,
   MessageSquare,
-  ChevronRight
+  ChevronRight,
+  Heart,
+  DollarSign,
+  Wallet,
+  ArrowRightLeft
 } from "lucide-react";
 import Link from "next/link";
 import styles from "./DashboardView.module.css";
@@ -49,22 +53,25 @@ export function DashboardView() {
   const [stats, setStats] = useState(null);
   const [movements, setMovements] = useState([]);
   const [alerts, setAlerts] = useState([]);
+  const [investorAlerts, setInvestorAlerts] = useState([]);
   const [chartData, setChartData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [statsRes, movementsRes, alertsRes, chartRes] = await Promise.all([
+        const [statsRes, movementsRes, alertsRes, investorAlertsRes, chartRes] = await Promise.all([
           dashboardApi.getResumen(),
           dashboardApi.getMovimientosRecientes(5),
           dashboardApi.getAlertasVencimientos(),
+          dashboardApi.getAlertasInversionistas(),
           dashboardApi.getFlujoCajaHistorico(),
         ]);
 
         setStats(statsRes.data.data);
         setMovements(movementsRes.data.data || []);
         setAlerts(alertsRes.data.data || []);
+        setInvestorAlerts(investorAlertsRes.data.data || []);
         setChartData(chartRes.data.data || []);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -291,8 +298,52 @@ export function DashboardView() {
         </div>
       </div>
 
+      {/* Salud Financiera y Rentabilidad */}
+      {stats.salud_financiera && (
+        <div className={styles.healthGrid}>
+          <div className={styles.healthCard}>
+            <div className={styles.healthHeader}>
+              <div className={styles.iconRed} style={{ padding: '0.5rem', borderRadius: '0.5rem' }}>
+                <Heart size={20} />
+              </div>
+              <h4 className={styles.healthTitle}>Salud de Cartera (PAR %)</h4>
+            </div>
+            <div className={styles.healthValue}>
+              {stats.salud_financiera.par_index.toFixed(1)}%
+            </div>
+            <div className={styles.healthProgress}>
+              <div 
+                className={`${styles.healthBar} ${
+                  stats.salud_financiera.par_index < 5 ? styles.barGreen : 
+                  stats.salud_financiera.par_index < 15 ? styles.barYellow : styles.barRed
+                }`}
+                style={{ width: `${Math.min(stats.salud_financiera.par_index, 100)}%` }}
+              ></div>
+            </div>
+            <p className={styles.statSubtext}>
+              Porcentaje de capital en riesgo de mora.
+            </p>
+          </div>
+
+          <div className={styles.healthCard}>
+            <div className={styles.healthHeader}>
+              <div className={styles.iconGreen} style={{ padding: '0.5rem', borderRadius: '0.5rem' }}>
+                <DollarSign size={20} />
+              </div>
+              <h4 className={styles.healthTitle}>Utilidad Neta Proyectada (Mes)</h4>
+            </div>
+            <div className={`${styles.healthValue} ${stats.salud_financiera.utilidad_mensual_proyectada < 0 ? styles.amountNeg : styles.textGreen}`}>
+              {formatCurrency(stats.salud_financiera.utilidad_mensual_proyectada)}
+            </div>
+            <p className={styles.statSubtext}>
+              <ArrowRightLeft size={14} /> Spread: Cobros - Pagos Inversionistas.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Calendario de Próximos Cobros - DESPUÉS DE LAS CARDS */}
-      <div className={styles.card} style={{ gridColumn: '1 / -1', marginBottom: '1rem' }}>
+      <div className={styles.card} style={{ gridColumn: '1 / -1', marginBottom: '2rem' }}>
         <div className={styles.cardHeader}>
           <h3 className={styles.cardTitle}>Calendario de Próximos Cobros (15 días)</h3>
           <Link href="/prestamos" className={styles.link}>Ver todos →</Link>
@@ -360,6 +411,85 @@ export function DashboardView() {
                           <MessageSquare size={16} />
                         </button>
                         <Link href={`/prestamos/${alert.id}`} className={styles.actionBtn} title="Ver detalle">
+                          <ChevronRight size={16} />
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Calendario de Pagos a Inversionistas */}
+      <div className={styles.card} style={{ gridColumn: '1 / -1', marginBottom: '2rem', borderLeft: '4px solid #7c3aed' }}>
+        <div className={styles.cardHeader}>
+          <h3 className={styles.cardTitle}>Próximos Pagos a Inversionistas (Intereses)</h3>
+          <Link href="/inversiones" className={styles.link}>Ver todas →</Link>
+        </div>
+        
+        <div className={styles.tableContainer}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Inversionista</th>
+                <th>Monto a Entregar</th>
+                <th>Fecha Programada</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {investorAlerts.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className={styles.emptyState}>No hay pagos pendientes para los próximos 15 días</td>
+                </tr>
+              ) : (
+                investorAlerts.map((pay) => (
+                  <tr key={pay.id}>
+                    <td>
+                      <div className={styles.clientInfo}>
+                        <span className={styles.clientName}>{pay.inversionista.nombre_completo}</span>
+                        <span className={styles.clientPhone}>{pay.inversionista.telefono || 'Sin teléfono'}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div className={styles.amount} style={{ color: '#7c3aed' }}>
+                        {formatCurrency(pay.monto_a_pagar)}
+                        <span className={styles.amountSub}>Interés mensual</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontWeight: 600 }}>{formatDate(pay.fecha_pago)}</span>
+                        <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                          En {pay.dias_restantes} días
+                        </span>
+                      </div>
+                    </td>
+                    <td>
+                      <span className={`${styles.statusBadge}`} style={{ 
+                        background: pay.nivel_alerta === 'urgente' ? '#f5f3ff' : '#f8fafc',
+                        color: pay.nivel_alerta === 'urgente' ? '#7c3aed' : '#64748b'
+                      }}>
+                        {pay.nivel_alerta}
+                      </span>
+                    </td>
+                    <td>
+                      <div className={styles.actionBtns}>
+                        <button 
+                          className={styles.actionBtn}
+                          onClick={() => {
+                            const tel = pay.inversionista.telefono?.replace(/\D/g, '');
+                            if (tel) window.open(`https://wa.me/${tel}?text=Hola ${pay.inversionista.nombre_completo}, te informamos que tu pago de rendimientos por valor de ${formatCurrency(pay.monto_a_pagar)} está programado...`, '_blank');
+                          }}
+                          title="Notificar por WhatsApp"
+                        >
+                          <MessageSquare size={16} />
+                        </button>
+                        <Link href={`/inversiones/${pay.id}`} className={styles.actionBtn} title="Ver detalle de inversión">
                           <ChevronRight size={16} />
                         </Link>
                       </div>

@@ -57,6 +57,7 @@ export const dashboardApi = {
   getInversionistasDetalle: (params = {}) =>
     api.get("/dashboard/inversionistas/detalle", { params }),
   getAlertasVencimientos: () => api.get("/dashboard/alertas/vencimientos"),
+  getAlertasInversionistas: () => api.get("/dashboard/alertas/inversionistas"),
   getMovimientosRecientes: (limit = 10) =>
     api.get(`/dashboard/movimientos/recientes?limit=${limit}`),
   getFlujoCajaHistorico: () => api.get("/dashboard/flujo-caja-historico"),
