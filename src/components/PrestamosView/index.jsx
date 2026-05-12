@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { prestamosApi } from '@/lib/api'
+import { perfilesApi, prestamosApi } from '@/lib/api'
 import { formatCurrency, formatDate, calcularDiasMora, getEstadoBadge } from '@/lib/utils'
-import { Plus, Search, AlertTriangle, Eye } from 'lucide-react'
+import { Plus, Search, AlertTriangle, Eye, Filter, Calendar, TrendingUp, Users, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
 import { Modal } from '../Modal'
 import { PrestamoDetalleView } from '../PrestamoDetalleView'
@@ -14,14 +14,43 @@ export function PrestamosView() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filtroEstado, setFiltroEstado] = useState('')
+  const [filtroInversionista, setFiltroInversionista] = useState('')
+  const [filtroTasa, setFiltroTasa] = useState('')
+  const [fechaDesde, setFechaDesde] = useState('')
+  const [fechaHasta, setFechaHasta] = useState('')
+  const [inversionistas, setInversionistas] = useState([])
+  const [tasasDisponibles, setTasasDisponibles] = useState([])
   const [selectedPrestamoId, setSelectedPrestamoId] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [showFilters, setShowFilters] = useState(false)
+
+  useEffect(() => {
+    const fetchMetadata = async () => {
+      try {
+        const [invRes, filterRes] = await Promise.all([
+          perfilesApi.getAll({ rol: 'inversionista' }),
+          prestamosApi.getFiltros()
+        ])
+        setInversionistas(invRes.data.data || [])
+        setTasasDisponibles(filterRes.data.data.tasas || [])
+      } catch (error) {
+        console.error('Error fetching metadata:', error)
+      }
+    }
+    fetchMetadata()
+  }, [])
 
   useEffect(() => {
     const fetchPrestamos = async () => {
       try {
+        setLoading(true)
         const params = {}
         if (filtroEstado) params.estado = filtroEstado
+        if (filtroInversionista) params.inversionista_id = filtroInversionista
+        if (filtroTasa) params.tasa_interes = filtroTasa
+        if (fechaDesde) params.fecha_desde = fechaDesde
+        if (fechaHasta) params.fecha_hasta = fechaHasta
+        
         const { data } = await prestamosApi.getAll(params)
         setPrestamos(data.data || [])
       } catch (error) {
@@ -32,7 +61,7 @@ export function PrestamosView() {
     }
 
     fetchPrestamos()
-  }, [filtroEstado])
+  }, [filtroEstado, filtroInversionista, filtroTasa, fechaDesde, fechaHasta])
 
   const filteredPrestamos = prestamos.filter(p => 
     p.cliente?.nombre_completo?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -86,26 +115,115 @@ export function PrestamosView() {
 
       <div className={styles.card}>
         <div className={styles.toolbar}>
-          <div className={styles.searchBox}>
-            <Search className={styles.searchIcon} size={20} />
-            <input
-              type="text"
-              placeholder="Buscar por cliente..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className={styles.input}
-            />
+          {/* Fila Principal: Buscador y Estado */}
+          <div className={styles.mainActions}>
+            <div className={styles.searchBox}>
+              <Search className={styles.searchIcon} size={18} />
+              <input
+                type="text"
+                placeholder="Buscar cliente..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className={styles.input}
+              />
+            </div>
+
+            <div className={styles.primaryFilters}>
+              <select
+                value={filtroEstado}
+                onChange={(e) => setFiltroEstado(e.target.value)}
+                className={styles.selectStatus}
+              >
+                <option value="">Todos los estados</option>
+                <option value="activo">Activo</option>
+                <option value="pagado">Pagado</option>
+                <option value="mora">En Mora</option>
+              </select>
+
+              <button 
+                onClick={() => setShowFilters(!showFilters)}
+                className={`${styles.btnToggleFilters} ${showFilters ? styles.active : ''}`}
+              >
+                <Filter size={16} />
+                Filtros
+                {showFilters ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              </button>
+            </div>
           </div>
-          <select
-            value={filtroEstado}
-            onChange={(e) => setFiltroEstado(e.target.value)}
-            className={styles.select}
-          >
-            <option value="">Todos los estados</option>
-            <option value="activo">Activo</option>
-            <option value="pagado">Pagado</option>
-            <option value="mora">En Mora</option>
-          </select>
+
+          {/* Fila Secundaria: Filtros Avanzados (Colapsable) */}
+          {showFilters && (
+            <div className={styles.advancedFilters}>
+              <div className={styles.filterGroup}>
+                <div className={styles.filterLabel}>Inversionista</div>
+                <div className={styles.filterInputWrapper}>
+                  <Users size={14} className={styles.filterIcon} />
+                  <select
+                    value={filtroInversionista}
+                    onChange={(e) => setFiltroInversionista(e.target.value)}
+                    className={styles.selectSmall}
+                  >
+                    <option value="">Todos</option>
+                    {inversionistas.map(inv => (
+                      <option key={inv.id} value={inv.id}>{inv.nombre_completo}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className={styles.filterGroup}>
+                <div className={styles.filterLabel}>Interés</div>
+                <div className={styles.filterInputWrapper}>
+                  <TrendingUp size={14} className={styles.filterIcon} />
+                  <select
+                    value={filtroTasa}
+                    onChange={(e) => setFiltroTasa(e.target.value)}
+                    className={styles.selectSmall}
+                  >
+                    <option value="">Todos</option>
+                    {tasasDisponibles.map(tasa => (
+                      <option key={tasa} value={tasa}>{tasa}%</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className={styles.filterGroup}>
+                <div className={styles.filterLabel}>Rango de Fecha</div>
+                <div className={styles.dateRange}>
+                  <Calendar size={14} className={styles.filterIcon} />
+                  <input
+                    type="date"
+                    value={fechaDesde}
+                    onChange={(e) => setFechaDesde(e.target.value)}
+                    className={styles.dateInput}
+                  />
+                  <span className={styles.dateDivider}>-</span>
+                  <input
+                    type="date"
+                    value={fechaHasta}
+                    onChange={(e) => setFechaHasta(e.target.value)}
+                    className={styles.dateInput}
+                  />
+                </div>
+              </div>
+
+              {(filtroInversionista || filtroTasa || fechaDesde || fechaHasta) && (
+                <button 
+                  onClick={() => {
+                    setFiltroInversionista('')
+                    setFiltroTasa('')
+                    setFechaDesde('')
+                    setFechaHasta('')
+                  }}
+                  className={styles.btnClearAdvanced}
+                >
+                  <RefreshCw size={14} />
+                  Limpiar filtros
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         <div className={styles.desktopView}>

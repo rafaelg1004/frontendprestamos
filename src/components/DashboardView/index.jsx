@@ -367,10 +367,15 @@ export function DashboardView() {
                 </tr>
               ) : (
                 alerts.map((alert) => (
-                  <tr key={alert.id}>
+                  <tr key={alert.cuota_id || alert.id}>
                     <td>
                       <div className={styles.clientInfo}>
-                        <span className={styles.clientName}>{alert.cliente.nombre_completo || alert.cliente}</span>
+                        <div className={styles.clientNameRow}>
+                          <span className={styles.clientName}>{alert.cliente.nombre_completo || alert.cliente}</span>
+                          {alert.numero_cuota && (
+                            <span className={styles.installmentBadge}>Cuota #{alert.numero_cuota}</span>
+                          )}
+                        </div>
                         <span className={styles.clientPhone}>{alert.cliente.telefono || 'Sin teléfono'}</span>
                       </div>
                     </td>

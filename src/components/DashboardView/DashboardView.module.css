@@ -624,3 +624,20 @@
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+.clientNameRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.installmentBadge {
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid #dbeafe;
+  white-space: nowrap;
+}

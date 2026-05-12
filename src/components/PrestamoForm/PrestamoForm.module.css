@@ -265,44 +265,117 @@
   border-left: 4px solid #dc2626;
 }
 
-/* Success Modal Styles */
 .successContent {
   text-align: center;
-  padding: 1rem 0;
+  padding: 0.5rem 0;
+}
+
+.successHeader {
+  margin-bottom: 2rem;
 }
 
 .successIcon {
   color: #10b981;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   display: flex;
   justify-content: center;
   animation: scaleIn 0.3s ease-out;
 }
 
-.successContent h3 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 0.5rem;
+.loanSummaryBox {
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  margin-bottom: 2rem;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-.successContent p {
-  color: #6b7280;
-  margin-bottom: 2rem;
+.summaryItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+}
+
+.summaryLabel {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.summaryValue {
+  color: var(--text-primary);
+  font-weight: 700;
 }
 
 .uploadStep {
-  background: #f9fafb;
-  border: 2px dashed #e5e7eb;
+  background: white;
+  border: 2px dashed var(--border-color);
   border-radius: 1rem;
   padding: 1.5rem;
   margin-bottom: 2rem;
   transition: all 0.2s;
 }
 
-.uploadStep:hover {
-  border-color: #2563eb;
-  background: #f0f7ff;
+.uploadLoading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  color: var(--primary);
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--primary-light);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.selectedFileBox {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #f0fdf4;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid #bbf7d0;
+  width: 100%;
+}
+
+.fileName {
+  flex: 1;
+  font-size: 0.9rem;
+  color: #166534;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btnRemoveFile {
+  background: #fee2e2;
+  color: #dc2626;
+  border: none;
+  padding: 0.4rem;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.btnRemoveFile:hover {
+  background: #fecaca;
 }
 
 .uploadHeader {
@@ -310,20 +383,15 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 0.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
 }
 
 .uploadHint {
-  font-size: 0.875rem;
-  color: #6b7280;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
   margin-bottom: 1.25rem;
-}
-
-.uploadActions {
-  display: flex;
-  justify-content: center;
 }
 
 .btnUpload {
@@ -331,61 +399,45 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background: white;
-  color: #2563eb;
-  border: 1px solid #2563eb;
-  border-radius: 0.5rem;
+  background: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: 0.75rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .btnUpload:hover {
-  background: #2563eb;
+  background: var(--primary);
   color: white;
 }
 
 .modalFooter {
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .btnFinish {
-  width: 100%;
+  flex: 1;
   padding: 0.875rem;
-  background: #2563eb;
+  background: var(--primary);
   color: white;
   border: none;
   border-radius: 0.75rem;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.btnFinish:hover {
-  opacity: 0.9;
 }
 
 .btnSecondaryLink {
-  width: 100%;
+  flex: 1;
   padding: 0.875rem;
-  background: transparent;
-  color: #4b5563;
-  border: 1px solid #d1d5db;
+  background: white;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 0.75rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btnSecondaryLink:hover {
-  background: #f3f4f6;
-}
-
-@keyframes scaleIn {
-  from { transform: scale(0.8); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
 }
 
 /* Select Trigger Button (replaces dropdown) */

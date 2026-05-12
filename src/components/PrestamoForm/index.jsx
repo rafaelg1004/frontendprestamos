@@ -18,7 +18,8 @@ export function PrestamoForm() {
   const [clientes, setClientes] = useState([]);
   const [inversiones, setInversiones] = useState([]);
   const [cuentas, setCuentas] = useState([]);
-  const [fondos, setFondos] = useState([]); // [{ inversion_id, monto }]
+  const [fondos, setFondos] = useState([{ inversion_id: "", monto: "" }]);
+  const [salidas, setSalidas] = useState([{ cuenta_id: "", monto: "" }]);
   const [error, setError] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [createdPrestamoId, setCreatedPrestamoId] = useState(null);
@@ -108,8 +109,6 @@ export function PrestamoForm() {
 
   const handleMontoChange = (e) => {
     const { value } = e.target;
-    // Guardamos el valor formateado en el input para mostrar puntos
-    // Pero en el estado guardamos el número limpio para cálculos
     const formatted = formatInputNumber(value);
     setFormData((prev) => ({ 
       ...prev, 
@@ -117,8 +116,25 @@ export function PrestamoForm() {
     }));
   };
 
+  const isRepartoCorrecto = () => {
+    const totalPrincipal = parseNumber(formData.monto_principal);
+    if (totalPrincipal <= 0) return false;
+
+    const totalFondos = fondos.reduce((sum, f) => sum + parseNumber(f.monto || 0), 0);
+    const totalSalidas = salidas.reduce((sum, s) => sum + parseNumber(s.monto || 0), 0);
+
+    const fondosOk = Math.abs(totalFondos - totalPrincipal) < 0.01 && fondos.every(f => f.inversion_id && parseNumber(f.monto) > 0);
+    const salidasOk = Math.abs(totalSalidas - totalPrincipal) < 0.01 && salidas.every(s => s.cuenta_id && parseNumber(s.monto) > 0);
+
+    return fondosOk && salidasOk;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isRepartoCorrecto()) {
+      toast.error("El reparto de capital y la salida de fondos deben coincidir con el monto principal");
+      return;
+    }
     setSaving(true);
     setError("");
 
@@ -131,19 +147,19 @@ export function PrestamoForm() {
         tasa_mora_diaria: 0.5,
         fecha_inicio: formData.fecha_inicio,
         fecha_vencimiento: formData.fecha_vencimiento,
-        cuenta_id: formData.cuenta_id,
-        fondos: fondos.map(f => ({ ...f, monto: parseNumber(f.monto) * 1000 })),
+        fondos: fondos.map(f => ({ 
+          inversion_id: f.inversion_id, 
+          monto: parseNumber(f.monto) * 1000
+        })),
+        salidas: salidas.map(s => ({
+          cuenta_id: s.cuenta_id,
+          monto: parseNumber(s.monto) * 1000
+        })),
         notas: formData.observaciones,
         plazo_meses: parseInt(formData.plazo_meses),
         frecuencia_pago: formData.frecuencia_pago,
         tipo_amortizacion: formData.tipo_amortizacion,
       };
-
-      // Validar que la suma de fondos coincida con el principal
-      const totalFondos = fondos.reduce((sum, f) => sum + parseNumber(f.monto || 0), 0);
-      if (Math.abs(totalFondos - parseNumber(formData.monto_principal)) > 0.01) {
-        throw new Error(`El reparto de fondos (${formatInputNumber(totalFondos)}) debe ser igual al monto del préstamo (${formData.monto_principal})`);
-      }
 
       const response = await prestamosApi.create(dataToSend);
 
@@ -226,23 +242,33 @@ export function PrestamoForm() {
     setPreviewTable(table);
   };
 
-  const handleFileUpload = async (e) => {
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  const handleFileSelect = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("archivo", file);
-    formData.append("tipo_documento", "otro");
-
-    try {
-      setUploading(true);
-      await prestamosApi.subirDocumento(createdPrestamoId, formData);
-      toast.success("Documento vinculado correctamente");
-    } catch (error) {
-      toast.error("Error al subir el documento");
-    } finally {
-      setUploading(false);
+    if (file) {
+      setSelectedFile(file);
     }
+  };
+
+  const handleFinish = async () => {
+    if (selectedFile && createdPrestamoId) {
+      const uploadData = new FormData();
+      uploadData.append("archivo", selectedFile);
+      uploadData.append("tipo_documento", "otro");
+
+      try {
+        setUploading(true);
+        await prestamosApi.subirDocumento(createdPrestamoId, uploadData);
+        toast.success("Documento vinculado correctamente");
+      } catch (error) {
+        toast.error("Error al subir el documento");
+        return; // Detener redirección si falla la subida importante? O preguntar?
+      } finally {
+        setUploading(false);
+      }
+    }
+    router.push("/prestamos");
   };
 
   return (
@@ -418,22 +444,57 @@ export function PrestamoForm() {
 
           {/* Columna Derecha: Origen de Fondos */}
           <div className={styles.sideColumn}>
-            {/* Tesorería */}
+            {/* Tesorería y Salida (Cuentas) */}
             <div className={`${styles.formCard} ${styles.highlightCard}`}>
               <div className={styles.cardHeader}>
                 <CreditCard size={20} />
                 <h2>Tesorería y Salida</h2>
               </div>
-              <div className={styles.field}>
-                <label className={styles.label}>Cuenta de Origen *</label>
-                <select name="cuenta_id" value={formData.cuenta_id} onChange={handleChange} className={styles.select} required>
-                  <option value="">¿De dónde sale el dinero?</option>
-                  {cuentas.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.nombre} ({formatCurrency(c.saldo_actual)})
-                    </option>
-                  ))}
-                </select>
+              <div className={styles.fundList}>
+                {salidas.map((s, index) => (
+                  <div key={index} className={styles.fundItem}>
+                    <select
+                      className={styles.select}
+                      value={s.cuenta_id}
+                      onChange={(e) => {
+                        const newSalidas = [...salidas];
+                        newSalidas[index].cuenta_id = e.target.value;
+                        setSalidas(newSalidas);
+                      }}
+                      required
+                    >
+                      <option value="">Cuenta...</option>
+                      {cuentas.map(c => (
+                        <option key={c.id} value={c.id}>{c.nombre} (${formatCurrency(c.saldo_actual * 1000)})</option>
+                      ))}
+                    </select>
+                    <input
+                      type="text"
+                      value={s.monto}
+                      onChange={(e) => {
+                        const newSalidas = [...salidas];
+                        newSalidas[index].monto = formatInputNumber(e.target.value);
+                        setSalidas(newSalidas);
+                      }}
+                      placeholder="Monto"
+                      className={styles.inputSmall}
+                      required
+                    />
+                    <button type="button" onClick={() => setSalidas(salidas.filter((_, i) => i !== index))} className={styles.btnTrash}>
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button 
+                type="button" 
+                onClick={() => setSalidas([...salidas, { cuenta_id: '', monto: '' }])}
+                className={styles.btnAddSimple}
+              >
+                <Plus size={16} /> Añadir Cuenta de Salida
+              </button>
+              <div className={styles.totalBadge}>
+                Total Salida: {formatCurrency(salidas.reduce((sum, s) => sum + parseNumber(s.monto || 0), 0) * 1000)}
               </div>
             </div>
 
@@ -463,7 +524,7 @@ export function PrestamoForm() {
                             </div>
                           </span>
                         ) : (
-                          <span className={styles.selectTriggerPlaceholder}>Seleccionar inversión...</span>
+                          <span className={styles.selectTriggerPlaceholder}>Inversión...</span>
                         )}
                         <ChevronRight size={14} />
                       </button>
@@ -495,11 +556,9 @@ export function PrestamoForm() {
                 <Plus size={16} /> Añadir Inversionista
               </button>
 
-              {fondos.length > 0 && (
-                <div className={styles.totalBadge}>
-                  Total: {formatCurrency(fondos.reduce((sum, f) => sum + parseNumber(f.monto || 0), 0) * 1000)}
-                </div>
-              )}
+              <div className={styles.totalBadge}>
+                Total Reparto: {formatCurrency(fondos.reduce((sum, f) => sum + parseNumber(f.monto || 0), 0) * 1000)}
+              </div>
             </div>
 
             {/* Notas */}
@@ -521,9 +580,20 @@ export function PrestamoForm() {
 
         <div className={styles.formFooter}>
           <Link href="/prestamos" className={styles.btnCancel}>Cancelar</Link>
-          <button type="submit" disabled={saving || loading} className={styles.btnSubmit}>
-            {saving ? "Procesando..." : "Emitir Préstamo"}
-          </button>
+          <div className={styles.submitSection}>
+            {!isRepartoCorrecto() && parseNumber(formData.monto_principal) > 0 && (
+              <span className={styles.validationText}>
+                El reparto y la salida deben coincidir con el capital.
+              </span>
+            )}
+            <button 
+              type="submit" 
+              disabled={saving || !isRepartoCorrecto()} 
+              className={styles.btnSubmit}
+            >
+              {saving ? "Procesando..." : "Emitir Préstamo"}
+            </button>
+          </div>
         </div>
       </form>
 
@@ -535,46 +605,85 @@ export function PrestamoForm() {
         size="md"
       >
         <div className={styles.successContent}>
-          <div className={styles.successIcon}>
-            <CheckCircle size={64} />
+          <div className={styles.successHeader}>
+            <div className={styles.successIcon}>
+              <CheckCircle size={64} />
+            </div>
+            <h3>¡Emisión Exitosa!</h3>
+            <p>El préstamo ha sido registrado correctamente.</p>
           </div>
-          <h3>¡Emisión Exitosa!</h3>
-          <p>El préstamo ha sido registrado correctamente en el sistema.</p>
+
+          <div className={styles.loanSummaryBox}>
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryLabel}>Cliente:</span>
+              <span className={styles.summaryValue}>
+                {clientes.find(c => c.id === formData.perfil_id)?.nombre_completo || "N/A"}
+              </span>
+            </div>
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryLabel}>Monto:</span>
+              <span className={styles.summaryValue}>$ {formData.monto_principal}</span>
+            </div>
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryLabel}>Tasa:</span>
+              <span className={styles.summaryValue}>{formData.tasa_interes_mensual}% mensual</span>
+            </div>
+          </div>
           
           <div className={styles.uploadStep}>
             <div className={styles.uploadHeader}>
               <FileText size={20} />
-              <span>Soportes Legales (Opcional)</span>
+              <span>Soportes Legales</span>
             </div>
-            <p className={styles.uploadHint}>Sube la letra, pagaré o contrato ahora para dejar el registro completo.</p>
             
-            <div className={styles.uploadActions}>
-              <input 
-                type="file" 
-                id="post-create-upload" 
-                style={{ display: 'none' }} 
-                onChange={handleFileUpload}
-                disabled={uploading}
-              />
-              <label htmlFor="post-create-upload" className={styles.btnUpload}>
-                <Upload size={20} />
-                {uploading ? "Subiendo..." : "Subir Documento"}
-              </label>
-            </div>
+            {uploading ? (
+              <div className={styles.uploadLoading}>
+                <div className={styles.spinner}></div>
+                <span>Subiendo documento...</span>
+              </div>
+            ) : (
+              <div className={styles.uploadActions}>
+                {selectedFile ? (
+                  <div className={styles.selectedFileBox}>
+                    <CheckCircle size={16} color="#10b981" />
+                    <span className={styles.fileName}>{selectedFile.name}</span>
+                    <button onClick={() => setSelectedFile(null)} className={styles.btnRemoveFile}>
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <p className={styles.uploadHint}>¿Deseas adjuntar la letra o pagaré firmado ahora?</p>
+                    <input 
+                      type="file" 
+                      id="post-create-upload" 
+                      style={{ display: 'none' }} 
+                      onChange={handleFileSelect}
+                    />
+                    <label htmlFor="post-create-upload" className={styles.btnUpload}>
+                      <Upload size={20} />
+                      Seleccionar Archivo
+                    </label>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           <div className={styles.modalFooter}>
             <button 
-              onClick={() => router.push("/prestamos")} 
+              onClick={handleFinish} 
+              disabled={uploading}
               className={styles.btnFinish}
             >
-              Terminar y volver a la lista
+              {uploading ? "Subiendo..." : "Terminar y volver"}
             </button>
             <button 
               onClick={() => router.push(`/prestamos/${createdPrestamoId}`)} 
+              disabled={uploading}
               className={styles.btnSecondaryLink}
             >
-              Ver detalle completo
+              Ver detalle
             </button>
           </div>
         </div>
