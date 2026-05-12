@@ -30,16 +30,32 @@ export function PrestamoForm() {
     perfil_id: "",
     monto_principal: "",
     tasa_interes_mensual: "20",
-    plazo_meses: "30",
+    plazo_meses: "1",
     fecha_inicio: new Date().toISOString().split("T")[0],
     fecha_vencimiento: "",
-    frecuencia_pago: "diario",
+    frecuencia_pago: "mensual",
     tipo_amortizacion: "frances",
     metodo_pago: "efectivo",
     cuenta_id: "",
     observaciones: "",
   });
   const [previewTable, setPreviewTable] = useState([]);
+
+  // Ajustar plazo automáticamente según la frecuencia para que sea 1 mes por defecto
+  useEffect(() => {
+    const autoPlazo = {
+      diario: "30",
+      semanal: "4",
+      quincenal: "2",
+      mensual: "1"
+    };
+    if (autoPlazo[formData.frecuencia_pago]) {
+      setFormData(prev => ({
+        ...prev,
+        plazo_meses: autoPlazo[formData.frecuencia_pago]
+      }));
+    }
+  }, [formData.frecuencia_pago]);
 
   // Cargar clientes
   useEffect(() => {

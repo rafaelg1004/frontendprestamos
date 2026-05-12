@@ -15,8 +15,8 @@ import styles from "./SimuladorView.module.css";
 export function SimuladorView() {
   const [monto, setMonto] = useState("1.000.000");
   const [tasa, setTasa] = useState(20);
-  const [plazo, setPlazo] = useState(30);
-  const [frecuencia, setFrecuencia] = useState("diario");
+  const [plazo, setPlazo] = useState(1);
+  const [frecuencia, setFrecuencia] = useState("mensual");
   const [tipoAmortizacion, setTipoAmortizacion] = useState("frances"); // frances o flat
   const [cuotas, setCuotas] = useState([]);
   const [resumen, setResumen] = useState({
@@ -29,6 +29,17 @@ export function SimuladorView() {
   useEffect(() => {
     calcularAmortizacion();
   }, [monto, tasa, plazo, frecuencia, tipoAmortizacion]);
+
+  useEffect(() => {
+    // Al cambiar la frecuencia, ajustamos el plazo para que sea 1 mes por defecto
+    const autoPlazo = {
+      diario: 30,
+      semanal: 4,
+      quincenal: 2,
+      mensual: 1
+    };
+    setPlazo(autoPlazo[frecuencia]);
+  }, [frecuencia]);
 
   const getLabelPlazo = () => {
     switch (frecuencia) {
