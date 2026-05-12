@@ -380,6 +380,176 @@
   text-decoration: underline;
 }
 
+/* Alert Banner at Top */
+.alertBanner {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border: 1px solid #fca5a5;
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 0.5rem;
+  animation: slideInDown 0.5s ease-out;
+}
+
+@keyframes slideInDown {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.alertBannerIcon {
+  width: 3rem;
+  height: 3rem;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  flex-shrink: 0;
+}
+
+.alertBannerContent {
+  flex: 1;
+}
+
+.alertBannerTitle {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #991b1b;
+  margin: 0 0 0.25rem 0;
+}
+
+.alertBannerText {
+  font-size: 0.9375rem;
+  color: #b91c1c;
+  margin: 0;
+  font-weight: 500;
+}
+
+.alertBannerLink {
+  background: #991b1b;
+  color: white;
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.alertBannerLink:hover {
+  background: #7f1d1d;
+  transform: scale(1.05);
+}
+
+/* Collections Table */
+.tableContainer {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  padding: 1rem;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.table td {
+  padding: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.clientInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.clientName {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 0.9375rem;
+}
+
+.clientPhone {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.amount {
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.amountSub {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  display: block;
+}
+
+.statusBadge {
+  display: inline-flex;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.urgent { background: #fee2e2; color: #ef4444; }
+.warning { background: #ffedd5; color: #f97316; }
+.normal { background: #f0f9ff; color: #0ea5e9; }
+
+.actionBtns {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.actionBtn {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #64748b;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.actionBtn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+.whatsappBtn:hover {
+  background: #dcfce7;
+  color: #16a34a;
+  border-color: #86efac;
+}
+
 .skeleton {
   background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
   background-size: 200% 100%;

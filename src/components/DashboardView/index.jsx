@@ -39,6 +39,8 @@ import {
   ArrowDownLeft,
   Clock,
   CheckCircle,
+  MessageSquare,
+  ChevronRight
 } from "lucide-react";
 import Link from "next/link";
 import styles from "./DashboardView.module.css";
@@ -206,6 +208,25 @@ export function DashboardView() {
         </div>
       </div>
 
+      {/* Banner de Alertas Críticas */}
+      {alerts.filter(a => a.nivel_alerta === 'vencido').length > 0 && (
+        <div className={styles.alertBanner}>
+          <div className={styles.alertBannerIcon}>
+            <AlertTriangle size={24} />
+          </div>
+          <div className={styles.alertBannerContent}>
+            <h3 className={styles.alertBannerTitle}>¡Atención! Préstamos Vencidos</h3>
+            <p className={styles.alertBannerText}>
+              Tienes {alerts.filter(a => a.nivel_alerta === 'vencido').length} préstamos que ya superaron su fecha de vencimiento. 
+              Es necesario gestionar el cobro lo antes posible.
+            </p>
+          </div>
+          <Link href="/prestamos?solo_mora=true" className={styles.alertBannerLink}>
+            Gestionar Mora
+          </Link>
+        </div>
+      )}
+
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
           <div className={styles.statContent}>
@@ -267,6 +288,87 @@ export function DashboardView() {
               <AlertTriangle size={24} />
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Calendario de Próximos Cobros - DESPUÉS DE LAS CARDS */}
+      <div className={styles.card} style={{ gridColumn: '1 / -1', marginBottom: '1rem' }}>
+        <div className={styles.cardHeader}>
+          <h3 className={styles.cardTitle}>Calendario de Próximos Cobros (15 días)</h3>
+          <Link href="/prestamos" className={styles.link}>Ver todos →</Link>
+        </div>
+        
+        <div className={styles.tableContainer}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Deudor</th>
+                <th>Monto a Cobrar</th>
+                <th>Fecha Vencimiento</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {alerts.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className={styles.emptyState}>No hay cobros programados</td>
+                </tr>
+              ) : (
+                alerts.map((alert) => (
+                  <tr key={alert.id}>
+                    <td>
+                      <div className={styles.clientInfo}>
+                        <span className={styles.clientName}>{alert.cliente.nombre_completo || alert.cliente}</span>
+                        <span className={styles.clientPhone}>{alert.cliente.telefono || 'Sin teléfono'}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div className={styles.amount}>
+                        {formatCurrency(alert.monto_total_cobrar || alert.saldo_pendiente)}
+                        <span className={styles.amountSub}>
+                          Cap: {formatCurrency(alert.monto_capital_pendiente || 0)} + Int: {formatCurrency(alert.monto_interes_pendiente || 0)}
+                        </span>
+                      </div>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontWeight: 600 }}>{formatDate(alert.fecha_vencimiento)}</span>
+                        <span style={{ fontSize: '0.75rem', color: alert.dias_restantes <= 0 ? '#ef4444' : '#64748b' }}>
+                          {alert.dias_restantes <= 0 ? 'VENCIDO' : `En ${alert.dias_restantes} días`}
+                        </span>
+                      </div>
+                    </td>
+                    <td>
+                      <span className={`${styles.statusBadge} ${
+                        alert.nivel_alerta === 'vencido' ? styles.urgent : 
+                        alert.nivel_alerta === 'urgente' ? styles.warning : styles.normal
+                      }`}>
+                        {alert.nivel_alerta}
+                      </span>
+                    </td>
+                    <td>
+                      <div className={styles.actionBtns}>
+                        <button 
+                          className={`${styles.actionBtn} ${styles.whatsappBtn}`}
+                          onClick={() => {
+                            const tel = alert.cliente.telefono?.replace(/\D/g, '');
+                            if (tel) window.open(`https://wa.me/${tel}?text=Hola ${alert.cliente.nombre_completo}, te escribimos para recordarte tu pago...`, '_blank');
+                          }}
+                          title="Contactar"
+                        >
+                          <MessageSquare size={16} />
+                        </button>
+                        <Link href={`/prestamos/${alert.id}`} className={styles.actionBtn} title="Ver detalle">
+                          <ChevronRight size={16} />
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -361,54 +463,6 @@ export function DashboardView() {
               ))
             )}
           </div>
-        </div>
-
-        <div className={styles.card}>
-          <div className={styles.cardHeader}>
-            <h3 className={styles.cardTitle}>Alertas Prioritarias</h3>
-            {alerts.filter(a => a.nivel_alerta === 'vencido').length > 0 && (
-              <span className={`${styles.badge} ${styles.badgeDanger}`}>
-                {alerts.filter(a => a.nivel_alerta === 'vencido').length} Vencidos
-              </span>
-            )}
-          </div>
-
-          <div className={styles.alertList}>
-            {alerts.length === 0 ? (
-              <div className={styles.emptyState}>
-                <CheckCircle size={40} className={styles.iconGreen} style={{ margin: '0 auto 1rem' }} />
-                <p>Todo al día</p>
-              </div>
-            ) : (
-              alerts.slice(0, 4).map((alert, index) => (
-                <Link 
-                  key={alert.prestamo_id || index} 
-                  href={`/prestamos/${alert.prestamo_id}`}
-                  className={`${styles.alertItem} ${getAlertClass(alert.nivel_alerta)}`}
-                >
-                  <div className={styles.alertContent}>
-                    <div className={styles.alertIcon}>{getAlertIcon(alert.nivel_alerta)}</div>
-                    <div className={styles.alertInfo}>
-                      <div className={styles.alertHeader}>
-                        <p className={styles.alertClient}>{alert.cliente}</p>
-                        <span className={styles.alertDays}>
-                          {alert.dias_restantes <= 0 ? 'MORA' : `${alert.dias_restantes}d`}
-                        </span>
-                      </div>
-                      <p className={styles.alertDetails}>
-                        Saldo: {formatCurrency(alert.saldo_pendiente)} • Vence: {formatDate(alert.fecha_vencimiento)}
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              ))
-            )}
-          </div>
-          {alerts.length > 4 && (
-            <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-              <Link href="/prestamos" className={styles.link}>Ver todas las alertas →</Link>
-            </div>
-          )}
         </div>
       </div>
     </div>
