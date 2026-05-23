@@ -113,6 +113,12 @@ export function InversionesView() {
                     </span>
                   </div>
                   <div className={styles.stat}>
+                    <span className={styles.statLabel}>Disponible</span>
+                    <span className={styles.statValue}>
+                      {formatCurrency(inv.calculos?.disponible_en_cuenta || 0)}
+                    </span>
+                  </div>
+                  <div className={styles.stat}>
                     <span className={styles.statLabel}>Cap. Pendiente</span>
                     <span className={styles.statValue}>
                       {formatCurrency(inv.calculos?.capital_pendiente || 0)}
