@@ -27,6 +27,8 @@ export function PrestamoForm() {
   const [isInvModalOpen, setIsInvModalOpen] = useState(false);
   const [activeFondoIndex, setActiveFondoIndex] = useState(null);
   const [invSearch, setInvSearch] = useState("");
+  const [isClienteModalOpen, setIsClienteModalOpen] = useState(false);
+  const [clienteSearch, setClienteSearch] = useState("");
   const [formData, setFormData] = useState({
     perfil_id: "",
     monto_principal: "",
@@ -64,8 +66,8 @@ export function PrestamoForm() {
       try {
         setLoading(true);
         const [cliRes, invRes, cueRes] = await Promise.all([
-          perfilesApi.getAll({ rol: "cliente" }),
-          inversionesApi.getAll({ estado: "activo" }),
+          perfilesApi.getAll({ rol: "cliente", limit: 1000 }),
+          inversionesApi.getAll({ estado: "activo", limit: 1000 }),
           cuentasApi.getAll()
         ]);
         setClientes(cliRes.data?.data || []);
@@ -297,20 +299,26 @@ export function PrestamoForm() {
               </div>
               <div className={styles.field}>
                 <label className={styles.label}>Seleccionar Beneficiario *</label>
-                <select
-                  name="perfil_id"
-                  value={formData.perfil_id}
-                  onChange={handleChange}
-                  className={styles.select}
-                  required
+                <button
+                  type="button"
+                  className={styles.selectTrigger}
+                  onClick={() => { setClienteSearch(""); setIsClienteModalOpen(true); }}
+                  style={{ width: "100%", padding: "0.75rem 1rem", fontSize: "0.95rem" }}
                 >
-                  <option value="">Seleccione un cliente</option>
-                  {clientes.map((cliente) => (
-                    <option key={cliente.id} value={cliente.id}>
-                      {cliente.nombre_completo} ({cliente.identificacion})
-                    </option>
-                  ))}
-                </select>
+                  {formData.perfil_id ? (
+                    <span className={styles.selectTriggerFilled}>
+                      <User size={16} />
+                      <div className={styles.selectTriggerText}>
+                        <span className={styles.selectTriggerName}>
+                          {clientes.find(c => c.id === formData.perfil_id)?.nombre_completo}
+                        </span>
+                      </div>
+                    </span>
+                  ) : (
+                    <span className={styles.selectTriggerPlaceholder}>Buscar y seleccionar cliente...</span>
+                  )}
+                  <ChevronRight size={16} />
+                </button>
               </div>
             </div>
 
@@ -763,6 +771,71 @@ export function PrestamoForm() {
               <div className={styles.invEmpty}>
                 <Search size={32} />
                 <p>No se encontraron inversiones</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </Modal>
+
+      {/* Modal de Selección de Cliente */}
+      <Modal
+        isOpen={isClienteModalOpen}
+        onClose={() => setIsClienteModalOpen(false)}
+        title="Buscar Beneficiario"
+        size="md"
+      >
+        <div className={styles.invModalContent}>
+          <div className={styles.invSearchWrapper}>
+            <Search size={16} className={styles.invSearchIcon} />
+            <input
+              type="text"
+              placeholder="Buscar por nombre o identificación..."
+              className={styles.invSearchInput}
+              value={clienteSearch}
+              onChange={(e) => setClienteSearch(e.target.value)}
+              autoFocus
+            />
+          </div>
+
+          <div className={styles.invList}>
+            {clientes
+              .filter(cli =>
+                cli.nombre_completo?.toLowerCase().includes(clienteSearch.toLowerCase()) ||
+                cli.identificacion?.includes(clienteSearch)
+              )
+              .map((cli) => (
+                <button
+                  key={cli.id}
+                  type="button"
+                  className={`${styles.invItem} ${
+                    formData.perfil_id === cli.id ? styles.invItemSelected : ''
+                  }`}
+                  onClick={() => {
+                    setFormData(prev => ({ ...prev, perfil_id: cli.id }));
+                    setIsClienteModalOpen(false);
+                  }}
+                >
+                  <div className={styles.invItemAvatar}>
+                    {cli.nombre_completo?.charAt(0).toUpperCase()}
+                  </div>
+                  <div className={styles.invItemInfo}>
+                    <span className={styles.invItemName}>{cli.nombre_completo}</span>
+                    <div className={styles.invItemMeta}>
+                      <span className={styles.invItemDate}>
+                        C.C: {cli.identificacion}
+                      </span>
+                    </div>
+                  </div>
+                </button>
+              ))
+            }
+            {clientes.filter(cli =>
+                cli.nombre_completo?.toLowerCase().includes(clienteSearch.toLowerCase()) ||
+                cli.identificacion?.includes(clienteSearch)
+            ).length === 0 && (
+              <div className={styles.invEmpty}>
+                <Search size={32} />
+                <p>No se encontraron clientes</p>
               </div>
             )}
           </div>

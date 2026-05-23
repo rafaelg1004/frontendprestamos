@@ -22,7 +22,7 @@ import { LogoutModal } from "../LogoutModal";
 import styles from "./Sidebar.module.css";
 
 const menuItems = [
-  { href: "/", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/personas", icon: Users, label: "Personas" },
   { href: "/prestamos", icon: Banknote, label: "Préstamos" },
   { href: "/reportes", icon: BarChart3, label: "Reportes" },
@@ -40,11 +40,11 @@ export function Sidebar({ collapsed = false, onToggle }) {
   const handleLogout = async () => {
     try {
       await authApi.logout();
-      window.location.href = "/login";
+      window.location.href = "/";
     } catch (error) {
       console.error("Error logging out:", error);
       // Even if API fails, clear local session and redirect
-      window.location.href = "/login";
+      window.location.href = "/";
     }
   };
 

@@ -24,7 +24,7 @@ export function PersonasView() {
   const fetchPersonas = async () => {
     try {
       setLoading(true)
-      const params = {}
+      const params = { limit: 1000 }
       if (filtroRol) params.rol = filtroRol
       
       const response = await perfilesApi.getAll(params)

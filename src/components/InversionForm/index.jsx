@@ -38,7 +38,7 @@ export function InversionForm({ isOpen, onClose, onSuccess }) {
         try {
           setLoading(true);
           const [invRes, cuentasRes] = await Promise.all([
-            perfilesApi.getAll({ rol: "inversionista" }),
+            perfilesApi.getAll({ rol: "inversionista", limit: 1000 }),
             cuentasApi.getAll()
           ]);
           setInversionistas(invRes.data?.data || []);

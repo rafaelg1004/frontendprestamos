@@ -28,7 +28,7 @@ export function PrestamosView() {
     const fetchMetadata = async () => {
       try {
         const [invRes, filterRes] = await Promise.all([
-          perfilesApi.getAll({ rol: 'inversionista' }),
+          perfilesApi.getAll({ rol: 'inversionista', limit: 1000 }),
           prestamosApi.getFiltros()
         ])
         setInversionistas(invRes.data.data || [])
@@ -44,7 +44,7 @@ export function PrestamosView() {
     const fetchPrestamos = async () => {
       try {
         setLoading(true)
-        const params = {}
+        const params = { limit: 1000 }
         if (filtroEstado) params.estado = filtroEstado
         if (filtroInversionista) params.inversionista_id = filtroInversionista
         if (filtroTasa) params.tasa_interes = filtroTasa

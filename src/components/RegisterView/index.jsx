@@ -32,7 +32,7 @@ export function RegisterView() {
 
       // Registro exitoso - redirigir al login (no iniciar sesión automáticamente)
       toast.success("Usuario creado exitosamente. Ahora inicia sesión.");
-      router.push("/login");
+      router.push("/");
     } catch (err) {
       const message = err.response?.data?.error || "Error al registrar usuario";
       setError(message);
@@ -121,7 +121,7 @@ export function RegisterView() {
         <div className={styles.footer}>
           <p className={styles.footerText}>
             ¿Ya tienes una cuenta?{" "}
-            <Link href="/login" className={styles.link}>
+            <Link href="/" className={styles.link}>
               Inicia sesión
             </Link>
           </p>

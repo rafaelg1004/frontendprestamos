@@ -13,7 +13,7 @@ export function InversionistasView() {
   useEffect(() => {
     const fetchInversionistas = async () => {
       try {
-        const { data } = await perfilesApi.getAll({ rol: 'inversionista' })
+        const { data } = await perfilesApi.getAll({ rol: 'inversionista', limit: 1000 })
         setInversionistas(data.data || [])
       } catch (error) {
         console.error('Error fetching inversionistas:', error)

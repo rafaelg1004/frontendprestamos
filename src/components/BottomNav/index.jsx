@@ -13,7 +13,7 @@ export function BottomNav() {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
 
   const navItems = [
-    { href: '/', icon: LayoutDashboard, label: 'Inicio' },
+    { href: '/dashboard', icon: LayoutDashboard, label: 'Inicio' },
     { href: '/prestamos', icon: Banknote, label: 'Créditos' },
     { href: '/inversiones', icon: TrendingUp, label: 'Inversiones' },
     { href: '/cuentas', icon: Wallet, label: 'Cuentas' },
@@ -23,9 +23,9 @@ export function BottomNav() {
   const handleLogout = async () => {
     try {
       await authApi.logout()
-      window.location.href = "/login"
+      window.location.href = "/"
     } catch (error) {
-      window.location.href = "/login"
+      window.location.href = "/"
     }
   }
 

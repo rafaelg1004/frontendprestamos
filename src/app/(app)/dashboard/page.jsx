@@ -12,7 +12,7 @@ export default function Home() {
       .split("; ")
       .find((row) => row.startsWith("auth_token="));
     if (!token) {
-      router.push("/login");
+      router.push("/");
     }
   }, [router]);
 

@@ -38,7 +38,7 @@ export function LoginView() {
       if (token) {
         authApi.setToken(token);
         toast.success("Bienvenido");
-        router.push("/");
+        router.push("/dashboard");
       } else {
         setError("Error en la respuesta del servidor");
       }
