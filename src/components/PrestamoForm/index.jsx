@@ -719,11 +719,10 @@ export function PrestamoForm() {
 
           <div className={styles.invList}>
             {inversiones
-              .filter(inv =>
-                inv.inversionista.nombre_completo
-                  .toLowerCase()
-                  .includes(invSearch.toLowerCase())
-              )
+              .filter(inv => {
+                const disp = inv.saldo_disponible !== undefined ? inv.saldo_disponible : parseFloat(inv.monto_invertido);
+                return disp > 0 && inv.inversionista.nombre_completo.toLowerCase().includes(invSearch.toLowerCase());
+              })
               .map((inv) => (
                 <button
                   key={inv.id}
@@ -747,7 +746,7 @@ export function PrestamoForm() {
                     <span className={styles.invItemName}>{inv.inversionista.nombre_completo}</span>
                     <div className={styles.invItemMeta}>
                       <span className={styles.invItemAmount}>
-                        {formatCurrency(parseFloat(inv.monto_invertido))}
+                        Disp: {formatCurrency(inv.saldo_disponible !== undefined ? inv.saldo_disponible : parseFloat(inv.monto_invertido))}
                       </span>
                       <span className={styles.invItemDot}>·</span>
                       <span className={styles.invItemRate}>
@@ -765,9 +764,10 @@ export function PrestamoForm() {
                 </button>
               ))
             }
-            {inversiones.filter(inv =>
-              inv.inversionista.nombre_completo.toLowerCase().includes(invSearch.toLowerCase())
-            ).length === 0 && (
+            {inversiones.filter(inv => {
+                const disp = inv.saldo_disponible !== undefined ? inv.saldo_disponible : parseFloat(inv.monto_invertido);
+                return disp > 0 && inv.inversionista.nombre_completo.toLowerCase().includes(invSearch.toLowerCase());
+            }).length === 0 && (
               <div className={styles.invEmpty}>
                 <Search size={32} />
                 <p>No se encontraron inversiones</p>
