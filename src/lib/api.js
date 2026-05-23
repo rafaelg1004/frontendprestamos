@@ -107,7 +107,7 @@ export const inversionesApi = {
 
 // Cuentas
 export const cuentasApi = {
-  getAll: () => api.get("/cuentas"),
+  getAll: (params = {}) => api.get("/cuentas", { params }),
   getById: (id) => api.get(`/cuentas/${id}`),
   create: (data) => api.post("/cuentas", data),
   update: (id, data) => api.put(`/cuentas/${id}`, data),

@@ -29,6 +29,9 @@ export function PrestamoForm() {
   const [invSearch, setInvSearch] = useState("");
   const [isClienteModalOpen, setIsClienteModalOpen] = useState(false);
   const [clienteSearch, setClienteSearch] = useState("");
+  const [isCuentaModalOpen, setIsCuentaModalOpen] = useState(false);
+  const [activeSalidaIndex, setActiveSalidaIndex] = useState(null);
+  const [cuentaSearch, setCuentaSearch] = useState("");
   const [formData, setFormData] = useState({
     perfil_id: "",
     monto_principal: "",
@@ -44,21 +47,7 @@ export function PrestamoForm() {
   });
   const [previewTable, setPreviewTable] = useState([]);
 
-  // Ajustar plazo automáticamente según la frecuencia para que sea 1 mes por defecto
-  useEffect(() => {
-    const autoPlazo = {
-      diario: "30",
-      semanal: "4",
-      quincenal: "2",
-      mensual: "1"
-    };
-    if (autoPlazo[formData.frecuencia_pago]) {
-      setFormData(prev => ({
-        ...prev,
-        plazo_meses: autoPlazo[formData.frecuencia_pago]
-      }));
-    }
-  }, [formData.frecuencia_pago]);
+  // En modelo de capital abierto ya no hay plazo fijo ni tabla de amortización
 
   // Cargar clientes
   useEffect(() => {
@@ -82,20 +71,7 @@ export function PrestamoForm() {
     fetchData();
   }, []);
 
-  // Calcular fecha de vencimiento automáticamente
-  useEffect(() => {
-    if (formData.fecha_inicio && formData.plazo_meses) {
-      const fechaInicio = new Date(formData.fecha_inicio);
-      const fechaVencimiento = new Date(fechaInicio);
-      fechaVencimiento.setMonth(
-        fechaVencimiento.getMonth() + parseInt(formData.plazo_meses),
-      );
-      setFormData((prev) => ({
-        ...prev,
-        fecha_vencimiento: fechaVencimiento.toISOString().split("T")[0],
-      }));
-    }
-  }, [formData.fecha_inicio, formData.plazo_meses]);
+  // Fecha de vencimiento ya no aplica en capital abierto
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -183,66 +159,6 @@ export function PrestamoForm() {
     }
   };
 
-  const handlePreviewTable = () => {
-    const p = parseNumber(formData.monto_principal);
-    const tasaMensual = parseFloat(formData.tasa_interes_mensual) / 100;
-    const n = parseInt(formData.plazo_meses);
-    
-    if (!p || !n) {
-      toast.error("Ingresa monto y duración para previsualizar");
-      return;
-    }
-
-    // Multiplicador solo para la TASA
-    let multiplier = 1;
-    if (formData.frecuencia_pago === "diario") multiplier = 30;
-    else if (formData.frecuencia_pago === "semanal") multiplier = 4;
-    else if (formData.frecuencia_pago === "quincenal") multiplier = 2;
-
-    const r = tasaMensual / multiplier;
-
-    let table = [];
-    if (formData.tipo_amortizacion === "frances") {
-      const cuotaMonto = Math.round((p * (r * Math.pow(1 + r, n))) / (Math.pow(1 + r, n) - 1) / 1000) * 1000;
-      let saldo = p;
-      for (let i = 1; i <= n; i++) {
-        const interes = Math.round((saldo * r) / 1000) * 1000;
-        let capital = cuotaMonto - interes;
-        if (i === n) capital = saldo;
-        saldo -= capital;
-        table.push({ numero: i, capital, interes, total: capital + interes, saldo: Math.max(0, saldo) });
-      }
-    } else if (formData.tipo_amortizacion === "flat") {
-      const totalInteresPlan = Math.round((p * tasaMensual * (n / multiplier)) / 1000) * 1000;
-      const interesCuotaBase = Math.round((totalInteresPlan / n) / 1000) * 1000;
-      const capitalCuotaBase = Math.round((p / n) / 1000) * 1000;
-      
-      let saldoCapital = p;
-      let saldoInteres = totalInteresPlan;
-
-      for (let i = 1; i <= n; i++) {
-        let currentCapital = capitalCuotaBase;
-        let currentInteres = interesCuotaBase;
-
-        if (i === n) {
-          currentCapital = saldoCapital;
-          currentInteres = saldoInteres;
-        } else {
-          currentCapital = Math.min(currentCapital, saldoCapital);
-          currentInteres = Math.min(currentInteres, saldoInteres);
-        }
-
-        saldoCapital -= currentCapital;
-        saldoInteres -= currentInteres;
-        table.push({ numero: i, capital: currentCapital, interes: currentInteres, total: currentCapital + currentInteres, saldo: Math.max(0, saldoCapital) });
-      }
-    } else {
-      // Al vencimiento
-      const interesTotal = Math.round((p * tasaMensual * (n / multiplier)) / 1000) * 1000;
-      table = [{ numero: 1, capital: p, interes: interesTotal, total: p + interesTotal, saldo: 0 }];
-    }
-    setPreviewTable(table);
-  };
 
   const [selectedFile, setSelectedFile] = useState(null);
 
@@ -357,78 +273,6 @@ export function PrestamoForm() {
                   />
                 </div>
               </div>
-              <div className={styles.inputGroup}>
-                <div className={styles.field}>
-                  <label className={styles.label}>
-                    {formData.frecuencia_pago === "diario" ? "Duración (Días)" : 
-                     formData.frecuencia_pago === "semanal" ? "Duración (Semanas)" :
-                     formData.frecuencia_pago === "quincenal" ? "Duración (Quincenas)" :
-                     "Duración (Meses)"} *
-                  </label>
-                  <input
-                    type="number"
-                    name="plazo_meses"
-                    value={formData.plazo_meses}
-                    onChange={handleChange}
-                    className={styles.input}
-                    required
-                  />
-                </div>
-                <div className={styles.field}>
-                  <label className={styles.label}>Frecuencia de Cobro</label>
-                  <select name="frecuencia_pago" value={formData.frecuencia_pago} onChange={handleChange} className={styles.select}>
-                    <option value="mensual">Mensual</option>
-                    <option value="quincenal">Quincenal</option>
-                    <option value="semanal">Semanal</option>
-                    <option value="diario">Diario</option>
-                  </select>
-                </div>
-              </div>
-              <div className={styles.field}>
-                <label className={styles.label}>Sistema de Amortización</label>
-                <select 
-                  name="tipo_amortizacion" 
-                  value={formData.tipo_amortizacion} 
-                  onChange={handleChange} 
-                  className={styles.select}
-                >
-                  <option value="frances">Francés (Cuota Fija)</option>
-                  <option value="flat">Flat (Interés Fijo)</option>
-                  <option value="final">Al Vencimiento (Un solo pago)</option>
-                </select>
-              </div>
-
-              <button type="button" onClick={handlePreviewTable} className={styles.btnPreview}>
-                <TrendingUp size={16} /> Previsualizar Tabla de Cuotas
-              </button>
-
-              {previewTable.length > 0 && (
-                <div className={styles.previewSection}>
-                  <h3 className={styles.previewTitle}>Desglose de Cuotas Proyectado</h3>
-                  <div className={styles.previewTableContainer}>
-                    <table className={styles.previewTable}>
-                      <thead>
-                        <tr>
-                          <th>N°</th>
-                          <th>Capital</th>
-                          <th>Interés</th>
-                          <th>Total</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {previewTable.map(c => (
-                          <tr key={c.numero}>
-                            <td>{c.numero}</td>
-                            <td>{formatCurrency(c.capital * 1000)}</td>
-                            <td>{formatCurrency(c.interes * 1000)}</td>
-                            <td style={{ fontWeight: 700 }}>{formatCurrency(c.total * 1000)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Sección: Fechas */}
@@ -441,10 +285,6 @@ export function PrestamoForm() {
                 <div className={styles.field}>
                   <label className={styles.label}>Fecha Desembolso *</label>
                   <input type="date" name="fecha_inicio" value={formData.fecha_inicio} onChange={handleChange} className={styles.input} required />
-                </div>
-                <div className={styles.field}>
-                  <label className={styles.label}>Fecha Vencimiento</label>
-                  <input type="date" value={formData.fecha_vencimiento} className={styles.inputReadOnly} readOnly />
                 </div>
               </div>
             </div>
@@ -459,23 +299,28 @@ export function PrestamoForm() {
                 <h2>Tesorería y Salida</h2>
               </div>
               <div className={styles.fundList}>
-                {salidas.map((s, index) => (
+                {salidas.map((s, index) => {
+                  const cuentaSeleccionada = cuentas.find(c => c.id === s.cuenta_id);
+                  return (
                   <div key={index} className={styles.fundItem}>
-                    <select
-                      className={styles.select}
-                      value={s.cuenta_id}
-                      onChange={(e) => {
-                        const newSalidas = [...salidas];
-                        newSalidas[index].cuenta_id = e.target.value;
-                        setSalidas(newSalidas);
-                      }}
-                      required
+                    <button
+                      type="button"
+                      className={styles.selectTrigger}
+                      onClick={() => { setActiveSalidaIndex(index); setCuentaSearch(""); setIsCuentaModalOpen(true); }}
                     >
-                      <option value="">Cuenta...</option>
-                      {cuentas.map(c => (
-                        <option key={c.id} value={c.id}>{c.nombre} (${formatCurrency(c.saldo_actual * 1000)})</option>
-                      ))}
-                    </select>
+                      {cuentaSeleccionada ? (
+                        <span className={styles.selectTriggerFilled}>
+                          <Landmark size={14} />
+                          <div className={styles.selectTriggerText}>
+                            <span className={styles.selectTriggerName}>{cuentaSeleccionada.nombre}</span>
+                            <span className={styles.selectTriggerRate}>({formatCurrency(cuentaSeleccionada.saldo_actual * 1000)})</span>
+                          </div>
+                        </span>
+                      ) : (
+                        <span className={styles.selectTriggerPlaceholder}>Cuenta...</span>
+                      )}
+                      <ChevronRight size={14} />
+                    </button>
                     <input
                       type="text"
                       value={s.monto}
@@ -492,7 +337,8 @@ export function PrestamoForm() {
                       <Trash2 size={16} />
                     </button>
                   </div>
-                ))}
+                  );
+                })}
               </div>
               <button 
                 type="button" 
@@ -604,6 +450,65 @@ export function PrestamoForm() {
           </div>
         </div>
       </form>
+
+      {/* Modal Seleccionar Cuenta */}
+      <Modal
+        isOpen={isCuentaModalOpen}
+        onClose={() => setIsCuentaModalOpen(false)}
+        title="Seleccionar Cuenta"
+        size="md"
+      >
+        <div className={styles.invModalContent}>
+          <div className={styles.invSearchWrapper}>
+            <Search size={16} className={styles.invSearchIcon} />
+            <input 
+              type="text" 
+              placeholder="Buscar por nombre..." 
+              value={cuentaSearch}
+              onChange={(e) => setCuentaSearch(e.target.value)}
+              className={styles.invSearchInput}
+              autoFocus
+            />
+          </div>
+          <div className={styles.invList}>
+            {cuentas.filter(c => c.nombre.toLowerCase().includes(cuentaSearch.toLowerCase())).map(c => (
+              <button 
+                key={c.id} 
+                type="button" 
+                className={styles.invItem}
+                onClick={() => {
+                  const newSalidas = [...salidas];
+                  newSalidas[activeSalidaIndex].cuenta_id = c.id;
+                  setSalidas(newSalidas);
+                  setIsCuentaModalOpen(false);
+                }}
+              >
+                <div className={styles.invItemAvatar} style={{ background: '#e0f2fe', color: '#0284c7' }}>
+                  <Landmark size={20} />
+                </div>
+                <div className={styles.invItemInfo}>
+                  <span className={styles.invItemName}>{c.nombre}</span>
+                  <div className={styles.invItemMeta}>
+                    <span className={styles.invItemAmount}>
+                      Saldo: {formatCurrency(c.saldo_actual * 1000)}
+                    </span>
+                    <span className={styles.invItemDot}>·</span>
+                    <span className={styles.invItemRate}>
+                      {c.tipo}
+                    </span>
+                  </div>
+                </div>
+              </button>
+            ))}
+            {cuentas.filter(c => c.nombre.toLowerCase().includes(cuentaSearch.toLowerCase())).length === 0 && (
+              <div className={styles.invEmpty}>
+                <Search size={32} />
+                <p>No se encontraron cuentas.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </Modal>
 
       {/* Modal de Éxito y Carga de Documentos */}
       <Modal

@@ -21,7 +21,7 @@ export function CuentasView() {
   const fetchCuentas = async () => {
     try {
       setLoading(true)
-      const { data } = await cuentasApi.getAll()
+      const { data } = await cuentasApi.getAll({ incluir_billeteras: true })
       setCuentas(data.data || [])
     } catch (error) {
       toast.error('Error al cargar cuentas')
