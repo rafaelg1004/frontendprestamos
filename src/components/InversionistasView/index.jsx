@@ -60,8 +60,46 @@ export function InversionistasView() {
           <p className={styles.emptyState}>No hay inversionistas registrados</p>
         ) : (
           <div>
-            <p>Total: {inversionistas.length} inversionistas</p>
-            {/* Aquí va la tabla de inversionistas */}
+            <p style={{ marginBottom: "1rem" }}>Total: {inversionistas.length} inversionistas</p>
+            <div className={styles.tableContainer}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Teléfono</th>
+                    <th>Saldo en Billetera (Intereses Generados)</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {inversionistas.map(inv => (
+                    <tr key={inv.id}>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <div className={styles.avatar}>
+                            {inv.nombre_completo.charAt(0).toUpperCase()}
+                          </div>
+                          <span style={{ fontWeight: 500 }}>{inv.nombre_completo}</span>
+                        </div>
+                      </td>
+                      <td>{inv.email || "-"}</td>
+                      <td>{inv.telefono || "-"}</td>
+                      <td>
+                        <span style={{ color: "#16a34a", fontWeight: "bold" }}>
+                          $ {Number(inv.billetera_saldo || 0).toLocaleString("es-CO")}
+                        </span>
+                      </td>
+                      <td>
+                        <Link href={`/inversionistas/${inv.id}`} className={styles.btnAction}>
+                          Ver Detalles
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>

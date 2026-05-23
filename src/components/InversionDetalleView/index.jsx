@@ -207,7 +207,7 @@ export function InversionDetalleView({ id }) {
                     }}
                   />
                   <p style={{ fontSize: '0.7rem', color: '#6b7280', marginTop: '4px' }}>
-                    Sugerido: {formatCurrency(inversion.calculos?.interes_sugerido || 0)}
+                    Disponible en Billetera: {formatCurrency(inversion.calculos?.interes_sugerido || 0)}
                   </p>
                 </div>
                 <div className={styles.formGroup}>

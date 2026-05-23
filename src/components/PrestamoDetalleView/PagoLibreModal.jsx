@@ -120,23 +120,9 @@ export function PagoLibreModal({
             <select
               value={pagoLibreData.cuenta_id}
               onChange={(e) => setPagoLibreData({ ...pagoLibreData, cuenta_id: e.target.value })}
-              required
+              required={parseFloat(pagoLibreData.monto_capital) > 0}
             >
               <option value="">Selecciona cuenta para capital...</option>
-              {cuentas.map((c) => (
-                <option key={c.id} value={c.id}>{c.nombre} (Saldo: {formatCurrency(c.saldo_actual)})</option>
-              ))}
-            </select>
-          </div>
-          
-          <div className={styles.formGroup} style={{ marginBottom: "1rem" }}>
-            <label>Cuenta Destino Intereses *</label>
-            <select
-              value={pagoLibreData.cuenta_intereses_id}
-              onChange={(e) => setPagoLibreData({ ...pagoLibreData, cuenta_intereses_id: e.target.value })}
-              required
-            >
-              <option value="">Selecciona cuenta para intereses...</option>
               {cuentas.map((c) => (
                 <option key={c.id} value={c.id}>{c.nombre} (Saldo: {formatCurrency(c.saldo_actual)})</option>
               ))}
@@ -181,7 +167,7 @@ export function PagoLibreModal({
           <div className={styles.distribucionContainer}>
             <label className={styles.distribucionTitle}>Distribución de Abono a Intereses</label>
             <div className={styles.distribucionHelpText}>
-              <span>El sistema calculó el interés por inversionista según su tasa pactada. Lo que sobre es tu ganancia.</span>
+              <span>El sistema calculó el interés por inversionista según su tasa pactada. Lo que sobre irá a la billetera de la inversionista principal (Yesika).</span>
             </div>
             {distribucionIntereses.map((dist, index) => (
               <div key={dist.inversion_id} className={styles.distribucionRow}>
@@ -212,7 +198,7 @@ export function PagoLibreModal({
               
               return (
                 <div className={styles.distribucionSummary} style={{ marginTop: "0.5rem", color: "#16a34a" }}>
-                  <span>Tu Ganancia (Admin): {formatCurrency(gananciaAdmin * 1000)}</span>
+                  <span>Ganancia para Billetera Principal (Yesika): {formatCurrency(gananciaAdmin * 1000)}</span>
                 </div>
               );
             })()}
