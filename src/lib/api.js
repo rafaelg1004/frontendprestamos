@@ -91,7 +91,7 @@ export const prestamosApi = {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
   eliminarDocumento: (docId) => api.delete(`/prestamos/documentos/${docId}`),
-  pagarCuota: (id, data) => api.post(`/prestamos/cuotas/${id}/pagar`, data),
+  registrarPagoLibre: (id, data) => api.post(`/prestamos/${id}/pagos`, data),
 };
 
 // Inversiones

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { prestamosApi, perfilesApi } from "@/lib/api";
+import { prestamosApi, perfilesApi, cuentasApi } from "@/lib/api";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import {
   ArrowLeft,
@@ -18,110 +18,34 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import { usePrestamoDetalle } from "@/hooks/prestamos/usePrestamoDetalle";
+import { PagoLibreModal } from "./PagoLibreModal";
 import styles from "./PrestamoDetalleView.module.css";
 
 export function PrestamoDetalleView({ id, isModal = false }) {
-  const [prestamo, setPrestamo] = useState(null);
-  const [cliente, setCliente] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [documentos, setDocumentos] = useState([]);
-  const [uploading, setUploading] = useState(false);
+  const {
+    prestamo,
+    cliente,
+    loading,
+    documentos,
+    uploading,
+    cuentas,
+    showPagoLibreModal,
+    setShowPagoLibreModal,
+    pagoLibreData,
+    setPagoLibreData,
+    distribucionCapital,
+    setDistribucionCapital,
+    distribucionIntereses,
+    setDistribucionIntereses,
+    handleOpenPagoModal,
+    handlePagarLibreSubmit,
+    handleFileUpload,
+    handleDeleteDocumento
+  } = usePrestamoDetalle(id);
 
-  useEffect(() => {
-    if (!id) return;
 
-    const fetchData = async () => {
-      try {
-        const prestamoRes = await prestamosApi.getById(id);
-        const prestamoData = prestamoRes.data?.data;
-        setPrestamo(prestamoData);
 
-        // El cliente viene incluido en la respuesta del backend
-        if (prestamoData?.cliente) {
-          setCliente(prestamoData.cliente);
-        } else if (prestamoData?.cliente_id) {
-          // Fallback: hacer fetch si no viene incluido
-          const clienteRes = await perfilesApi.getById(prestamoData.cliente_id);
-          setCliente(clienteRes.data?.data);
-        }
-      } catch (error) {
-        console.error("Error fetching prestamo:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const fetchDocumentos = async () => {
-      try {
-        const res = await prestamosApi.getDocumentos(id);
-        setDocumentos(res.data?.data || []);
-      } catch (error) {
-        console.error("Error fetching documentos:", error);
-      }
-    };
-
-    fetchData();
-    fetchDocumentos();
-  }, [id]);
-
-  const handlePagarCuota = async (cuotaId, numero) => {
-    const confirmacion = confirm(`¿Estás seguro de registrar el pago de la cuota #${numero}? El dinero entrará a tu cuenta predeterminada.`);
-    if (!confirmacion) return;
-
-    try {
-      // Por simplicidad, usamos la primera cuenta del préstamo o una predeterminada
-      const cuenta_id = prestamo.cuenta_id; 
-      await prestamosApi.pagarCuota(cuotaId, { 
-        cuenta_id, 
-        metodo_pago: 'efectivo', 
-        notas: `Pago rápido de cuota #${numero}` 
-      });
-      toast.success(`Cuota #${numero} pagada exitosamente`);
-      
-      // Recargar datos
-      const prestamoRes = await prestamosApi.getById(id);
-      setPrestamo(prestamoRes.data?.data);
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Error al pagar la cuota");
-    }
-  };
-
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("archivo", file);
-    formData.append("tipo_documento", "otro"); // Podría pedirse en un prompt si se desea
-
-    try {
-      setUploading(true);
-      await prestamosApi.subirDocumento(id, formData);
-      toast.success("Documento subido correctamente");
-      // Recargar documentos
-      const res = await prestamosApi.getDocumentos(id);
-      setDocumentos(res.data?.data || []);
-    } catch (error) {
-      toast.error("Error al subir el documento");
-      console.error(error);
-    } finally {
-      setUploading(false);
-      // Reset input
-      e.target.value = null;
-    }
-  };
-
-  const handleDeleteDocumento = async (docId) => {
-    if (!confirm("¿Estás seguro de eliminar este documento?")) return;
-
-    try {
-      await prestamosApi.eliminarDocumento(docId);
-      toast.success("Documento eliminado");
-      setDocumentos(documentos.filter(d => d.id !== docId));
-    } catch (error) {
-      toast.error("Error al eliminar el documento");
-    }
-  };
 
   if (loading) {
     return (
@@ -176,12 +100,12 @@ export function PrestamoDetalleView({ id, isModal = false }) {
             </Link>
             {prestamo.estado === "activo" && (
               <>
-                <Link
-                  href={`/prestamos/${prestamo.id}/pago`}
+                <button
+                  onClick={() => handleOpenPagoModal()}
                   className={styles.btnPrimary}
                 >
                   Registrar Pago
-                </Link>
+                </button>
                 <Link
                   href={`/prestamos/${prestamo.id}/liquidacion`}
                   className={styles.btnSecondary}
@@ -199,12 +123,12 @@ export function PrestamoDetalleView({ id, isModal = false }) {
         <div className={styles.modalActions}>
            {prestamo.estado === "activo" && (
             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
-              <Link
-                href={`/prestamos/${prestamo.id}/pago`}
+              <button
+                onClick={() => handleOpenPagoModal()}
                 className={styles.btnPrimary}
               >
                 Registrar Pago
-              </Link>
+              </button>
               <Link
                 href={`/prestamos/${prestamo.id}/liquidacion`}
                 className={styles.btnSecondary}
@@ -224,33 +148,12 @@ export function PrestamoDetalleView({ id, isModal = false }) {
 
         {cliente ? (
           <div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.75rem",
-                marginBottom: "0.75rem",
-              }}
-            >
-              <div
-                style={{
-                  width: "2.5rem",
-                  height: "2.5rem",
-                  borderRadius: "50%",
-                  background:
-                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "1rem",
-                  fontWeight: 600,
-                  color: "white",
-                }}
-              >
+            <div className={styles.clientHeader}>
+              <div className={styles.clientAvatar}>
                 {cliente.nombre_completo?.charAt(0).toUpperCase()}
               </div>
               <div>
-                <p style={{ margin: 0, fontWeight: 600, fontSize: "1rem" }}>
+                <p className={styles.clientName}>
                   {cliente.nombre_completo}
                 </p>
                 <Link
@@ -283,23 +186,11 @@ export function PrestamoDetalleView({ id, isModal = false }) {
         )}
 
         {prestamo.observaciones && (
-          <div
-            style={{
-              marginTop: "1.5rem",
-              paddingTop: "1rem",
-              borderTop: "1px solid #e5e7eb",
-            }}
-          >
-            <h3
-              style={{
-                margin: "0 0 0.5rem 0",
-                fontSize: "0.875rem",
-                fontWeight: 600,
-              }}
-            >
+          <div className={styles.observacionesSection}>
+            <h3 className={styles.observacionesTitle}>
               Observaciones
             </h3>
-            <p style={{ margin: 0, fontSize: "0.875rem", color: "#4b5563" }}>
+            <p className={styles.observacionesText}>
               {prestamo.observaciones}
             </p>
           </div>
@@ -317,19 +208,17 @@ export function PrestamoDetalleView({ id, isModal = false }) {
         <div className={styles.infoBarSeparator}></div>
 
         <div className={styles.infoBarItem}>
-          <span className={styles.infoBarLabel}>Cuota</span>
+          <span className={styles.infoBarLabel}>Interés Total</span>
           <span className={styles.infoBarValue}>
-            {formatCurrency(prestamo.calculos?.cuota_mensual)}
+            {formatCurrency(prestamo.calculos?.interes_total_deuda)}
           </span>
         </div>
         <div className={styles.infoBarSeparator}></div>
 
         <div className={styles.infoBarItem}>
-          <span className={styles.infoBarLabel}>Saldo</span>
+          <span className={styles.infoBarLabel}>Capital Actual</span>
           <span className={styles.infoBarValue}>
-            {formatCurrency(
-              prestamo.calculos?.saldo_pendiente ?? prestamo.monto_principal,
-            )}
+            {formatCurrency(prestamo.calculos?.capital_pendiente)}
           </span>
         </div>
         <div className={styles.infoBarSeparator}></div>
@@ -446,98 +335,19 @@ export function PrestamoDetalleView({ id, isModal = false }) {
           </div>
         )}
 
-        {/* Tabla de Cuotas */}
-        {prestamo.cuotas && prestamo.cuotas.length > 0 && (
-          <div
-            className={styles.amortizationTable}
-            style={{ marginTop: "1.5rem" }}
-          >
-            <h3
-              style={{
-                margin: "0 0 1rem 0",
-                fontSize: "0.875rem",
-                fontWeight: 600,
-              }}
-            >
-              Plan de Pagos (Cuotas)
-            </h3>
-            <div className={styles.tableContainer}>
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Vencimiento</th>
-                    <th>Capital</th>
-                    <th>Interés</th>
-                    <th>Total</th>
-                    <th>Estado</th>
-                    <th>Pagado</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {prestamo.cuotas
-                    .sort((a, b) => a.numero_cuota - b.numero_cuota)
-                    .map((cuota) => (
-                      <tr key={cuota.id} className={styles[cuota.estado]}>
-                        <td>{cuota.numero_cuota}</td>
-                        <td>
-                          {new Date(cuota.fecha_vencimiento).toLocaleDateString(
-                            "es-ES",
-                          )}
-                        </td>
-                        <td>{formatCurrency(cuota.capital)}</td>
-                        <td>{formatCurrency(cuota.interes)}</td>
-                        <td>{formatCurrency(cuota.total_cuota)}</td>
-                        <td>
-                          <span
-                            className={`${styles.estadoBadge} ${styles[cuota.estado]}`}
-                          >
-                            {cuota.estado === "pendiente" && "⏳ Pendiente"}
-                            {cuota.estado === "pagado" && "✅ Pagado"}
-                            {cuota.estado === "parcial" && "⚡ Parcial"}
-                          </span>
-                        </td>
-                        <td>
-                          {cuota.monto_pagado > 0
-                            ? formatCurrency(cuota.monto_pagado)
-                            : "-"}
-                        </td>
-                        <td>
-                          {cuota.estado === 'pendiente' && (
-                            <button 
-                              onClick={() => handlePagarCuota(cuota.id, cuota.numero_cuota)}
-                              className={styles.btnPaySmall}
-                            >
-                              Pagar
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
         {/* Resumen de saldo */}
-        <div className={styles.saldoResumen}>
+        <div className={styles.saldoResumen} style={{ marginTop: "1.5rem" }}>
           <div className={styles.saldoRow}>
-            <span>Total Prestado:</span>
+            <span>Total Prestado (Inicial):</span>
             <span>{formatCurrency(prestamo.monto_principal)}</span>
           </div>
           <div className={styles.saldoRow}>
-            <span>Capital Pagado:</span>
-            <span style={{ color: "#16a34a" }}>
-              {formatCurrency(prestamo.calculos?.capital_pagado || 0)}
-            </span>
+            <span>Días desde último corte:</span>
+            <span>{prestamo.calculos?.dias_transcurridos || 0} días</span>
           </div>
           <div className={styles.saldoRow}>
-            <span>Interés Pagado:</span>
-            <span style={{ color: "#16a34a" }}>
-              {formatCurrency(prestamo.calculos?.interes_pagado || 0)}
-            </span>
+            <span>Interés generado en el periodo:</span>
+            <span>{formatCurrency(prestamo.calculos?.interes_generado_periodo || 0)}</span>
           </div>
           <div
             className={styles.saldoRow}
@@ -548,17 +358,10 @@ export function PrestamoDetalleView({ id, isModal = false }) {
               fontWeight: 600,
             }}
           >
-            <span>Saldo Capital Pendiente:</span>
-            <span
-              style={{
-                color:
-                  (prestamo.calculos?.saldo_pendiente || 0) > 0
-                    ? "#dc2626"
-                    : "#16a34a",
-              }}
-            >
+            <span>Deuda Total (Capital + Intereses):</span>
+            <span style={{ color: "#dc2626" }}>
               {formatCurrency(
-                prestamo.calculos?.saldo_pendiente ?? prestamo.monto_principal,
+                (prestamo.calculos?.capital_pendiente || 0) + (prestamo.calculos?.interes_total_deuda || 0)
               )}
             </span>
           </div>
@@ -625,6 +428,22 @@ export function PrestamoDetalleView({ id, isModal = false }) {
           )}
         </div>
       </div>
+
+      {/* Modal para Pagar Libre */}
+      <PagoLibreModal
+        isOpen={showPagoLibreModal}
+        onClose={() => setShowPagoLibreModal(false)}
+        prestamo={prestamo}
+        pagoLibreData={pagoLibreData}
+        setPagoLibreData={setPagoLibreData}
+        distribucionCapital={distribucionCapital}
+        setDistribucionCapital={setDistribucionCapital}
+        distribucionIntereses={distribucionIntereses}
+        setDistribucionIntereses={setDistribucionIntereses}
+        cuentas={cuentas}
+        uploading={uploading}
+        onSubmit={handlePagarLibreSubmit}
+      />
     </div>
   );
 }
