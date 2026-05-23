@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { perfilesApi, prestamosApi } from '@/lib/api'
 import { formatCurrency, formatDate, calcularDiasMora, getEstadoBadge } from '@/lib/utils'
-import { Plus, Search, AlertTriangle, Eye, Filter, Calendar, TrendingUp, Users, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react'
+import { Plus, Search, AlertTriangle, Eye, Filter, Calendar, TrendingUp, Users, ChevronDown, ChevronUp, RefreshCw, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { Modal } from '../Modal'
 import { PrestamoDetalleView } from '../PrestamoDetalleView'
@@ -70,6 +70,19 @@ export function PrestamosView() {
   const openDetalle = (id) => {
     setSelectedPrestamoId(id)
     setIsModalOpen(true)
+  }
+
+  const handleDelete = async (id) => {
+    if (window.confirm("¿Estás seguro de que deseas eliminar este préstamo y todos sus registros (cuotas, movimientos)? Esta acción no se puede deshacer.")) {
+      try {
+        await prestamosApi.delete(id)
+        setPrestamos(prestamos.filter(p => p.id !== id))
+        alert("Préstamo eliminado exitosamente.")
+      } catch (error) {
+        console.error('Error eliminando préstamo:', error)
+        alert("Error al eliminar el préstamo.")
+      }
+    }
   }
 
   const prestamosEnMora = filteredPrestamos.filter(p => {
@@ -289,13 +302,21 @@ export function PrestamosView() {
                             {badge.label}
                           </span>
                         </td>
-                        <td className={styles.actionsCell}>
+                        <td className={styles.actionsCell} style={{ display: 'flex', gap: '0.5rem' }}>
                           <button 
                             onClick={() => openDetalle(prestamo.id)} 
                             className={styles.btnView}
                           >
                             <Eye size={16} />
                             Detalle
+                          </button>
+                          <button 
+                            onClick={() => handleDelete(prestamo.id)} 
+                            className={styles.btnView}
+                            style={{ color: '#dc2626', borderColor: '#fecaca', background: '#fef2f2' }}
+                          >
+                            <Trash2 size={16} />
+                            Eliminar
                           </button>
                         </td>
                       </tr>
