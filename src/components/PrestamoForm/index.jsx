@@ -124,7 +124,7 @@ export function PrestamoForm() {
         tasa_interes_mensual: parseFloat(formData.tasa_interes_mensual),
         tasa_mora_diaria: 0.5,
         fecha_inicio: formData.fecha_inicio,
-        fecha_vencimiento: formData.fecha_vencimiento,
+        fecha_vencimiento: formData.fecha_vencimiento || null,
         fondos: fondos.map(f => ({ 
           inversion_id: f.inversion_id, 
           monto: parseNumber(f.monto) * 1000
