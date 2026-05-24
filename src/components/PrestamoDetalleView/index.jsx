@@ -99,20 +99,12 @@ export function PrestamoDetalleView({ id, isModal = false }) {
               Volver
             </Link>
             {prestamo.estado === "activo" && (
-              <>
-                <button
-                  onClick={() => handleOpenPagoModal()}
-                  className={styles.btnPrimary}
-                >
-                  Registrar Pago
-                </button>
-                <Link
-                  href={`/prestamos/${prestamo.id}/liquidacion`}
-                  className={styles.btnSecondary}
-                >
-                  💰 Liquidar Préstamo
-                </Link>
-              </>
+              <button
+                onClick={() => handleOpenPagoModal()}
+                className={styles.btnPrimary}
+              >
+                Registrar Pago
+              </button>
             )}
           </div>
         </div>
@@ -129,12 +121,6 @@ export function PrestamoDetalleView({ id, isModal = false }) {
               >
                 Registrar Pago
               </button>
-              <Link
-                href={`/prestamos/${prestamo.id}/liquidacion`}
-                className={styles.btnSecondary}
-              >
-                💰 Liquidar
-              </Link>
             </div>
           )}
         </div>
@@ -185,13 +171,13 @@ export function PrestamoDetalleView({ id, isModal = false }) {
           </p>
         )}
 
-        {prestamo.observaciones && (
+        {prestamo.notas && (
           <div className={styles.observacionesSection}>
             <h3 className={styles.observacionesTitle}>
               Observaciones
             </h3>
-            <p className={styles.observacionesText}>
-              {prestamo.observaciones}
+            <p className={styles.observacionesText} style={{ whiteSpace: 'pre-wrap' }}>
+              {prestamo.notas}
             </p>
           </div>
         )}
@@ -231,17 +217,7 @@ export function PrestamoDetalleView({ id, isModal = false }) {
         </div>
         <div className={styles.infoBarSeparator}></div>
 
-        <div className={styles.infoBarItem}>
-          <span className={styles.infoBarLabel}>Plazo</span>
-          <span className={styles.infoBarValue}>
-            {prestamo.plazo_meses
-              ? `${prestamo.plazo_meses} meses`
-              : prestamo.fecha_inicio && prestamo.fecha_vencimiento
-                ? `${Math.ceil((new Date(prestamo.fecha_vencimiento) - new Date(prestamo.fecha_inicio)) / (1000 * 60 * 60 * 24 * 30))} meses`
-                : "N/A"}
-          </span>
-        </div>
-        <div className={styles.infoBarSeparator}></div>
+
 
         <div className={styles.infoBarItem}>
           <span className={styles.infoBarLabel}>Inicio</span>
@@ -252,9 +228,15 @@ export function PrestamoDetalleView({ id, isModal = false }) {
         <div className={styles.infoBarSeparator}></div>
 
         <div className={styles.infoBarItem}>
-          <span className={styles.infoBarLabel}>Vence</span>
+          <span className={styles.infoBarLabel}>Próximo Corte</span>
           <span className={styles.infoBarValue}>
-            {formatDate(prestamo.fecha_vencimiento)}
+            {prestamo.fecha_ultimo_corte || prestamo.fecha_inicio ? formatDate(
+              new Date(
+                new Date(prestamo.fecha_ultimo_corte || prestamo.fecha_inicio).getFullYear(),
+                new Date(prestamo.fecha_ultimo_corte || prestamo.fecha_inicio).getMonth() + 1,
+                new Date(prestamo.fecha_ultimo_corte || prestamo.fecha_inicio).getDate()
+              ).toISOString()
+            ) : "N/A"}
           </span>
         </div>
       </div>

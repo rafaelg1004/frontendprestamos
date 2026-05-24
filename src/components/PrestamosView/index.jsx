@@ -85,6 +85,12 @@ export function PrestamosView() {
     }
   }
 
+  const getProximoCorte = (p) => {
+    if (!p) return null;
+    const d = new Date(p.fecha_ultimo_corte || p.fecha_inicio);
+    return new Date(d.getFullYear(), d.getMonth() + 1, d.getDate()).toISOString();
+  };
+
   const prestamosEnMora = filteredPrestamos.filter(p => {
     const diasMora = calcularDiasMora(p.fecha_vencimiento)
     return diasMora > 0 && p.estado === 'activo'
@@ -246,7 +252,7 @@ export function PrestamosView() {
                 <tr>
                   <th>Cliente</th>
                   <th>Monto</th>
-                  <th>Vencimiento</th>
+                  <th>Próximo Corte</th>
                   <th>Estado</th>
                   <th style={{ textAlign: 'right' }}>Acciones</th>
                 </tr>
@@ -288,7 +294,7 @@ export function PrestamosView() {
                         </td>
                         <td>
                           <div className={styles.vencimientoCell}>
-                            {formatDate(prestamo.fecha_vencimiento)}
+                            {formatDate(getProximoCorte(prestamo))}
                             {isMora && (
                               <span className={styles.moraBadge}>
                                 <AlertTriangle size={12} />
@@ -359,8 +365,8 @@ export function PrestamosView() {
                         <span>{prestamo.tasa_interes_mensual}%</span>
                       </div>
                       <div className={styles.mobileDetailItem}>
-                        <span className={styles.mobileSubLabel}>Vence</span>
-                        <span>{formatDate(prestamo.fecha_vencimiento)}</span>
+                        <span className={styles.mobileSubLabel}>Próximo Corte</span>
+                        <span>{formatDate(getProximoCorte(prestamo))}</span>
                       </div>
                     </div>
                   </div>

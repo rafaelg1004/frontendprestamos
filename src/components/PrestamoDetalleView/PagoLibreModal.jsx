@@ -167,7 +167,7 @@ export function PagoLibreModal({
           <div className={styles.distribucionContainer}>
             <label className={styles.distribucionTitle}>Distribución de Abono a Intereses</label>
             <div className={styles.distribucionHelpText}>
-              <span>El sistema calculó el interés por inversionista según su tasa pactada. Lo que sobre irá a la billetera de la inversionista principal (Yesika).</span>
+              <span>El sistema calculó el interés por inversionista según su tasa pactada. Lo que sobre (el margen de ganancia) irá a la Billetera del Administrador.</span>
             </div>
             {distribucionIntereses.map((dist, index) => (
               <div key={dist.inversion_id} className={styles.distribucionRow}>
@@ -198,7 +198,7 @@ export function PagoLibreModal({
               
               return (
                 <div className={styles.distribucionSummary} style={{ marginTop: "0.5rem", color: "#16a34a" }}>
-                  <span>Ganancia para Billetera Principal (Yesika): {formatCurrency(gananciaAdmin * 1000)}</span>
+                  <span>Ganancia para Billetera del Administrador: {formatCurrency(gananciaAdmin * 1000)}</span>
                 </div>
               );
             })()}
