@@ -151,7 +151,7 @@ export function PrestamoForm() {
       }
     } catch (err) {
       const message =
-        err.response?.data?.message || "Error al crear el préstamo";
+        err.response?.data?.error || err.response?.data?.message || err.response?.data?.details || "Error al crear el préstamo";
       setError(message);
       toast.error(message);
     } finally {
