@@ -109,6 +109,10 @@ export function PrestamoForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.perfil_id) {
+      toast.error("Por favor selecciona un beneficiario (cliente)");
+      return;
+    }
     if (!isRepartoCorrecto()) {
       toast.error("El reparto de capital y la salida de fondos deben coincidir con el monto principal");
       return;
