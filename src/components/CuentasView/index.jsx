@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { cuentasApi } from '@/lib/api'
 import { formatCurrency } from '@/lib/utils'
-import { Wallet, Plus, Trash2, Landmark, CreditCard, Banknote, RefreshCw, AlertCircle } from 'lucide-react'
+import { Wallet, Plus, Trash2, Landmark, CreditCard, Banknote, RefreshCw, AlertCircle, Eye } from 'lucide-react'
+import Link from 'next/link'
 import toast from 'react-hot-toast'
 import styles from './CuentasView.module.css'
 
@@ -102,6 +103,14 @@ export function CuentasView() {
                 {getAccountIcon(cuenta.tipo)}
               </div>
               <div className={styles.cardActions}>
+                <Link
+                  href={`/cuentas/${cuenta.id}`}
+                  className={styles.btnView}
+                  title="Ver movimientos"
+                  style={{ color: '#4f46e5', background: '#e0e7ff', padding: '0.5rem', borderRadius: '0.375rem', display: 'flex', alignItems: 'center' }}
+                >
+                  <Eye size={18} />
+                </Link>
                 <button 
                   onClick={() => handleSync(cuenta.id)}
                   className={`${styles.btnSync} ${syncingId === cuenta.id ? styles.spinning : ''}`}

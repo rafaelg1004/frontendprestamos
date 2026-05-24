@@ -18,7 +18,7 @@ export function MovimientosView() {
   useEffect(() => {
     const fetchMovimientos = async () => {
       try {
-        const { data } = await movimientosApi.getAll();
+        const { data } = await movimientosApi.getAll({ limit: 1000 });
         setMovimientos(data.data || []);
       } catch (error) {
         console.error("Error fetching movimientos:", error);

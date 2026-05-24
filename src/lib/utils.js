@@ -92,7 +92,8 @@ export function getTipoMovimientoLabel(tipo) {
     entrega_prestamo: 'Entrega de Préstamo',
     pago_cliente: 'Pago de Cliente',
     recibo_inversion: 'Recibo de Inversión',
-    devolucion_inversion: 'Devolución de Inversión'
+    devolucion_inversion: 'Devolución de Inversión',
+    ganancia_interes: 'Ganancia de Interés'
   }
   
   return tipos[tipo] || tipo

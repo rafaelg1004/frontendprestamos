@@ -101,7 +101,7 @@ export function InversionesView() {
                         {inv.estado}
                       </span>
                     </div>
-                    <p className={styles.userMeta}>Inversión #{inv.id.slice(0, 8)} · {formatDate(inv.fecha_inversion)}</p>
+                    <p className={styles.userMeta}>Inversión #{inv.id.slice(0, 8)} · Creada: {formatDate(inv.fecha_inversion)}</p>
                   </div>
                 </div>
                 
@@ -140,7 +140,7 @@ export function InversionesView() {
                       </span>
                     ) : (
                       <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Calendar size={14} /> {formatDate(inv.calculos?.proxima_fecha_pago)}
+                        <Calendar size={14} /> Corte: {formatDate(inv.calculos?.proxima_fecha_pago)}
                       </span>
                     )}
                   </div>

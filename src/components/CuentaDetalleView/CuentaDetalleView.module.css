@@ -1,0 +1,425 @@
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.titleSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.btnBack {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6b7280;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: color 0.2s;
+  width: fit-content;
+}
+
+.btnBack:hover {
+  color: #1f2937;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+/* Card Info */
+.cardInfo {
+  background: white;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.iconWrapper {
+  width: 3rem;
+  height: 3rem;
+  background: #f3f4f6;
+  color: #4f46e5;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.accountName {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.accountType {
+  font-size: 0.875rem;
+  color: #6b7280;
+  text-transform: capitalize;
+  background: #f3f4f6;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+.balanceSection {
+  text-align: right;
+  min-width: 200px;
+}
+
+.balanceLabel {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.balanceRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.balanceValue {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.balanceValue.negative {
+  color: #ef4444;
+}
+
+.btnSync {
+  background: #f3f4f6;
+  border: none;
+  color: #4b5563;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnSync:hover:not(:disabled) {
+  background: #e5e7eb;
+  color: #1f2937;
+}
+
+.btnSync:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Rendimientos Section */
+.cardRendimientos {
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  margin-bottom: 2rem;
+  overflow: hidden;
+}
+
+.cardRendimientos .cardTitle h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.rendimientosGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.rendimientoCard {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.rendTitle {
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.rendMonto, .rendGanancia {
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.rendLabel {
+  color: #64748b;
+}
+
+/* Card Table */
+.card {
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.cardTitle {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.cardTitle h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.desktopView {
+  display: block;
+  overflow-x: auto;
+}
+
+.mobileView {
+  display: none;
+  padding: 1rem;
+  gap: 1rem;
+  flex-direction: column;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table th {
+  padding: 1rem 1.5rem;
+  background: #f9fafb;
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.table td {
+  padding: 1rem 1.5rem;
+  font-size: 0.875rem;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: middle;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover td {
+  background: #f9fafb;
+}
+
+.typeCell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  background: #f3f4f6;
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+
+.amount {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.amountPositive {
+  color: #16a34a;
+}
+
+.amountNegative {
+  color: #dc2626;
+}
+
+.refCell {
+  color: #6b7280;
+}
+
+.emptyState {
+  padding: 4rem 2rem;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* Mobile Cards */
+.mobileCard {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.cardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.cardTypeInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.iconCircle {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconIn {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.iconOut {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.typeLabel {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #111827;
+  margin-bottom: 0.125rem;
+}
+
+.dateLabel {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.cardAmount {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cardRef {
+  font-size: 0.8125rem;
+  color: #4b5563;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mobileNotes {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #6b7280;
+  font-style: italic;
+  background: #f9fafb;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.loadingSkeleton {
+  background: #f3f4f6;
+  border-radius: 0.5rem;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .5; }
+}
+
+@media (max-width: 768px) {
+  .desktopView {
+    display: none;
+  }
+  
+  .mobileView {
+    display: flex;
+  }
+
+  .cardInfo {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .balanceSection {
+    text-align: left;
+    width: 100%;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 1rem;
+  }
+
+  .balanceRow {
+    justify-content: flex-start;
+  }
+}
