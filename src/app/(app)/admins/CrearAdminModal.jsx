@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 
 const AVAILABLE_PERMISSIONS = [
   { id: 'ver_reportes', label: 'Ver Reportes / Dashboard' },
+  { id: 'ver_personas', label: 'Ver Personas' },
   { id: 'ver_prestamos', label: 'Ver Préstamos' },
   { id: 'crear_prestamos', label: 'Crear Préstamos' },
   { id: 'registrar_pagos', label: 'Registrar Pagos' },

@@ -25,7 +25,7 @@ import styles from "./Sidebar.module.css";
 
 const menuItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", requirePermiso: "ver_reportes" },
-  { href: "/personas", icon: Users, label: "Personas", requirePermiso: ["ver_prestamos", "ver_inversiones", "gestionar_usuarios"] },
+  { href: "/personas", icon: Users, label: "Personas", requirePermiso: "ver_personas" },
   { href: "/prestamos", icon: Banknote, label: "Préstamos", requirePermiso: "ver_prestamos" },
   { href: "/reportes", icon: BarChart3, label: "Reportes", requirePermiso: "ver_reportes" },
   { href: "/simulador", icon: Calculator, label: "Simulador" },
