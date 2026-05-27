@@ -47,6 +47,7 @@ import {
   ArrowRightLeft
 } from "lucide-react";
 import Link from "next/link";
+import { DashboardPaymentModal } from "./DashboardPaymentModal";
 import styles from "./DashboardView.module.css";
 
 export function DashboardView() {
@@ -56,6 +57,7 @@ export function DashboardView() {
   const [investorAlerts, setInvestorAlerts] = useState([]);
   const [chartData, setChartData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [paymentModal, setPaymentModal] = useState({ isOpen: false, prestamoId: null });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -406,6 +408,14 @@ export function DashboardView() {
                     <td>
                       <div className={styles.actionBtns}>
                         <button 
+                          className={styles.actionBtn}
+                          style={{ backgroundColor: '#eff6ff', color: '#3b82f6', border: '1px solid #bfdbfe' }}
+                          onClick={() => setPaymentModal({ isOpen: true, prestamoId: alert.id })}
+                          title="Cobrar Ahora"
+                        >
+                          <DollarSign size={16} />
+                        </button>
+                        <button 
                           className={`${styles.actionBtn} ${styles.whatsappBtn}`}
                           onClick={() => {
                             const tel = alert.cliente.telefono?.replace(/\D/g, '');
@@ -600,6 +610,16 @@ export function DashboardView() {
           </div>
         </div>
       </div>
+
+      <DashboardPaymentModal 
+        prestamoId={paymentModal.prestamoId} 
+        isOpen={paymentModal.isOpen} 
+        onClose={() => {
+          setPaymentModal({ isOpen: false, prestamoId: null });
+          // Opcional: recargar el dashboard si se hizo un pago
+          // window.location.reload(); 
+        }} 
+      />
     </div>
   );
 }

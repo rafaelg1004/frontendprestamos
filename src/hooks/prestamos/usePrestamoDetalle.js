@@ -33,10 +33,9 @@ export function usePrestamoDetalle(id) {
         const prestamoData = prestamoRes.data?.data;
         setPrestamo(prestamoData);
 
-        if (prestamoData?.cliente) {
-          setCliente(prestamoData.cliente);
-        } else if (prestamoData?.cliente_id) {
-          const clienteRes = await perfilesApi.getById(prestamoData.cliente_id);
+        const clientId = prestamoData?.cliente_id || prestamoData?.cliente?.id;
+        if (clientId) {
+          const clienteRes = await perfilesApi.getById(clientId);
           setCliente(clienteRes.data?.data);
         }
       } catch (error) {
