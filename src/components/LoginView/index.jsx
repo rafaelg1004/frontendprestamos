@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Mail, Lock, Shield, AlertCircle } from "lucide-react";
+import { Mail, Lock, Shield, AlertCircle, TrendingUp } from "lucide-react";
 import { authApi } from "@/lib/api";
 import toast from "react-hot-toast";
 import styles from "./LoginView.module.css";
@@ -108,6 +108,27 @@ export function LoginView() {
         </form>
 
         <div className={styles.footer}>
+          <Link 
+            href="/consulta-inversionista" 
+            style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: '0.4rem',
+              padding: '0.55rem 1.2rem', 
+              borderRadius: '0.5rem', 
+              border: '1px solid #e2e8f0', 
+              backgroundColor: '#f8fafc', 
+              color: '#475569', 
+              fontSize: '0.85rem', 
+              fontWeight: 500, 
+              textDecoration: 'none',
+              transition: 'all 0.2s',
+              marginBottom: '0.75rem'
+            }}
+          >
+            <TrendingUp size={16} />
+            Portal del Inversionista
+          </Link>
           <p className={styles.footerText}>
             © 2026 Binaria · Desarrollado por Rafael Gracia
           </p>
