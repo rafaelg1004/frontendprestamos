@@ -112,6 +112,7 @@ export function MovimientosView() {
                     <th style={{ textAlign: 'right' }}>Monto</th>
                     <th>Método</th>
                     <th>Referencia</th>
+                    <th>Registrado por</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -141,6 +142,9 @@ export function MovimientosView() {
                           ) : mov.inversion?.id ? (
                             <span>Inversión <span className={styles.refId}>#{mov.inversion.id.slice(0,8)}</span></span>
                           ) : '-'}
+                        </td>
+                        <td style={{ fontSize: '0.85rem', color: '#4b5563' }}>
+                          {mov.registrado_por?.email?.split('@')[0] || 'Sistema'}
                         </td>
                       </tr>
                     );
@@ -181,6 +185,9 @@ export function MovimientosView() {
                         ) : mov.inversion?.id ? (
                           <span>Ref: #{mov.inversion.id.slice(0,8)}</span>
                         ) : null}
+                        <div style={{ marginTop: '4px', fontSize: '0.75rem', color: '#6b7280' }}>
+                          Reg. por: {mov.registrado_por?.email?.split('@')[0] || 'Sistema'}
+                        </div>
                       </div>
                     </div>
                   </div>
