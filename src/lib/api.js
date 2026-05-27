@@ -156,9 +156,14 @@ export const authApi = {
   login: (email, password) => api.post("/auth/login", { email, password }),
   register: (identificacion, password) =>
     api.post("/auth/register", { identificacion, password }),
-  logout: () => {
-    deleteCookie("auth_token");
-    return Promise.resolve();
+  logout: async () => {
+    try {
+      await api.post("/auth/logout");
+    } catch (e) {
+      console.error("Error logging out from server", e);
+    } finally {
+      deleteCookie("auth_token");
+    }
   },
   setToken: (token) => {
     setCookie("auth_token", token, 7); // 7 días
