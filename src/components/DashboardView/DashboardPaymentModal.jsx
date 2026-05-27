@@ -12,7 +12,9 @@ export function DashboardPaymentModal({ prestamoId, isOpen, onClose }) {
     pagoLibreData,
     setPagoLibreData,
     distribucionCapital,
+    setDistribucionCapital,
     distribucionIntereses,
+    setDistribucionIntereses,
     handleOpenPagoModal,
     handlePagarLibreSubmit,
     uploading
@@ -46,7 +48,9 @@ export function DashboardPaymentModal({ prestamoId, isOpen, onClose }) {
       pagoLibreData={pagoLibreData}
       setPagoLibreData={setPagoLibreData}
       distribucionCapital={distribucionCapital}
+      setDistribucionCapital={setDistribucionCapital}
       distribucionIntereses={distribucionIntereses}
+      setDistribucionIntereses={setDistribucionIntereses}
       onSubmit={async (e) => {
         await handlePagarLibreSubmit(e);
         onClose(); // Cerrar el wrapper después de pagar

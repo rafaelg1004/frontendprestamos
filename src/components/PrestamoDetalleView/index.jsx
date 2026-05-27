@@ -152,40 +152,62 @@ export function PrestamoDetalleView({ id, isModal = false }) {
               </div>
             </div>
 
-            <div className={styles.infoGrid} style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Identificación</span>
-                <span className={styles.infoValue}>{cliente.identificacion || 'No registrada'}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Email</span>
-                <span className={styles.infoValue}>{cliente.email || 'No registrado'}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Teléfono</span>
-                <span className={styles.infoValue}>{cliente.telefono || 'No registrado'}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Dirección</span>
-                <span className={styles.infoValue}>{cliente.direccion || 'No registrada'}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Historial de Préstamos</span>
-                <span className={styles.infoValue}>
-                  {cliente.prestamos ? `${cliente.prestamos.length} registrado(s)` : 'Consultando...'}
-                </span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Préstamos Activos</span>
-                <span className={styles.infoValue}>
-                  {cliente.prestamos ? (
-                    <span style={{ color: cliente.prestamos.filter(p => p.estado === 'activo').length > 0 ? '#10b981' : '#64748b' }}>
-                      {cliente.prestamos.filter(p => p.estado === 'activo').length} en curso
+            {(() => {
+              let nivelConfianza = "Evaluando...";
+              let colorConfianza = "#64748b";
+              let cancelados = 0;
+              let historico = 0;
+
+              if (cliente.prestamos) {
+                const enMora = cliente.prestamos.some(p => p.estado === 'mora');
+                cancelados = cliente.prestamos.filter(p => p.estado === 'pagado').length;
+                historico = cliente.prestamos.reduce((sum, p) => sum + parseFloat(p.monto_principal || 0), 0);
+                
+                if (enMora) {
+                  nivelConfianza = "Riesgoso";
+                  colorConfianza = "#ef4444";
+                } else if (cancelados > 0) {
+                  nivelConfianza = "Excelente";
+                  colorConfianza = "#10b981";
+                } else if (cliente.prestamos.length > 0) {
+                  nivelConfianza = "Regular";
+                  colorConfianza = "#f59e0b";
+                } else {
+                  nivelConfianza = "Nuevo";
+                }
+              }
+
+              return (
+                <div className={styles.infoGrid} style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '1rem' }}>
+                  <div className={styles.infoItem} style={{ minWidth: '140px' }}>
+                    <span className={styles.infoLabel}>Score</span>
+                    <span className={styles.infoValue} style={{ color: colorConfianza, fontWeight: 'bold' }}>
+                      {nivelConfianza}
                     </span>
-                  ) : 'Consultando...'}
-                </span>
-              </div>
-            </div>
+                  </div>
+                  <div className={styles.infoItem} style={{ minWidth: '140px' }}>
+                    <span className={styles.infoLabel}>Préstamos Pagados</span>
+                    <span className={styles.infoValue}>{cliente.prestamos ? cancelados : '...'}</span>
+                  </div>
+                  <div className={styles.infoItem} style={{ minWidth: '140px' }}>
+                    <span className={styles.infoLabel}>Capital Histórico</span>
+                    <span className={styles.infoValue}>{cliente.prestamos ? formatCurrency(historico) : '...'}</span>
+                  </div>
+                  <div className={styles.infoItem} style={{ minWidth: '140px' }}>
+                    <span className={styles.infoLabel}>Identificación</span>
+                    <span className={styles.infoValue}>{cliente.identificacion || 'No registrada'}</span>
+                  </div>
+                  <div className={styles.infoItem} style={{ minWidth: '140px' }}>
+                    <span className={styles.infoLabel}>Teléfono</span>
+                    <span className={styles.infoValue}>{cliente.telefono || 'No registrado'}</span>
+                  </div>
+                  <div className={styles.infoItem} style={{ minWidth: '140px' }}>
+                    <span className={styles.infoLabel}>Dirección</span>
+                    <span className={styles.infoValue}>{cliente.direccion || 'No registrada'}</span>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         ) : (
           <p className={styles.emptyState}>
