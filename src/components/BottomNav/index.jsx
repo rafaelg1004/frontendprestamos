@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, Users, Banknote, Wallet, ArrowLeftRight, TrendingUp, LogOut } from 'lucide-react'
@@ -12,13 +12,32 @@ export function BottomNav() {
   const pathname = usePathname()
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
 
+  const [userPermisos, setUserPermisos] = useState(null)
+
   const navItems = [
-    { href: '/dashboard', icon: LayoutDashboard, label: 'Inicio' },
-    { href: '/prestamos', icon: Banknote, label: 'Créditos' },
-    { href: '/inversiones', icon: TrendingUp, label: 'Inversiones' },
-    { href: '/cuentas', icon: Wallet, label: 'Cuentas' },
-    { href: '/movimientos', icon: ArrowLeftRight, label: 'Historial' },
+    { href: '/dashboard', icon: LayoutDashboard, label: 'Inicio', requirePermiso: 'ver_reportes' },
+    { href: '/prestamos', icon: Banknote, label: 'Créditos', requirePermiso: 'ver_prestamos' },
+    { href: '/inversiones', icon: TrendingUp, label: 'Inversiones', requirePermiso: 'ver_inversiones' },
+    { href: '/cuentas', icon: Wallet, label: 'Cuentas', requirePermiso: 'gestionar_caja' },
+    { href: '/movimientos', icon: ArrowLeftRight, label: 'Historial', requirePermiso: 'gestionar_caja' },
   ]
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await authApi.me();
+        if (response.data?.data?.user?.permisos) {
+          setUserPermisos(response.data.data.user.permisos);
+        } else {
+          setUserPermisos([]);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        setUserPermisos([]);
+      }
+    };
+    fetchUser();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -32,7 +51,12 @@ export function BottomNav() {
   return (
     <>
       <nav className={styles.bottomNav}>
-        {navItems.map((item) => {
+        {userPermisos !== null && navItems.map((item) => {
+          // Filtrar por permisos
+          if (item.requirePermiso && !userPermisos.includes(item.requirePermiso) && !userPermisos.includes('superadmin')) {
+            return null;
+          }
+
           const Icon = item.icon
           const isActive = pathname === item.href
           

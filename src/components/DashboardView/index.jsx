@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { dashboardApi } from "@/lib/api";
+import { FaWhatsapp } from "react-icons/fa";
 import {
   formatCurrency,
   formatNumber,
@@ -421,9 +422,9 @@ export function DashboardView() {
                             const tel = alert.cliente.telefono?.replace(/\D/g, '');
                             if (tel) window.open(`https://wa.me/${tel}?text=Hola ${alert.cliente.nombre_completo}, te escribimos para recordarte tu pago...`, '_blank');
                           }}
-                          title="Contactar"
+                          title="Contactar por WhatsApp"
                         >
-                          <MessageSquare size={16} />
+                          <FaWhatsapp size={16} />
                         </button>
                         <Link href={`/prestamos/${alert.id}`} className={styles.actionBtn} title="Ver detalle">
                           <ChevronRight size={16} />
@@ -495,14 +496,14 @@ export function DashboardView() {
                     <td>
                       <div className={styles.actionBtns}>
                         <button 
-                          className={styles.actionBtn}
+                          className={`${styles.actionBtn} ${styles.whatsappBtn}`}
                           onClick={() => {
                             const tel = pay.inversionista.telefono?.replace(/\D/g, '');
                             if (tel) window.open(`https://wa.me/${tel}?text=Hola ${pay.inversionista.nombre_completo}, te informamos que tu pago de rendimientos por valor de ${formatCurrency(pay.monto_a_pagar)} está programado...`, '_blank');
                           }}
-                          title="Notificar por WhatsApp"
+                          title="Contactar Inversionista"
                         >
-                          <MessageSquare size={16} />
+                          <FaWhatsapp size={16} />
                         </button>
                         <Link href={`/inversiones/${pay.id}`} className={styles.actionBtn} title="Ver detalle de inversión">
                           <ChevronRight size={16} />
