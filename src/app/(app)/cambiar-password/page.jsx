@@ -37,7 +37,7 @@ export default function CambiarPasswordPage() {
     try {
       await authApi.changePassword(currentPassword, newPassword)
       toast.success("Contraseña actualizada exitosamente")
-      router.push("/")
+      router.push("/dashboard")
     } catch (err) {
       setError(err.response?.data?.message || "Error al cambiar contraseña")
       toast.error("Error al cambiar contraseña")
@@ -138,7 +138,7 @@ export default function CambiarPasswordPage() {
           <button
             type="button"
             className={styles.cancelButton}
-            onClick={() => router.push("/")}
+            onClick={() => router.push("/dashboard")}
           >
             Cancelar
           </button>

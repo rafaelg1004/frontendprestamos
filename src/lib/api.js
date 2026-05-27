@@ -97,6 +97,7 @@ export const prestamosApi = {
 // Inversiones
 export const inversionesApi = {
   getAll: (params = {}) => api.get("/inversiones", { params }),
+  getPublicByCedula: (cedula) => api.get(`/inversiones/publico/cedula/${cedula}`),
   getById: (id) => api.get(`/inversiones/${id}`),
   create: (data) => api.post("/inversiones", data),
   update: (id, data) => api.put(`/inversiones/${id}`, data),
@@ -163,4 +164,6 @@ export const authApi = {
     api.put("/auth/change-password", { currentPassword, newPassword }),
   createAdmin: (email, password, nombre) =>
     api.post("/auth/create-admin", { email, password, nombre }),
+  getAdmins: () => api.get("/auth/admins"),
+  deleteAdmin: (id) => api.delete(`/auth/admins/${id}`)
 };

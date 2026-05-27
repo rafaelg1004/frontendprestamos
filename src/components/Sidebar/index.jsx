@@ -15,6 +15,8 @@ import {
   Wallet,
   Calculator,
   BarChart3,
+  Key,
+  Shield
 } from "lucide-react";
 
 import { authApi } from "@/lib/api";
@@ -30,8 +32,9 @@ const menuItems = [
   { href: "/inversiones", icon: TrendingUp, label: "Inversiones" },
   { href: "/cuentas", icon: Wallet, label: "Cuentas" },
   { href: "/movimientos", icon: ArrowLeftRight, label: "Movimientos" },
+  { href: "/admins", icon: Shield, label: "Admins" },
+  { href: "/cambiar-password", icon: Key, label: "Contraseña" },
 ];
-
 
 export function Sidebar({ collapsed = false, onToggle }) {
   const pathname = usePathname();
