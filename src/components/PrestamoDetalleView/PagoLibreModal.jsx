@@ -50,7 +50,9 @@ export function PagoLibreModal({
       const dist = prestamo.fondos.map(f => {
         const proporcion = parseFloat(f.monto_aportado) / prestamo.monto_principal;
         const proporcionInteres = (parseFloat(f.tasa_interes_pactada) || 0) / parseFloat(prestamo.tasa_interes_mensual);
-        const montoInteres = Math.round(interes * proporcion * proporcionInteres);
+        const interesExacto = interes * proporcion * proporcionInteres;
+        // Redondear hacia abajo al millar más cercano para favorecer al admin
+        const montoInteres = Math.floor(interesExacto / 1000) * 1000;
         return {
           inversion_id: f.inversion_id,
           nombre_completo: f.inversionista?.nombre_completo,
