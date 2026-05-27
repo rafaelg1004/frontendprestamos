@@ -178,32 +178,32 @@ export function PrestamoDetalleView({ id, isModal = false }) {
               }
 
               return (
-                <div className={styles.infoGrid} style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '1rem' }}>
-                  <div className={styles.infoItem} style={{ minWidth: '140px' }}>
-                    <span className={styles.infoLabel}>Score</span>
-                    <span className={styles.infoValue} style={{ color: colorConfianza, fontWeight: 'bold' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', marginTop: '1rem', padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Score</span>
+                    <span style={{ fontSize: '0.875rem', color: colorConfianza, fontWeight: 'bold' }}>
                       {nivelConfianza}
                     </span>
                   </div>
-                  <div className={styles.infoItem} style={{ minWidth: '140px' }}>
-                    <span className={styles.infoLabel}>Préstamos Pagados</span>
-                    <span className={styles.infoValue}>{cliente.prestamos ? cancelados : '...'}</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Préstamos Pagados</span>
+                    <span style={{ fontSize: '0.875rem', color: '#1e293b', fontWeight: '500' }}>{cliente.prestamos ? cancelados : '...'}</span>
                   </div>
-                  <div className={styles.infoItem} style={{ minWidth: '140px' }}>
-                    <span className={styles.infoLabel}>Capital Histórico</span>
-                    <span className={styles.infoValue}>{cliente.prestamos ? formatCurrency(historico) : '...'}</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Capital Histórico</span>
+                    <span style={{ fontSize: '0.875rem', color: '#1e293b', fontWeight: '500' }}>{cliente.prestamos ? formatCurrency(historico) : '...'}</span>
                   </div>
-                  <div className={styles.infoItem} style={{ minWidth: '140px' }}>
-                    <span className={styles.infoLabel}>Identificación</span>
-                    <span className={styles.infoValue}>{cliente.identificacion || 'No registrada'}</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Identificación</span>
+                    <span style={{ fontSize: '0.875rem', color: '#1e293b', fontWeight: '500' }}>{cliente.identificacion || 'No registrada'}</span>
                   </div>
-                  <div className={styles.infoItem} style={{ minWidth: '140px' }}>
-                    <span className={styles.infoLabel}>Teléfono</span>
-                    <span className={styles.infoValue}>{cliente.telefono || 'No registrado'}</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Teléfono</span>
+                    <span style={{ fontSize: '0.875rem', color: '#1e293b', fontWeight: '500' }}>{cliente.telefono || 'No registrado'}</span>
                   </div>
-                  <div className={styles.infoItem} style={{ minWidth: '140px' }}>
-                    <span className={styles.infoLabel}>Dirección</span>
-                    <span className={styles.infoValue}>{cliente.direccion || 'No registrada'}</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Dirección</span>
+                    <span style={{ fontSize: '0.875rem', color: '#1e293b', fontWeight: '500' }}>{cliente.direccion || 'No registrada'}</span>
                   </div>
                 </div>
               );
