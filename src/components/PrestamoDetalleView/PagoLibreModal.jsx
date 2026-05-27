@@ -111,6 +111,20 @@ export function PagoLibreModal({
                 placeholder="0"
               />
             </div>
+            
+            <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+              <input 
+                type="checkbox" 
+                id="condonar"
+                checked={pagoLibreData.condonar_intereses}
+                onChange={(e) => setPagoLibreData({ ...pagoLibreData, condonar_intereses: e.target.checked })}
+                style={{ marginTop: '0.25rem', cursor: 'pointer' }}
+              />
+              <label htmlFor="condonar" style={{ fontSize: '0.85rem', color: '#475569', cursor: 'pointer', lineHeight: '1.4' }}>
+                <strong style={{ color: '#0f172a', display: 'block' }}>Condonar intereses restantes</strong>
+                Si marcas esto, la deuda de interés bajará a $0 sin importar cuánto pagues.
+              </label>
+            </div>
           </div>
         </div>
 

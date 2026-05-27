@@ -18,6 +18,7 @@ export function usePrestamoDetalle(id) {
     metodo_pago: "efectivo", 
     monto_capital: "",
     monto_interes: "",
+    condonar_intereses: false,
     notas: "" 
   });
   const [distribucionCapital, setDistribucionCapital] = useState([]);
@@ -73,6 +74,7 @@ export function usePrestamoDetalle(id) {
       metodo_pago: "efectivo",
       monto_capital: "",
       monto_interes: "",
+      condonar_intereses: false,
       notas: `Abono a crédito rotativo`
     });
 
@@ -91,6 +93,7 @@ export function usePrestamoDetalle(id) {
         ...pagoLibreData,
         monto_capital: (parseFloat(pagoLibreData.monto_capital) || 0) * 1000,
         monto_interes: (parseFloat(pagoLibreData.monto_interes) || 0) * 1000,
+        condonar_intereses: pagoLibreData.condonar_intereses,
         distribucion_capital: distribucionCapital.map(d => ({ inversion_id: d.inversion_id, monto: parseFloat(d.monto || 0) * 1000 })),
         distribucion_intereses: distribucionIntereses.map(d => ({ inversion_id: d.inversion_id, monto: parseFloat(d.monto || 0) * 1000 }))
       };
