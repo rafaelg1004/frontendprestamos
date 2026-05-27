@@ -75,20 +75,40 @@ export function PagoLibreModal({
       size="md"
     >
       <form onSubmit={onSubmit}>
-        <div className={styles.infoBar} style={{ marginBottom: "1rem" }}>
-          <div className={styles.infoBarItem}>
-            <span className={styles.infoBarLabel}>Deuda de Interés</span>
-            <span className={styles.infoBarValue}>{formatCurrency(calculos.interes_total_deuda)}</span>
+        {/* Resumen de deuda - tarjetas con color */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.25rem' }}>
+          <div style={{ 
+            background: 'linear-gradient(135deg, #fef3c7, #fde68a)', 
+            borderRadius: '10px', 
+            padding: '0.85rem 1rem',
+            border: '1px solid #f59e0b33'
+          }}>
+            <div style={{ fontSize: '0.7rem', color: '#92400e', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600, marginBottom: '0.3rem' }}>
+              Deuda de Interés
+            </div>
+            <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#78350f' }}>
+              {formatCurrency(calculos.interes_total_deuda)}
+            </div>
           </div>
-          <div className={styles.infoBarItem}>
-            <span className={styles.infoBarLabel}>Capital Actual</span>
-            <span className={styles.infoBarValue}>{formatCurrency(calculos.capital_pendiente)}</span>
+          <div style={{ 
+            background: 'linear-gradient(135deg, #dbeafe, #bfdbfe)', 
+            borderRadius: '10px', 
+            padding: '0.85rem 1rem',
+            border: '1px solid #3b82f633'
+          }}>
+            <div style={{ fontSize: '0.7rem', color: '#1e40af', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600, marginBottom: '0.3rem' }}>
+              Capital Pendiente
+            </div>
+            <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#1e3a8a' }}>
+              {formatCurrency(calculos.capital_pendiente)}
+            </div>
           </div>
         </div>
 
-        <div className={styles.row}>
-          <div className={styles.formGroup} style={{ marginBottom: "1rem" }}>
-            <label>Abono a Capital</label>
+        {/* Campos de abono lado a lado */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
+          <div className={styles.formGroup} style={{ marginBottom: 0 }}>
+            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151', marginBottom: '0.4rem', display: 'block' }}>Abono a Capital</label>
             <div className={styles.distribucionInputWrapper}>
               <span className={styles.distribucionCurrency}>$</span>
               <input
@@ -101,8 +121,8 @@ export function PagoLibreModal({
             </div>
           </div>
           
-          <div className={styles.formGroup} style={{ marginBottom: "1rem" }}>
-            <label>Abono a Intereses</label>
+          <div className={styles.formGroup} style={{ marginBottom: 0 }}>
+            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151', marginBottom: '0.4rem', display: 'block' }}>Abono a Intereses</label>
             <div className={styles.distribucionInputWrapper}>
               <span className={styles.distribucionCurrency}>$</span>
               <input
@@ -113,77 +133,56 @@ export function PagoLibreModal({
                 placeholder="0"
               />
             </div>
-            
-            <div 
-              style={{ 
-                marginTop: '1rem', 
-                padding: '0.85rem', 
-                borderRadius: '8px', 
-                border: pagoLibreData.condonar_intereses ? '1px solid #3b82f6' : '1px solid #e2e8f0', 
-                backgroundColor: pagoLibreData.condonar_intereses ? '#eff6ff' : '#f8fafc',
-                display: 'flex', 
-                alignItems: 'flex-start', 
-                gap: '0.75rem',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease-in-out'
-              }}
-              onClick={() => setPagoLibreData({ ...pagoLibreData, condonar_intereses: !pagoLibreData.condonar_intereses })}
-            >
-              <div style={{ marginTop: '0.15rem' }}>
-                <input 
-                  type="checkbox" 
-                  id="condonar"
-                  checked={pagoLibreData.condonar_intereses}
-                  onChange={(e) => setPagoLibreData({ ...pagoLibreData, condonar_intereses: e.target.checked })}
-                  style={{ 
-                    width: '1.1rem', 
-                    height: '1.1rem', 
-                    cursor: 'pointer',
-                    accentColor: '#3b82f6'
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label 
-                  htmlFor="condonar" 
-                  style={{ 
-                    fontSize: '0.85rem', 
-                    color: pagoLibreData.condonar_intereses ? '#1e40af' : '#475569', 
-                    cursor: 'pointer', 
-                    lineHeight: '1.4',
-                    display: 'block'
-                  }}
-                  onClick={(e) => e.preventDefault()}
-                >
-                  <strong style={{ color: pagoLibreData.condonar_intereses ? '#1e3a8a' : '#0f172a', display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.2rem' }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: pagoLibreData.condonar_intereses ? '#3b82f6' : '#94a3b8' }}>
-                      <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
-                      <path d="m9 12 2 2 4-4"/>
-                    </svg>
-                    Condonar intereses restantes
-                  </strong>
-                  Si activas esta opción, la deuda de interés bajará a $0 automáticamente sin importar el monto que pagues hoy.
-                </label>
-              </div>
-            </div>
           </div>
         </div>
 
-        <div className={styles.row}>
-          <div className={styles.formGroup} style={{ marginBottom: "1rem" }}>
-            <label>Cuenta Destino Capital *</label>
-            <select
-              value={pagoLibreData.cuenta_id}
-              onChange={(e) => setPagoLibreData({ ...pagoLibreData, cuenta_id: e.target.value })}
-              required={parseFloat(pagoLibreData.monto_capital) > 0}
-            >
-              <option value="">Selecciona cuenta para capital...</option>
-              {cuentas.map((c) => (
-                <option key={c.id} value={c.id}>{c.nombre} (Saldo: {formatCurrency(c.saldo_actual)})</option>
-              ))}
-            </select>
+        {/* Condonar intereses - más compacto */}
+        <div 
+          style={{ 
+            marginBottom: '1rem',
+            padding: '0.7rem 0.85rem', 
+            borderRadius: '8px', 
+            border: pagoLibreData.condonar_intereses ? '1px solid #3b82f6' : '1px solid #e2e8f0', 
+            backgroundColor: pagoLibreData.condonar_intereses ? '#eff6ff' : '#f8fafc',
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '0.65rem',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease-in-out'
+          }}
+          onClick={() => setPagoLibreData({ ...pagoLibreData, condonar_intereses: !pagoLibreData.condonar_intereses })}
+        >
+          <input 
+            type="checkbox" 
+            id="condonar"
+            checked={pagoLibreData.condonar_intereses}
+            onChange={(e) => setPagoLibreData({ ...pagoLibreData, condonar_intereses: e.target.checked })}
+            style={{ width: '1rem', height: '1rem', cursor: 'pointer', accentColor: '#3b82f6', flexShrink: 0 }}
+            onClick={(e) => e.stopPropagation()}
+          />
+          <div style={{ flex: 1 }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: pagoLibreData.condonar_intereses ? '#1e3a8a' : '#0f172a' }}>
+              Condonar intereses restantes
+            </span>
+            <span style={{ fontSize: '0.72rem', color: pagoLibreData.condonar_intereses ? '#1e40af' : '#64748b', marginLeft: '0.4rem' }}>
+              — La deuda de interés bajará a $0
+            </span>
           </div>
+        </div>
+
+        {/* Cuenta destino */}
+        <div className={styles.formGroup} style={{ marginBottom: '1rem' }}>
+          <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151', marginBottom: '0.4rem', display: 'block' }}>Cuenta Destino Capital *</label>
+          <select
+            value={pagoLibreData.cuenta_id}
+            onChange={(e) => setPagoLibreData({ ...pagoLibreData, cuenta_id: e.target.value })}
+            required={parseFloat(pagoLibreData.monto_capital) > 0}
+          >
+            <option value="">Selecciona cuenta para capital...</option>
+            {cuentas.map((c) => (
+              <option key={c.id} value={c.id}>{c.nombre} (Saldo: {formatCurrency(c.saldo_actual)})</option>
+            ))}
+          </select>
         </div>
 
         {distribucionCapital.length > 0 && (
@@ -262,11 +261,13 @@ export function PagoLibreModal({
         )}
 
         <div className={styles.formGroup}>
-          <label>Notas</label>
+          <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151', marginBottom: '0.4rem', display: 'block' }}>Notas</label>
           <textarea
             value={pagoLibreData.notas}
             onChange={(e) => setPagoLibreData({ ...pagoLibreData, notas: e.target.value })}
             className={styles.textarea}
+            rows={2}
+            placeholder="Observaciones opcionales..."
           />
         </div>
 
