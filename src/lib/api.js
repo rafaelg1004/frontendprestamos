@@ -31,19 +31,26 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
-// Interceptor de respuesta para manejar token expirado
+// Interceptor de respuesta para manejar token expirado y permisos
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     const requestUrl = error.config?.url || "";
     const is401 = error.response?.status === 401;
+    const is403 = error.response?.status === 403;
     // Solo redirigir al login si el 401 NO viene de /auth/me
     // (ese endpoint se usa para cargar el sidebar y no debería expulsar al usuario)
     const isAuthMeCheck = requestUrl.includes("/auth/me");
+    
     if (is401 && !isAuthMeCheck) {
       deleteCookie("auth_token");
       if (typeof window !== "undefined") {
         window.location.href = "/?expired=true";
+      }
+    } else if (is403) {
+      // Redirigir al dashboard principal si el usuario no tiene permisos
+      if (typeof window !== "undefined" && window.location.pathname !== "/dashboard") {
+        window.location.href = "/dashboard";
       }
     }
     return Promise.reject(error);
