@@ -17,7 +17,9 @@ export function PagoLibreModal({
   setDistribucionIntereses,
   cuentas,
   uploading,
-  onSubmit
+  onSubmit,
+  archivoPagoLibre,
+  setArchivoPagoLibre
 }) {
   const calculos = prestamo?.calculos;
 
@@ -257,6 +259,30 @@ export function PagoLibreModal({
                 </div>
               );
             })()}
+          </div>
+        )}
+
+        <div className={styles.formGroup}>
+          <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151', marginBottom: '0.4rem', display: 'block' }}>Método de Pago</label>
+          <select
+            value={pagoLibreData.metodo_pago || 'transferencia'}
+            onChange={(e) => setPagoLibreData({ ...pagoLibreData, metodo_pago: e.target.value })}
+            className={styles.select}
+          >
+            <option value="transferencia">Transferencia</option>
+            <option value="efectivo">Efectivo</option>
+          </select>
+        </div>
+
+        {pagoLibreData.metodo_pago === 'transferencia' && (
+          <div className={styles.formGroup}>
+            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151', marginBottom: '0.4rem', display: 'block' }}>Comprobante de Transferencia (Opcional)</label>
+            <input
+              type="file"
+              accept=".jpg,.jpeg,.png,.pdf"
+              onChange={(e) => setArchivoPagoLibre(e.target.files[0])}
+              style={{ padding: '0.5rem', border: '1px dashed #d1d5db', borderRadius: '0.375rem', width: '100%', fontSize: '0.9rem' }}
+            />
           </div>
         )}
 

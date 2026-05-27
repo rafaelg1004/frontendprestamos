@@ -23,6 +23,7 @@ export function usePrestamoDetalle(id) {
   });
   const [distribucionCapital, setDistribucionCapital] = useState([]);
   const [distribucionIntereses, setDistribucionIntereses] = useState([]);
+  const [archivoPagoLibre, setArchivoPagoLibre] = useState(null);
   
   // Estados para eliminación de documentos
   const [docToDelete, setDocToDelete] = useState(null);
@@ -78,11 +79,13 @@ export function usePrestamoDetalle(id) {
       monto_capital: "",
       monto_interes: "",
       condonar_intereses: false,
+      metodo_pago: 'transferencia',
       notas: `Abono a crédito rotativo`
     });
 
     setDistribucionCapital([]);
     setDistribucionIntereses([]);
+    setArchivoPagoLibre(null);
 
     setShowPagoLibreModal(true);
   };
@@ -101,7 +104,21 @@ export function usePrestamoDetalle(id) {
         distribucion_intereses: distribucionIntereses.map(d => ({ inversion_id: d.inversion_id, monto: parseFloat(d.monto || 0) * 1000 }))
       };
       
-      await prestamosApi.registrarPagoLibre(id, dataToSubmit);
+      let finalData = dataToSubmit;
+      if (archivoPagoLibre && pagoLibreData.metodo_pago === 'transferencia') {
+        const formData = new FormData();
+        Object.keys(dataToSubmit).forEach(key => {
+          if (Array.isArray(dataToSubmit[key])) {
+            formData.append(key, JSON.stringify(dataToSubmit[key]));
+          } else {
+            formData.append(key, dataToSubmit[key]);
+          }
+        });
+        formData.append('captura', archivoPagoLibre);
+        finalData = formData;
+      }
+      
+      await prestamosApi.registrarPagoLibre(id, finalData);
       toast.success(`Pago registrado exitosamente`);
       
       setShowPagoLibreModal(false);
@@ -181,6 +198,8 @@ export function usePrestamoDetalle(id) {
     setShowPagoLibreModal,
     pagoLibreData,
     setPagoLibreData,
+    archivoPagoLibre,
+    setArchivoPagoLibre,
     distribucionCapital,
     setDistribucionCapital,
     distribucionIntereses,

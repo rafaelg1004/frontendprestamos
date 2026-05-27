@@ -39,6 +39,8 @@ export function PrestamoDetalleView({ id, isModal = false }) {
     setDistribucionCapital,
     distribucionIntereses,
     setDistribucionIntereses,
+    archivoPagoLibre,
+    setArchivoPagoLibre,
     handleOpenPagoModal,
     handlePagarLibreSubmit,
     handleFileUpload,
@@ -340,7 +342,7 @@ export function PrestamoDetalleView({ id, isModal = false }) {
                     <p className={styles.movementNotes}>{mov.notas}</p>
                   )}
                 </div>
-                <div className={styles.movementAmount}>
+                <div className={styles.movementAmount} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                   <span style={{ color: "#16a34a" }}>
                     +{formatCurrency(mov.monto_total)}
                   </span>
@@ -349,12 +351,20 @@ export function PrestamoDetalleView({ id, isModal = false }) {
                       fontSize: "0.75rem",
                       color: "#6b7280",
                       marginTop: "2px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem"
                     }}
                   >
-                    Capital: {formatCurrency(mov.monto_capital || 0)}
+                    <span>Capital: {formatCurrency(mov.monto_capital || 0)}
                     {mov.monto_interes > 0 &&
-                      ` | Interés: ${formatCurrency(mov.monto_interes)}`}
+                      ` | Interés: ${formatCurrency(mov.monto_interes)}`}</span>
                   </div>
+                  {mov.url_captura && (
+                    <a href={`/api/uploads/documentos/${mov.url_captura}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.75rem', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '0.2rem', textDecoration: 'none', marginTop: '0.25rem' }}>
+                      <FileText size={12} /> Ver captura
+                    </a>
+                  )}
                 </div>
               </div>
             ))
@@ -468,6 +478,8 @@ export function PrestamoDetalleView({ id, isModal = false }) {
         prestamo={prestamo}
         pagoLibreData={pagoLibreData}
         setPagoLibreData={setPagoLibreData}
+        archivoPagoLibre={archivoPagoLibre}
+        setArchivoPagoLibre={setArchivoPagoLibre}
         distribucionCapital={distribucionCapital}
         setDistribucionCapital={setDistribucionCapital}
         distribucionIntereses={distribucionIntereses}

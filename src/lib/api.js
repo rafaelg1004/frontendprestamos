@@ -102,7 +102,12 @@ export const prestamosApi = {
   }),
   eliminarDocumento: (docId) => api.delete(`/prestamos/documentos/${docId}`),
   getDocumentViewToken: (docId) => api.get(`/prestamos/documentos/${docId}/view-token`),
-  registrarPagoLibre: (id, data) => api.post(`/prestamos/${id}/pagos`, data),
+  registrarPagoLibre: (id, data) => {
+    const config = data instanceof FormData 
+      ? { headers: { 'Content-Type': 'multipart/form-data' } } 
+      : {};
+    return api.post(`/prestamos/${id}/pagos`, data, config);
+  },
 };
 
 // Inversiones

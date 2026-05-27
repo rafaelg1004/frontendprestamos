@@ -8,7 +8,6 @@ import { inversionesApi, perfilesApi } from "@/lib/api";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import toast from "react-hot-toast";
 import {
-
   ArrowLeft,
   User,
   Calendar,
@@ -20,7 +19,8 @@ import {
   ArrowUpRight,
   PieChart,
   Briefcase,
-  AlertTriangle
+  AlertTriangle,
+  FileText
 } from "lucide-react";
 import Link from "next/link";
 import styles from "../PrestamoDetalleView/PrestamoDetalleView.module.css";
@@ -449,8 +449,13 @@ export function InversionDetalleView({ id }) {
                     </span>
                   </div>
                 </div>
-                <div className={styles.movementAmount} style={{ color: '#2563eb' }}>
+                <div className={styles.movementAmount} style={{ color: '#2563eb', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
                   {formatCurrency(mov.monto_total)}
+                  {mov.url_captura && (
+                    <a href={`/api/uploads/documentos/${mov.url_captura}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.75rem', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '0.2rem', textDecoration: 'none' }}>
+                      <FileText size={12} /> Ver captura
+                    </a>
+                  )}
                 </div>
               </div>
             ))}
@@ -484,9 +489,14 @@ export function InversionDetalleView({ id }) {
               </div>
               <div
                 className={styles.movementAmount}
-                style={{ color: "#16a34a" }}
+                style={{ color: "#16a34a", display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}
               >
                 +{formatCurrency(mov.monto_total)}
+                {mov.url_captura && (
+                  <a href={`/api/uploads/documentos/${mov.url_captura}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.75rem', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '0.2rem', textDecoration: 'none' }}>
+                    <FileText size={12} /> Ver captura
+                  </a>
+                )}
               </div>
             </div>
           ))}
