@@ -412,6 +412,9 @@ export function PrestamoDetalleView({ id, isModal = false }) {
             </label>
           </div>
         </div>
+        <p style={{ fontSize: '0.8rem', color: '#6b7280', marginTop: '0.5rem', marginBottom: '1rem' }}>
+          Límite de tamaño: 10 MB (PDF, Imágenes, Word). Si tu PDF es muy grande, puedes comprimirlo en <a href="https://www.ilovepdf.com/es/comprimir_pdf" target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6', textDecoration: 'underline' }}>iLovePDF</a>.
+        </p>
 
         <div className={styles.docsGrid}>
           {documentos.length > 0 ? (
@@ -428,7 +431,7 @@ export function PrestamoDetalleView({ id, isModal = false }) {
                 </div>
                 <div className={styles.docActions}>
                   <a 
-                    href={`/api/uploads/documentos/${doc.ruta_archivo}`} 
+                    href={`/api/uploads/documentos/${doc.ruta_archivo}?token=${typeof document !== 'undefined' ? (document.cookie.match(new RegExp('(^| )auth_token=([^;]+)'))?.[2] || '') : ''}`} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className={styles.docActionBtn}

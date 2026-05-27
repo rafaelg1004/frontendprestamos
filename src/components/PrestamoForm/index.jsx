@@ -581,6 +581,9 @@ export function PrestamoForm() {
                       <Upload size={20} />
                       Seleccionar Archivo
                     </label>
+                    <p style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.75rem', textAlign: 'center' }}>
+                      Límite: 10 MB (PDF, Imágenes, Word).<br/>Si tu PDF es muy grande, comprímelo en <a href="https://www.ilovepdf.com/es/comprimir_pdf" target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6', textDecoration: 'underline' }}>iLovePDF</a>.
+                    </p>
                   </>
                 )}
               </div>
