@@ -51,8 +51,8 @@ export function PagoLibreModal({
         const proporcion = parseFloat(f.monto_aportado) / prestamo.monto_principal;
         const proporcionInteres = (parseFloat(f.tasa_interes_pactada) || 0) / parseFloat(prestamo.tasa_interes_mensual);
         const interesExacto = interes * proporcion * proporcionInteres;
-        // Redondear hacia abajo a los 100 pesos más cercanos para favorecer al admin
-        const montoInteres = Math.floor(interesExacto / 100) * 100;
+        // Redondear hacia abajo a los 100 pesos más cercanos para favorecer al admin (100 pesos = 100,000 milunidades)
+        const montoInteres = Math.floor(interesExacto / 100000) * 100000;
         return {
           inversion_id: f.inversion_id,
           nombre_completo: f.inversionista?.nombre_completo,
