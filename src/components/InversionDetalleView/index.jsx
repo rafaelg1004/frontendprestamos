@@ -39,6 +39,7 @@ export function InversionDetalleView({ id }) {
     metodo_pago: 'transferencia',
     notas: ''
   });
+  const [archivo, setArchivo] = useState(null);
 
   useEffect(() => {
     if (!id) return;
@@ -76,9 +77,19 @@ export function InversionDetalleView({ id }) {
 
     try {
       setIsSubmitting(true);
-      await inversionesApi.pagar(id, paymentData);
+      
+      let dataToSend = paymentData;
+      if (archivo && paymentData.metodo_pago === 'transferencia') {
+        const formData = new FormData();
+        Object.keys(paymentData).forEach(key => formData.append(key, paymentData[key]));
+        formData.append('captura', archivo);
+        dataToSend = formData;
+      }
+
+      await inversionesApi.pagar(id, dataToSend);
       toast.success("Pago registrado exitosamente");
       setShowPaymentModal(false);
+      setArchivo(null);
       
       // Recargar datos
       const inversionRes = await inversionesApi.getById(id);
@@ -190,6 +201,29 @@ export function InversionDetalleView({ id }) {
                   ))}
                 </select>
               </div>
+
+              <div className={styles.formGroup}>
+                <label>Método de Pago</label>
+                <select 
+                  value={paymentData.metodo_pago}
+                  onChange={e => setPaymentData({...paymentData, metodo_pago: e.target.value})}
+                >
+                  <option value="transferencia">Transferencia</option>
+                  <option value="efectivo">Efectivo</option>
+                </select>
+              </div>
+
+              {paymentData.metodo_pago === 'transferencia' && (
+                <div className={styles.formGroup}>
+                  <label>Comprobante de Transferencia (Opcional)</label>
+                  <input 
+                    type="file" 
+                    accept=".jpg,.jpeg,.png,.pdf"
+                    onChange={e => setArchivo(e.target.files[0])}
+                    style={{ padding: '0.5rem', border: '1px dashed #d1d5db', borderRadius: '0.375rem', width: '100%' }}
+                  />
+                </div>
+              )}
 
               <div className={styles.row}>
                 <div className={styles.formGroup}>

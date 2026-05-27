@@ -113,7 +113,12 @@ export const inversionesApi = {
   create: (data) => api.post("/inversiones", data),
   update: (id, data) => api.put(`/inversiones/${id}`, data),
   delete: (id) => api.delete(`/inversiones/${id}`),
-  pagar: (id, data) => api.post(`/inversiones/${id}/pagar`, data),
+  pagar: (id, data) => {
+    const config = data instanceof FormData 
+      ? { headers: { 'Content-Type': 'multipart/form-data' } } 
+      : {};
+    return api.post(`/inversiones/${id}/pagar`, data, config);
+  },
 };
 
 
