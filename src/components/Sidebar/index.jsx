@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -24,21 +24,39 @@ import { LogoutModal } from "../LogoutModal";
 import styles from "./Sidebar.module.css";
 
 const menuItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/personas", icon: Users, label: "Personas" },
-  { href: "/prestamos", icon: Banknote, label: "Préstamos" },
-  { href: "/reportes", icon: BarChart3, label: "Reportes" },
+  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", requirePermiso: "ver_reportes" },
+  { href: "/personas", icon: Users, label: "Personas" }, // Public for everyone who can log in
+  { href: "/prestamos", icon: Banknote, label: "Préstamos", requirePermiso: "ver_prestamos" },
+  { href: "/reportes", icon: BarChart3, label: "Reportes", requirePermiso: "ver_reportes" },
   { href: "/simulador", icon: Calculator, label: "Simulador" },
-  { href: "/inversiones", icon: TrendingUp, label: "Inversiones" },
-  { href: "/cuentas", icon: Wallet, label: "Cuentas" },
-  { href: "/movimientos", icon: ArrowLeftRight, label: "Movimientos" },
-  { href: "/admins", icon: Shield, label: "Admins" },
+  { href: "/inversiones", icon: TrendingUp, label: "Inversiones", requirePermiso: "ver_inversiones" },
+  { href: "/cuentas", icon: Wallet, label: "Cuentas", requirePermiso: "gestionar_caja" },
+  { href: "/movimientos", icon: ArrowLeftRight, label: "Movimientos", requirePermiso: "gestionar_caja" },
+  { href: "/admins", icon: Shield, label: "Admins", requirePermiso: "gestionar_usuarios" },
   { href: "/cambiar-password", icon: Key, label: "Contraseña" },
 ];
 
 export function Sidebar({ collapsed = false, onToggle }) {
   const pathname = usePathname();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [userPermisos, setUserPermisos] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await authApi.me();
+        if (response.data?.data?.user?.permisos) {
+          setUserPermisos(response.data.data.user.permisos);
+        } else {
+          setUserPermisos([]);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        setUserPermisos([]);
+      }
+    };
+    fetchUser();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -46,10 +64,15 @@ export function Sidebar({ collapsed = false, onToggle }) {
       window.location.href = "/";
     } catch (error) {
       console.error("Error logging out:", error);
-      // Even if API fails, clear local session and redirect
       window.location.href = "/";
     }
   };
+
+  const filteredMenuItems = menuItems.filter(item => {
+    if (!item.requirePermiso) return true;
+    if (userPermisos === null) return false; // Hide until loaded
+    return userPermisos.includes(item.requirePermiso);
+  });
 
   return (
     <>
@@ -74,7 +97,7 @@ export function Sidebar({ collapsed = false, onToggle }) {
         </div>
 
         <nav className={styles.nav}>
-          {menuItems.map((item) => {
+          {filteredMenuItems.map((item) => {
             const Icon = item.icon;
             const isActive =
               pathname === item.href || pathname.startsWith(`${item.href}/`);

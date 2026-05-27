@@ -80,7 +80,7 @@ export function LoginView() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@prestamos.com"
+                placeholder="admin@binaria.com"
                 className={styles.input}
                 required
               />
@@ -109,13 +109,7 @@ export function LoginView() {
 
         <div className={styles.footer}>
           <p className={styles.footerText}>
-            ¿No tienes acceso?{" "}
-            <Link href="/register" className={styles.link}>
-              Crea tu usuario aquí
-            </Link>
-          </p>
-          <p className={styles.footerText} style={{ marginTop: "0.5rem" }}>
-            © 2024 Sistema de Préstamos e Inversiones
+            © 2026 Binaria · Desarrollado por Rafael Gracia
           </p>
         </div>
       </div>

@@ -16,7 +16,7 @@ function getCookie(name) {
   if (typeof document === "undefined") return null;
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(";").shift();
+  if (parts.length >= 2) return parts.pop().split(";").shift();
   return null;
 }
 
@@ -35,12 +35,15 @@ api.interceptors.request.use(async (config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Token expirado o inválido
+    const requestUrl = error.config?.url || "";
+    const is401 = error.response?.status === 401;
+    // Solo redirigir al login si el 401 NO viene de /auth/me
+    // (ese endpoint se usa para cargar el sidebar y no debería expulsar al usuario)
+    const isAuthMeCheck = requestUrl.includes("/auth/me");
+    if (is401 && !isAuthMeCheck) {
       deleteCookie("auth_token");
       if (typeof window !== "undefined") {
-        // Redirigir al login con mensaje de sesión expirada
-        window.location.href = "/login?expired=true";
+        window.location.href = "/?expired=true";
       }
     }
     return Promise.reject(error);
@@ -160,10 +163,12 @@ export const authApi = {
   setToken: (token) => {
     setCookie("auth_token", token, 7); // 7 días
   },
+  me: () => api.get("/auth/me"),
   changePassword: (currentPassword, newPassword) =>
     api.put("/auth/change-password", { currentPassword, newPassword }),
-  createAdmin: (email, password, nombre) =>
-    api.post("/auth/create-admin", { email, password, nombre }),
+  createAdmin: (email, password, nombre, permisos) =>
+    api.post("/auth/create-admin", { email, password, nombre, permisos }),
   getAdmins: () => api.get("/auth/admins"),
-  deleteAdmin: (id) => api.delete(`/auth/admins/${id}`)
+  deleteAdmin: (id) => api.delete(`/auth/admins/${id}`),
+  updatePermisos: (id, permisos) => api.put(`/auth/admins/${id}/permisos`, { permisos })
 };

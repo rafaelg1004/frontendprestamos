@@ -4,13 +4,31 @@ import { authApi } from "@/lib/api";
 import { Modal } from "@/components/Modal";
 import toast from "react-hot-toast";
 
+const AVAILABLE_PERMISSIONS = [
+  { id: 'ver_reportes', label: 'Ver Reportes / Dashboard' },
+  { id: 'ver_prestamos', label: 'Ver Préstamos' },
+  { id: 'crear_prestamos', label: 'Crear Préstamos' },
+  { id: 'registrar_pagos', label: 'Registrar Pagos' },
+  { id: 'ver_inversiones', label: 'Ver Inversiones' },
+  { id: 'gestionar_inversiones', label: 'Gestionar Inversiones' },
+  { id: 'gestionar_caja', label: 'Gestionar Caja/Movimientos' },
+  { id: 'gestionar_usuarios', label: 'Gestionar Usuarios' },
+];
+
 export function CrearAdminModal({ isOpen, onClose, onCreated }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nombre, setNombre] = useState("");
+  const [permisos, setPermisos] = useState(['ver_prestamos', 'registrar_pagos']); // Default básicos
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const togglePermiso = (id) => {
+    setPermisos(prev => 
+      prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
+    );
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,7 +42,7 @@ export function CrearAdminModal({ isOpen, onClose, onCreated }) {
     setLoading(true);
 
     try {
-      await authApi.createAdmin(email, password, nombre);
+      await authApi.createAdmin(email, password, nombre, permisos);
       toast.success("Usuario administrativo creado exitosamente");
       // Reset form
       setEmail("");
@@ -102,6 +120,23 @@ export function CrearAdminModal({ isOpen, onClose, onCreated }) {
           </div>
         </div>
 
+        <div>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: '500', color: '#374151' }}>Permisos del Usuario</label>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', backgroundColor: '#f9fafb', padding: '1rem', borderRadius: '0.375rem', border: '1px solid #d1d5db' }}>
+            {AVAILABLE_PERMISSIONS.map(perm => (
+              <label key={perm.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: '#4b5563', cursor: 'pointer' }}>
+                <input 
+                  type="checkbox" 
+                  checked={permisos.includes(perm.id)}
+                  onChange={() => togglePermiso(perm.id)}
+                  style={{ accentColor: '#4f46e5', width: '1rem', height: '1rem' }}
+                />
+                {perm.label}
+              </label>
+            ))}
+          </div>
+        </div>
+
         <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
           <button
             type="button"
@@ -115,7 +150,7 @@ export function CrearAdminModal({ isOpen, onClose, onCreated }) {
             disabled={loading}
             style={{ flex: 1, padding: '0.75rem', border: 'none', backgroundColor: '#4f46e5', color: 'white', borderRadius: '0.375rem', fontWeight: '500', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1 }}
           >
-            {loading ? "Creando..." : "Crear Administrador"}
+            {loading ? "Creando..." : "Crear Usuario"}
           </button>
         </div>
       </form>

@@ -2,19 +2,21 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Plus, Shield, Trash2, Mail, Calendar, LogIn, AlertTriangle } from "lucide-react";
+import { Plus, Shield, Trash2, Mail, Calendar, LogIn, AlertTriangle, Edit } from "lucide-react";
 import { authApi } from "@/lib/api";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import toast from "react-hot-toast";
 
 import { CrearAdminModal } from "./CrearAdminModal";
+import { EditarPermisosModal } from "./EditarPermisosModal";
 
 export default function AdminsPage() {
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingAdmin, setEditingAdmin] = useState(null);
 
   const fetchAdmins = async () => {
     try {
@@ -51,9 +53,9 @@ export default function AdminsPage() {
         <div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Shield size={24} color="#4f46e5" />
-            Administradores del Sistema
+            Usuarios del Sistema
           </h1>
-          <p style={{ color: '#6b7280', margin: '0.5rem 0 0 0' }}>Gestiona quién tiene acceso de control total a la plataforma</p>
+          <p style={{ color: '#6b7280', margin: '0.5rem 0 0 0' }}>Gestiona quién tiene acceso y qué permisos tienen en la plataforma</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
@@ -64,7 +66,7 @@ export default function AdminsPage() {
           }}
         >
           <Plus size={20} />
-          Nuevo Administrador
+          Nuevo Usuario
         </button>
       </div>
 
@@ -77,15 +79,15 @@ export default function AdminsPage() {
 
       <div style={{ backgroundColor: 'white', borderRadius: '0.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
         {loading ? (
-          <div style={{ padding: '3rem', textAlign: 'center', color: '#6b7280' }}>Cargando administradores...</div>
+          <div style={{ padding: '3rem', textAlign: 'center', color: '#6b7280' }}>Cargando usuarios...</div>
         ) : admins.length === 0 ? (
-          <div style={{ padding: '3rem', textAlign: 'center', color: '#6b7280' }}>No se encontraron administradores.</div>
+          <div style={{ padding: '3rem', textAlign: 'center', color: '#6b7280' }}>No se encontraron usuarios.</div>
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
                 <th style={{ padding: '0.75rem 1.5rem', fontWeight: '500', color: '#374151', fontSize: '0.875rem' }}>Email</th>
-                <th style={{ padding: '0.75rem 1.5rem', fontWeight: '500', color: '#374151', fontSize: '0.875rem' }}>Rol</th>
+                <th style={{ padding: '0.75rem 1.5rem', fontWeight: '500', color: '#374151', fontSize: '0.875rem' }}>Nivel de Acceso</th>
                 <th style={{ padding: '0.75rem 1.5rem', fontWeight: '500', color: '#374151', fontSize: '0.875rem' }}>Fecha de Creación</th>
                 <th style={{ padding: '0.75rem 1.5rem', fontWeight: '500', color: '#374151', fontSize: '0.875rem' }}>Último Acceso</th>
                 <th style={{ padding: '0.75rem 1.5rem', fontWeight: '500', color: '#374151', fontSize: '0.875rem', textAlign: 'right' }}>Acciones</th>
@@ -99,8 +101,15 @@ export default function AdminsPage() {
                     {admin.email}
                   </td>
                   <td style={{ padding: '1rem 1.5rem' }}>
-                    <span style={{ backgroundColor: '#e0e7ff', color: '#4338ca', padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: '500' }}>
-                      {admin.rol.toUpperCase()}
+                    <span style={{ 
+                      backgroundColor: admin.permisos?.includes('gestionar_usuarios') ? '#e0e7ff' : '#fef3c7', 
+                      color: admin.permisos?.includes('gestionar_usuarios') ? '#4338ca' : '#d97706', 
+                      padding: '0.25rem 0.75rem', 
+                      borderRadius: '9999px', 
+                      fontSize: '0.75rem', 
+                      fontWeight: '500' 
+                    }}>
+                      {admin.permisos?.includes('gestionar_usuarios') ? 'SUPERADMIN' : 'LIMITADO'}
                     </span>
                   </td>
                   <td style={{ padding: '1rem 1.5rem', color: '#6b7280', fontSize: '0.875rem' }}>
@@ -115,11 +124,19 @@ export default function AdminsPage() {
                       {admin.last_sign_in_at ? format(new Date(admin.last_sign_in_at), "dd MMM yyyy HH:mm", { locale: es }) : 'Nunca'}
                     </div>
                   </td>
-                  <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
+                  <td style={{ padding: '1rem 1.5rem', textAlign: 'right', display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                    <button 
+                      onClick={() => setEditingAdmin(admin)}
+                      style={{ background: '#f3f4f6', border: '1px solid #e5e7eb', color: '#4b5563', cursor: 'pointer', padding: '0.5rem', borderRadius: '0.375rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                      title="Editar Permisos"
+                    >
+                      <Edit size={16} />
+                      <span style={{ fontSize: '0.75rem', fontWeight: '500' }}>Permisos</span>
+                    </button>
                     <button 
                       onClick={() => handleDelete(admin.id, admin.email)}
                       style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0.5rem', borderRadius: '0.375rem' }}
-                      title="Eliminar Administrador"
+                      title="Eliminar Usuario"
                     >
                       <Trash2 size={20} />
                     </button>
@@ -135,6 +152,13 @@ export default function AdminsPage() {
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         onCreated={() => fetchAdmins()} 
+      />
+
+      <EditarPermisosModal
+        isOpen={!!editingAdmin}
+        onClose={() => setEditingAdmin(null)}
+        onUpdated={() => fetchAdmins()}
+        admin={editingAdmin}
       />
     </div>
   );
