@@ -22,6 +22,8 @@ export function PagoLibreModal({
   setArchivoPagoLibre
 }) {
   const calculos = prestamo?.calculos;
+  const isOverCapital = (parseFloat(pagoLibreData.monto_capital) || 0) * 1000 > (calculos?.capital_pendiente || 0);
+  const isFormInvalid = (!pagoLibreData.monto_capital && !pagoLibreData.monto_interes) || isOverCapital || !pagoLibreData.notas?.trim();
 
   // Actualizar distribuciones automáticamente al cambiar el monto de capital/interés
   useEffect(() => {
@@ -53,8 +55,8 @@ export function PagoLibreModal({
         const proporcion = parseFloat(f.monto_aportado) / prestamo.monto_principal;
         const proporcionInteres = (parseFloat(f.tasa_interes_pactada) || 0) / parseFloat(prestamo.tasa_interes_mensual);
         const interesExacto = interes * proporcion * proporcionInteres;
-        // Redondear hacia abajo a los 100 pesos más cercanos para favorecer al admin (100 pesos = 100,000 milunidades)
-        const montoInteres = Math.floor(interesExacto / 100000) * 100000;
+        // Redondear hacia abajo a los 100 pesos más cercanos para favorecer al admin
+        const montoInteres = Math.floor(interesExacto / 100) * 100;
         return {
           inversion_id: f.inversion_id,
           nombre_completo: f.inversionista?.nombre_completo,
@@ -116,11 +118,17 @@ export function PagoLibreModal({
               <input
                 type="text"
                 value={formatInputNumber(pagoLibreData.monto_capital)}
-                className={styles.distribucionInput}
+                className={`${styles.distribucionInput} ${isOverCapital ? styles.inputError : ''}`}
                 onChange={(e) => setPagoLibreData({ ...pagoLibreData, monto_capital: parseNumber(e.target.value) })}
                 placeholder="0"
+                style={isOverCapital ? { borderColor: '#ef4444', backgroundColor: '#fef2f2', color: '#b91c1c' } : {}}
               />
             </div>
+            {isOverCapital && (
+              <div style={{ color: '#dc2626', fontSize: '0.75rem', marginTop: '4px', fontWeight: 500 }}>
+                Supera el capital pendiente
+              </div>
+            )}
           </div>
           
           <div className={styles.formGroup} style={{ marginBottom: 0 }}>
@@ -287,13 +295,16 @@ export function PagoLibreModal({
         )}
 
         <div className={styles.formGroup}>
-          <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151', marginBottom: '0.4rem', display: 'block' }}>Notas</label>
+          <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151', marginBottom: '0.4rem', display: 'block' }}>
+            Notas <span style={{ color: '#dc2626' }}>*</span>
+          </label>
           <textarea
             value={pagoLibreData.notas}
             onChange={(e) => setPagoLibreData({ ...pagoLibreData, notas: e.target.value })}
             className={styles.textarea}
             rows={2}
-            placeholder="Observaciones opcionales..."
+            placeholder="Ej: Abono a crédito rotativo por transferencia bancaria..."
+            required
           />
         </div>
 
@@ -307,8 +318,9 @@ export function PagoLibreModal({
           </button>
           <button 
             type="submit" 
-            disabled={uploading || (!pagoLibreData.monto_capital && !pagoLibreData.monto_interes)}
+            disabled={uploading || isFormInvalid}
             className={styles.btnPrimary}
+            style={isFormInvalid ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
           >
             {uploading ? "Procesando..." : "Registrar Pago"}
           </button>

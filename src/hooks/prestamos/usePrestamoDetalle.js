@@ -12,19 +12,19 @@ export function usePrestamoDetalle(id) {
 
   // Modal State
   const [showPagoLibreModal, setShowPagoLibreModal] = useState(false);
-  const [pagoLibreData, setPagoLibreData] = useState({ 
-    cuenta_id: "", 
-    cuenta_intereses_id: "", 
-    metodo_pago: "efectivo", 
+  const [pagoLibreData, setPagoLibreData] = useState({
+    cuenta_id: "",
+    cuenta_intereses_id: "",
+    metodo_pago: "efectivo",
     monto_capital: "",
     monto_interes: "",
     condonar_intereses: false,
-    notas: "" 
+    notas: ""
   });
   const [distribucionCapital, setDistribucionCapital] = useState([]);
   const [distribucionIntereses, setDistribucionIntereses] = useState([]);
   const [archivoPagoLibre, setArchivoPagoLibre] = useState(null);
-  
+
   // Estados para eliminación de documentos
   const [docToDelete, setDocToDelete] = useState(null);
   const [deletingDoc, setDeletingDoc] = useState(false);
@@ -63,7 +63,7 @@ export function usePrestamoDetalle(id) {
       try {
         const res = await cuentasApi.getAll();
         setCuentas(res.data?.data || []);
-      } catch (error) {}
+      } catch (error) { }
     };
 
     fetchData();
@@ -75,12 +75,11 @@ export function usePrestamoDetalle(id) {
     setPagoLibreData({
       cuenta_id: prestamo.cuenta_id || (cuentas.length > 0 ? cuentas[0].id : ""),
       cuenta_intereses_id: prestamo.cuenta_id || (cuentas.length > 0 ? cuentas[0].id : ""),
-      metodo_pago: "efectivo",
       monto_capital: "",
       monto_interes: "",
       condonar_intereses: false,
-      metodo_pago: 'transferencia',
-      notas: `Abono a crédito rotativo`
+      metodo_pago: 'efectivo',
+      notas: ''
     });
 
     setDistribucionCapital([]);
@@ -103,7 +102,7 @@ export function usePrestamoDetalle(id) {
         distribucion_capital: distribucionCapital.map(d => ({ inversion_id: d.inversion_id, monto: parseFloat(d.monto || 0) * 1000 })),
         distribucion_intereses: distribucionIntereses.map(d => ({ inversion_id: d.inversion_id, monto: parseFloat(d.monto || 0) * 1000 }))
       };
-      
+
       let finalData = dataToSubmit;
       if (archivoPagoLibre && pagoLibreData.metodo_pago === 'transferencia') {
         const formData = new FormData();
@@ -117,12 +116,12 @@ export function usePrestamoDetalle(id) {
         formData.append('captura', archivoPagoLibre);
         finalData = formData;
       }
-      
+
       await prestamosApi.registrarPagoLibre(id, finalData);
       toast.success(`Pago registrado exitosamente`);
-      
+
       setShowPagoLibreModal(false);
-      
+
       const prestamoRes = await prestamosApi.getById(id);
       setPrestamo(prestamoRes.data?.data);
     } catch (error) {
