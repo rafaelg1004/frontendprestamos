@@ -25,7 +25,7 @@ import styles from "./Sidebar.module.css";
 
 const menuItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", requirePermiso: "ver_reportes" },
-  { href: "/personas", icon: Users, label: "Personas" }, // Public for everyone who can log in
+  { href: "/personas", icon: Users, label: "Personas", requirePermiso: ["ver_prestamos", "ver_inversiones", "gestionar_usuarios"] },
   { href: "/prestamos", icon: Banknote, label: "Préstamos", requirePermiso: "ver_prestamos" },
   { href: "/reportes", icon: BarChart3, label: "Reportes", requirePermiso: "ver_reportes" },
   { href: "/simulador", icon: Calculator, label: "Simulador" },
@@ -71,6 +71,9 @@ export function Sidebar({ collapsed = false, onToggle }) {
   const filteredMenuItems = menuItems.filter(item => {
     if (!item.requirePermiso) return true;
     if (userPermisos === null) return false; // Hide until loaded
+    if (Array.isArray(item.requirePermiso)) {
+      return item.requirePermiso.some(p => userPermisos.includes(p));
+    }
     return userPermisos.includes(item.requirePermiso);
   });
 
