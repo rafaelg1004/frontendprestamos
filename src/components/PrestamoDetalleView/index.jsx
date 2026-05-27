@@ -42,6 +42,7 @@ export function PrestamoDetalleView({ id, isModal = false }) {
     handleOpenPagoModal,
     handlePagarLibreSubmit,
     handleFileUpload,
+    handleViewDocument,
     handleDeleteDocumento,
     docToDelete,
     setDocToDelete,
@@ -434,15 +435,13 @@ export function PrestamoDetalleView({ id, isModal = false }) {
                   </p>
                 </div>
                 <div className={styles.docActions}>
-                  <a 
-                    href={`/api/uploads/documentos/${doc.ruta_archivo}?token=${typeof document !== 'undefined' ? (document.cookie.match(new RegExp('(^| )auth_token=([^;]+)'))?.[2] || '') : ''}`} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
+                  <button 
+                    onClick={() => handleViewDocument(doc.id)}
                     className={styles.docActionBtn}
                     title="Ver documento"
                   >
                     <ExternalLink size={18} />
-                  </a>
+                  </button>
                   <button 
                     onClick={() => setDocToDelete(doc)}
                     className={`${styles.docActionBtn} ${styles.deleteBtn}`}

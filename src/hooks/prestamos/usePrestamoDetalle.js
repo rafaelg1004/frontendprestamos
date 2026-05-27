@@ -138,6 +138,21 @@ export function usePrestamoDetalle(id) {
     }
   };
 
+  const handleViewDocument = async (docId) => {
+    try {
+      const loadingToast = toast.loading("Abriendo documento...");
+      const res = await prestamosApi.getDocumentViewToken(docId);
+      toast.dismiss(loadingToast);
+      if (res.data?.success && res.data?.token) {
+        const url = `/api/uploads/documentos/${res.data.ruta_archivo}?view_token=${res.data.token}`;
+        window.open(url, '_blank');
+      }
+    } catch (error) {
+      toast.error("Error al obtener acceso al documento");
+      console.error(error);
+    }
+  };
+
   const handleDeleteDocumento = async () => {
     if (!docToDelete) return;
 
@@ -173,6 +188,7 @@ export function usePrestamoDetalle(id) {
     handleOpenPagoModal,
     handlePagarLibreSubmit,
     handleFileUpload,
+    handleViewDocument,
     handleDeleteDocumento,
     docToDelete,
     setDocToDelete,
