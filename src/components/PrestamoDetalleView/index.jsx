@@ -20,6 +20,7 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import { usePrestamoDetalle } from "@/hooks/prestamos/usePrestamoDetalle";
 import { PagoLibreModal } from "./PagoLibreModal";
+import { Modal } from "../Modal";
 import styles from "./PrestamoDetalleView.module.css";
 
 export function PrestamoDetalleView({ id, isModal = false }) {
@@ -41,7 +42,10 @@ export function PrestamoDetalleView({ id, isModal = false }) {
     handleOpenPagoModal,
     handlePagarLibreSubmit,
     handleFileUpload,
-    handleDeleteDocumento
+    handleDeleteDocumento,
+    docToDelete,
+    setDocToDelete,
+    deletingDoc
   } = usePrestamoDetalle(id);
 
 
@@ -440,7 +444,7 @@ export function PrestamoDetalleView({ id, isModal = false }) {
                     <ExternalLink size={18} />
                   </a>
                   <button 
-                    onClick={() => handleDeleteDocumento(doc.id)}
+                    onClick={() => setDocToDelete(doc)}
                     className={`${styles.docActionBtn} ${styles.deleteBtn}`}
                     title="Eliminar"
                   >
@@ -473,6 +477,36 @@ export function PrestamoDetalleView({ id, isModal = false }) {
         uploading={uploading}
         onSubmit={handlePagarLibreSubmit}
       />
+
+      {/* Modal de confirmación para eliminar documento */}
+      <Modal 
+        isOpen={!!docToDelete} 
+        onClose={() => !deletingDoc && setDocToDelete(null)}
+        title="Eliminar Documento"
+        size="sm"
+      >
+        <div style={{ padding: '1rem 0' }}>
+          <p style={{ color: '#374151', marginBottom: '1.5rem', fontSize: '0.95rem' }}>
+            ¿Estás seguro de que deseas eliminar el documento <strong>{docToDelete?.nombre_archivo}</strong>?
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+            <button 
+              onClick={() => setDocToDelete(null)}
+              disabled={deletingDoc}
+              style={{ padding: '0.5rem 1rem', borderRadius: '0.375rem', border: '1px solid #d1d5db', backgroundColor: 'white', color: '#374151', cursor: deletingDoc ? 'not-allowed' : 'pointer', fontWeight: 500 }}
+            >
+              Cancelar
+            </button>
+            <button 
+              onClick={handleDeleteDocumento}
+              disabled={deletingDoc}
+              style={{ padding: '0.5rem 1rem', borderRadius: '0.375rem', border: 'none', backgroundColor: '#ef4444', color: 'white', cursor: deletingDoc ? 'not-allowed' : 'pointer', fontWeight: 500 }}
+            >
+              {deletingDoc ? 'Eliminando...' : 'Eliminar'}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

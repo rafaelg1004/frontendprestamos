@@ -23,6 +23,10 @@ export function usePrestamoDetalle(id) {
   });
   const [distribucionCapital, setDistribucionCapital] = useState([]);
   const [distribucionIntereses, setDistribucionIntereses] = useState([]);
+  
+  // Estados para eliminación de documentos
+  const [docToDelete, setDocToDelete] = useState(null);
+  const [deletingDoc, setDeletingDoc] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -134,15 +138,20 @@ export function usePrestamoDetalle(id) {
     }
   };
 
-  const handleDeleteDocumento = async (docId) => {
-    if (!confirm("¿Estás seguro de eliminar este documento?")) return;
+  const handleDeleteDocumento = async () => {
+    if (!docToDelete) return;
 
+    setDeletingDoc(true);
     try {
-      await prestamosApi.eliminarDocumento(docId);
-      toast.success("Documento eliminado");
-      setDocumentos(documentos.filter(d => d.id !== docId));
+      await prestamosApi.eliminarDocumento(docToDelete.id);
+      toast.success("Documento eliminado correctamente");
+      setDocumentos(documentos.filter(d => d.id !== docToDelete.id));
+      setDocToDelete(null);
     } catch (error) {
       toast.error("Error al eliminar el documento");
+      console.error("Error eliminando documento:", error);
+    } finally {
+      setDeletingDoc(false);
     }
   };
 
@@ -164,6 +173,9 @@ export function usePrestamoDetalle(id) {
     handleOpenPagoModal,
     handlePagarLibreSubmit,
     handleFileUpload,
-    handleDeleteDocumento
+    handleDeleteDocumento,
+    docToDelete,
+    setDocToDelete,
+    deletingDoc
   };
 }
