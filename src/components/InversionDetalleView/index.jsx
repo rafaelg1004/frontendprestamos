@@ -52,10 +52,11 @@ export function InversionDetalleView({ id }) {
         
         // Cargar interés sugerido automáticamente
         if (data?.calculos?.interes_sugerido) {
+          const interesNormal = data.calculos.interes_sugerido / 1000;
           setPaymentData(prev => ({
             ...prev,
-            monto_interes: data.calculos.interes_sugerido,
-            monto_total: data.calculos.interes_sugerido + prev.monto_capital
+            monto_interes: interesNormal,
+            monto_total: interesNormal + prev.monto_capital
           }));
         }
 
@@ -78,10 +79,17 @@ export function InversionDetalleView({ id }) {
     try {
       setIsSubmitting(true);
       
-      let dataToSend = paymentData;
+      const payload = {
+        ...paymentData,
+        monto_capital: (parseFloat(paymentData.monto_capital) || 0) * 1000,
+        monto_interes: (parseFloat(paymentData.monto_interes) || 0) * 1000,
+        monto_total: (parseFloat(paymentData.monto_total) || 0) * 1000
+      };
+
+      let dataToSend = payload;
       if (archivo && paymentData.metodo_pago === 'transferencia') {
         const formData = new FormData();
-        Object.keys(paymentData).forEach(key => formData.append(key, paymentData[key]));
+        Object.keys(payload).forEach(key => formData.append(key, payload[key]));
         formData.append('captura', archivo);
         dataToSend = formData;
       }
