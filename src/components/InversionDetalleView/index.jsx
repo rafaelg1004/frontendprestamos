@@ -275,7 +275,7 @@ export function InversionDetalleView({ id }) {
 
               <div className={styles.formGroup}>
                 <label>Total a Pagar</label>
-                <input type="text" readOnly value={formatCurrency(paymentData.monto_total)} />
+                <input type="text" readOnly value={formatCurrency(paymentData.monto_total * 1000)} />
               </div>
 
               <div className={styles.formActions}>

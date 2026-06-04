@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { perfilesApi, prestamosApi, inversionesApi } from '@/lib/api'
+import { formatCurrency } from '@/lib/utils'
 import { 
   ArrowLeft, 
   User, 
@@ -168,7 +169,7 @@ export function PersonaDetalleView({ id, isModal = false }) {
                 {operaciones.map((op) => (
                   <tr key={op.id}>
                     <td>
-                      ${(esCliente ? op.monto_principal : op.monto_invertido)?.toLocaleString()}
+                      {formatCurrency(esCliente ? op.monto_principal : op.monto_invertido)}
                     </td>
                     <td>
                       {esCliente ? op.tasa_interes_mensual : op.tasa_interes_pactada}%
