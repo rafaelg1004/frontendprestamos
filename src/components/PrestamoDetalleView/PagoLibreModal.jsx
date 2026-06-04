@@ -23,7 +23,7 @@ export function PagoLibreModal({
 }) {
   const calculos = prestamo?.calculos;
   const isOverCapital = (parseFloat(pagoLibreData.monto_capital) || 0) * 1000 > (calculos?.capital_pendiente || 0);
-  const isFormInvalid = (!pagoLibreData.monto_capital && !pagoLibreData.monto_interes) || isOverCapital || !pagoLibreData.notas?.trim();
+  const isFormInvalid = (!pagoLibreData.condonar_intereses && !pagoLibreData.monto_capital && !pagoLibreData.monto_interes) || isOverCapital || !pagoLibreData.notas?.trim();
 
   // Actualizar distribuciones automáticamente al cambiar el monto de capital/interés
   useEffect(() => {
