@@ -23,6 +23,7 @@ export function PersonaDetalleView({ id, isModal = false }) {
   const router = useRouter()
   const [persona, setPersona] = useState(null)
   const [operaciones, setOperaciones] = useState([])
+  const [resumen, setResumen] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -38,6 +39,10 @@ export function PersonaDetalleView({ id, isModal = false }) {
       const personaRes = await perfilesApi.getById(id)
       const personaData = personaRes.data?.data
       setPersona(personaData)
+      
+      // Obtener resumen del perfil
+      const resumenRes = await perfilesApi.getResumen(id)
+      setResumen(resumenRes.data?.data?.resumen)
 
       // Obtener operaciones según el rol
       if (personaData?.rol === 'cliente') {
@@ -132,6 +137,44 @@ export function PersonaDetalleView({ id, isModal = false }) {
           </div>
         </div>
       </div>
+
+      {/* Resumen Inversionista */}
+      {!esCliente && resumen && (
+        <div className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2>
+              <TrendingUp size={22} />
+              Resumen Financiero
+            </h2>
+          </div>
+          <div className={styles.infoGrid} style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+            <div className={styles.infoItem} style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
+              <label style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Capital Invertido</label>
+              <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a' }}>{formatCurrency(resumen.inversion_inicial || 0)}</span>
+            </div>
+            <div className={styles.infoItem} style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
+              <label style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Capital Devuelto</label>
+              <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#16a34a' }}>{formatCurrency(resumen.capital_devuelto || 0)}</span>
+            </div>
+            <div className={styles.infoItem} style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
+              <label style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Capital en Calle</label>
+              <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#ef4444' }}>{formatCurrency(resumen.capital_todavia_adeudado || 0)}</span>
+            </div>
+            <div className={styles.infoItem} style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
+              <label style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Intereses Cobrados</label>
+              <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#16a34a' }}>{formatCurrency(resumen.intereses_pagados || 0)}</span>
+            </div>
+            <div className={styles.infoItem} style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
+              <label style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Intereses Acumulados</label>
+              <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f59e0b' }}>{formatCurrency(resumen.intereses_acumulados_estimados || 0)}</span>
+            </div>
+            <div className={styles.infoItem} style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
+              <label style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Tasa Promedio</label>
+              <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#3b82f6' }}>{resumen.tasa_promedio || 0}%</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Operaciones Section */}
       <div className={styles.section}>
