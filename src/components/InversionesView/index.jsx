@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { inversionesApi, api } from "@/lib/api";
 import { 
   Plus, 
@@ -11,7 +11,9 @@ import {
   Activity,
   CheckCircle2,
   Clock,
-  DollarSign
+  DollarSign,
+  Search,
+  Users
 } from "lucide-react";
 import Link from "next/link";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -22,7 +24,8 @@ export function InversionesView() {
   const [inversiones, setInversiones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("activas");
 
   const fetchInversiones = async () => {
     try {
@@ -51,6 +54,43 @@ export function InversionesView() {
   useEffect(() => {
     fetchInversiones();
   }, []);
+
+  // Filter and group investments
+  const groupedInversiones = useMemo(() => {
+    // 1. Filter by status (Tab)
+    let filtered = inversiones.filter((inv) => {
+      if (activeTab === "activas") return inv.estado === "activo" || inv.estado === "activa";
+      if (activeTab === "finalizadas") return inv.estado === "finalizado" || inv.estado === "finalizada";
+      return true;
+    });
+
+    // 2. Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter((inv) => 
+        inv.inversionista?.nombre_completo?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // 3. Group by inversionista_id
+    const groups = {};
+    filtered.forEach((inv) => {
+      const invId = inv.inversionista?.id || 'unknown';
+      if (!groups[invId]) {
+        groups[invId] = {
+          inversionista: inv.inversionista,
+          inversiones: []
+        };
+      }
+      groups[invId].inversiones.push(inv);
+    });
+
+    // Return array of groups, sorted by inversionista name
+    return Object.values(groups).sort((a, b) => {
+      const nameA = a.inversionista?.nombre_completo || '';
+      const nameB = b.inversionista?.nombre_completo || '';
+      return nameA.localeCompare(nameB);
+    });
+  }, [inversiones, activeTab, searchTerm]);
 
   if (loading) {
     return (
@@ -84,78 +124,123 @@ export function InversionesView() {
         onSuccess={fetchInversiones}
       />
 
+      <div className={styles.controlsSection}>
+        <div className={styles.tabs}>
+          <button 
+            className={`${styles.tab} ${activeTab === 'activas' ? styles.tabActive : ''}`}
+            onClick={() => setActiveTab('activas')}
+          >
+            Activas
+          </button>
+          <button 
+            className={`${styles.tab} ${activeTab === 'finalizadas' ? styles.tabActive : ''}`}
+            onClick={() => setActiveTab('finalizadas')}
+          >
+            Finalizadas
+          </button>
+        </div>
+        
+        <div className={styles.searchBox}>
+          <Search className={styles.searchIcon} size={18} />
+          <input
+            type="text"
+            placeholder="Buscar inversionista..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={styles.searchInput}
+          />
+        </div>
+      </div>
 
-      <div className={styles.grid}>
-        {inversiones.length > 0 ? (
-          inversiones.map((inv) => (
-            <div key={inv.id} className={styles.card}>
-              <div className={styles.cardMain}>
-                <div className={styles.userInfo}>
-                  <div className={styles.avatar}>
-                    {inv.inversionista?.nombre_completo?.charAt(0).toUpperCase()}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <h3 className={styles.userName}>{inv.inversionista?.nombre_completo}</h3>
-                      <span className={`${styles.badge} ${inv.estado === 'activo' || inv.estado === 'activa' ? styles.badgeSuccess : styles.badgeInfo}`}>
-                        {inv.estado}
-                      </span>
+      <div className={styles.groupedList}>
+        {groupedInversiones.length > 0 ? (
+          groupedInversiones.map((group, groupIdx) => (
+            <div key={group.inversionista?.id || groupIdx} className={styles.groupContainer}>
+              <div className={styles.groupHeader}>
+                <div className={styles.groupAvatar}>
+                  {group.inversionista?.nombre_completo?.charAt(0).toUpperCase() || '?'}
+                </div>
+                <div className={styles.groupInfo}>
+                  <h2 className={styles.groupName}>{group.inversionista?.nombre_completo || 'Inversionista Desconocido'}</h2>
+                  <span className={styles.groupCount}>
+                    <Users size={14} />
+                    {group.inversiones.length} {group.inversiones.length === 1 ? 'contrato' : 'contratos'}
+                  </span>
+                </div>
+              </div>
+
+              <div className={styles.grid}>
+                {group.inversiones.map((inv) => (
+                  <div key={inv.id} className={styles.card}>
+                    <div className={styles.cardMain}>
+                      <div className={styles.cardTop}>
+                        <div className={styles.cardTitleRow}>
+                          <h3 className={styles.investmentId}>Contrato #{inv.id.slice(0, 8)}</h3>
+                          <span className={`${styles.badge} ${inv.estado === 'activo' || inv.estado === 'activa' ? styles.badgeSuccess : styles.badgeInfo}`}>
+                            {inv.estado}
+                          </span>
+                        </div>
+                        <p className={styles.userMeta}>Creado: {formatDate(inv.fecha_inversion)}</p>
+                      </div>
+                      
+                      <div className={styles.stats}>
+                        <div className={styles.stat}>
+                          <span className={styles.statLabel}>Interés Sugerido</span>
+                          <span className={styles.statValue} style={{ color: inv.calculos?.en_mora ? '#ef4444' : '#1e293b' }}>
+                            {formatCurrency(inv.calculos?.interes_sugerido || 0)}
+                          </span>
+                        </div>
+                        <div className={styles.stat}>
+                          <span className={styles.statLabel}>Disponible</span>
+                          <span className={styles.statValue}>
+                            {formatCurrency(inv.calculos?.disponible_en_cuenta || 0)}
+                          </span>
+                        </div>
+                        <div className={styles.stat}>
+                          <span className={styles.statLabel}>Cap. Pendiente</span>
+                          <span className={styles.statValue}>
+                            {formatCurrency(inv.calculos?.capital_pendiente || 0)}
+                          </span>
+                        </div>
+                        <div className={styles.stat}>
+                          <span className={styles.statLabel}>Tasa Mensual</span>
+                          <span className={styles.statValue}>
+                            {inv.tasa_interes_pactada}%
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className={styles.footer}>
+                        <div className={styles.nextPay}>
+                          {inv.estado === 'finalizado' || inv.estado === 'finalizada' ? (
+                            <span style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <CheckCircle2 size={14} /> Pagado
+                            </span>
+                          ) : inv.calculos?.en_mora ? (
+                            <span style={{ color: '#dc2626', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <AlertTriangle size={14} /> Vencido
+                            </span>
+                          ) : (
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <Calendar size={14} /> Corte: {formatDate(inv.calculos?.proxima_fecha_pago)}
+                            </span>
+                          )}
+                        </div>
+                        <Link href={`/inversiones/${inv.id}`} className={styles.btnAction}>
+                          Gestionar
+                          <ArrowRight size={16} />
+                        </Link>
+                      </div>
                     </div>
-                    <p className={styles.userMeta}>Inversión #{inv.id.slice(0, 8)} · Creada: {formatDate(inv.fecha_inversion)}</p>
                   </div>
-                </div>
-                
-                <div className={styles.stats}>
-                  <div className={styles.stat}>
-                    <span className={styles.statLabel}>Interés Sugerido</span>
-                    <span className={styles.statValue} style={{ color: inv.calculos?.en_mora ? '#ef4444' : '#1e293b' }}>
-                      {formatCurrency(inv.calculos?.interes_sugerido || 0)}
-                    </span>
-                  </div>
-                  <div className={styles.stat}>
-                    <span className={styles.statLabel}>Disponible</span>
-                    <span className={styles.statValue}>
-                      {formatCurrency(inv.calculos?.disponible_en_cuenta || 0)}
-                    </span>
-                  </div>
-                  <div className={styles.stat}>
-                    <span className={styles.statLabel}>Cap. Pendiente</span>
-                    <span className={styles.statValue}>
-                      {formatCurrency(inv.calculos?.capital_pendiente || 0)}
-                    </span>
-                  </div>
-                  <div className={styles.stat}>
-                    <span className={styles.statLabel}>Tasa Mensual</span>
-                    <span className={styles.statValue}>
-                      {inv.tasa_interes_pactada}%
-                    </span>
-                  </div>
-                </div>
-
-                <div className={styles.footer}>
-                  <div className={styles.nextPay}>
-                    {inv.calculos?.en_mora ? (
-                      <span style={{ color: '#dc2626', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <AlertTriangle size={14} /> Vencido
-                      </span>
-                    ) : (
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Calendar size={14} /> Corte: {formatDate(inv.calculos?.proxima_fecha_pago)}
-                      </span>
-                    )}
-                  </div>
-                  <Link href={`/inversiones/${inv.id}`} className={styles.btnAction}>
-                    Gestionar
-                    <ArrowRight size={16} />
-                  </Link>
-                </div>
+                ))}
               </div>
             </div>
           ))
         ) : (
           <div className={styles.empty}>
             <CheckCircle2 size={48} color="#10b981" />
-            <p>No hay inversiones registradas aún.</p>
+            <p>No se encontraron inversiones en esta vista.</p>
           </div>
         )}
       </div>
