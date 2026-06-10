@@ -40,6 +40,11 @@ export function InversionDetalleView({ id }) {
     notas: ''
   });
   const [archivo, setArchivo] = useState(null);
+  
+  // Estados para Intereses Históricos
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [historyMonto, setHistoryMonto] = useState("");
+  const [historyNotas, setHistoryNotas] = useState("");
 
   useEffect(() => {
     if (!id) return;
@@ -104,6 +109,29 @@ export function InversionDetalleView({ id }) {
       setInversion(inversionRes.data?.data);
     } catch (error) {
       toast.error(error.response?.data?.message || "Error al registrar el pago");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleHistorySubmit = async (e) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+    try {
+      setIsSubmitting(true);
+      await inversionesApi.registrarInteresHistorico(id, {
+        monto: parseFloat(historyMonto) * 1000,
+        notas: historyNotas
+      });
+      toast.success("Intereses históricos registrados");
+      setShowHistoryModal(false);
+      setHistoryMonto("");
+      setHistoryNotas("");
+      
+      const inversionRes = await inversionesApi.getById(id);
+      setInversion(inversionRes.data?.data);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error al registrar histórico");
     } finally {
       setIsSubmitting(false);
     }
@@ -179,6 +207,14 @@ export function InversionDetalleView({ id }) {
             <ArrowLeft size={18} />
             Volver
           </Link>
+          <button
+            onClick={() => setShowHistoryModal(true)}
+            className={styles.btnSecondary}
+            style={{ borderColor: '#8b5cf6', color: '#8b5cf6' }}
+          >
+            <Clock size={18} />
+            Ingresar Histórico
+          </button>
           {(inversion.estado === "activa" || inversion.estado === "activo") && (
             <button
               onClick={() => setShowPaymentModal(true)}
@@ -282,6 +318,45 @@ export function InversionDetalleView({ id }) {
                 <button type="button" onClick={() => setShowPaymentModal(false)} className={styles.btnSecondary} disabled={isSubmitting}>Cancelar</button>
                 <button type="submit" className={styles.btnPrimary} disabled={isSubmitting}>
                   {isSubmitting ? 'Procesando...' : 'Confirmar Pago'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Histórico */}
+      {showHistoryModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <h3>Ajustar Intereses Históricos</h3>
+            <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '1rem' }}>
+              Registra los intereses que el inversionista ya cobró en meses pasados. Esto aumentará su saldo en la Billetera para que puedas marcar el pago real.
+            </p>
+            <form onSubmit={handleHistorySubmit}>
+              <div className={styles.formGroup}>
+                <label>Monto de Interés Ganado</label>
+                <input 
+                  type="number" 
+                  required
+                  value={historyMonto}
+                  onChange={e => setHistoryMonto(e.target.value)}
+                  placeholder="Ej: 5000000"
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Notas / Periodo</label>
+                <input 
+                  type="text" 
+                  value={historyNotas}
+                  onChange={e => setHistoryNotas(e.target.value)}
+                  placeholder="Ej: Intereses del año pasado"
+                />
+              </div>
+              <div className={styles.formActions}>
+                <button type="button" onClick={() => setShowHistoryModal(false)} className={styles.btnSecondary} disabled={isSubmitting}>Cancelar</button>
+                <button type="submit" className={styles.btnPrimary} disabled={isSubmitting}>
+                  {isSubmitting ? 'Guardando...' : 'Añadir al Saldo'}
                 </button>
               </div>
             </form>

@@ -124,6 +124,7 @@ export const inversionesApi = {
       : {};
     return api.post(`/inversiones/${id}/pagar`, data, config);
   },
+  registrarInteresHistorico: (id, data) => api.post(`/inversiones/${id}/interes-historico`, data),
 };
 
 
