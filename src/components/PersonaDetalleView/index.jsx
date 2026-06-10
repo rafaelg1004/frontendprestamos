@@ -26,9 +26,6 @@ export function PersonaDetalleView({ id, isModal = false, isOpen = true, onClose
   const [resumen, setResumen] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // Si es modal controlado y no está abierto, no renderizar
-  if (isModal && !isOpen) return null
-
   useEffect(() => {
     if (!id) return
     fetchData()
@@ -61,6 +58,9 @@ export function PersonaDetalleView({ id, isModal = false, isOpen = true, onClose
       setLoading(false)
     }
   }
+
+  // Si es modal controlado y no está abierto, no renderizar
+  if (isModal && !isOpen) return null
 
   if (loading) {
     return <div className={styles.loading}>Cargando...</div>
