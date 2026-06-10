@@ -25,6 +25,7 @@ import {
 import Link from "next/link";
 import styles from "../PrestamoDetalleView/PrestamoDetalleView.module.css";
 import { PersonaDetalleView } from "@/components/PersonaDetalleView";
+import { Modal } from "@/components/Modal";
 
 export function InversionDetalleView({ id, isModal = false, isOpen = false, onClose }) {
   const [inversion, setInversion] = useState(null);
@@ -679,13 +680,17 @@ export function InversionDetalleView({ id, isModal = false, isOpen = false, onCl
   return (
     <>
       {content}
-      {/* Modal del Perfil del Inversionista */}
-      <PersonaDetalleView 
-        id={inversion?.inversionista?.id}
-        isModal={true}
+      {/* Modal del Perfil del Inversionista - mismo Modal que PersonasView */}
+      <Modal
         isOpen={showPerfilModal}
         onClose={() => setShowPerfilModal(false)}
-      />
+        title="Detalle del Perfil"
+        size="lg"
+      >
+        {inversion?.inversionista?.id && (
+          <PersonaDetalleView id={inversion.inversionista.id} isModal={true} />
+        )}
+      </Modal>
     </>
   );
 }
