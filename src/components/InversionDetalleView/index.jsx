@@ -32,9 +32,9 @@ export function InversionDetalleView({ id }) {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [cuentas, setCuentas] = useState([]);
   const [paymentData, setPaymentData] = useState({
-    monto_total: 0,
-    monto_capital: 0,
-    monto_interes: 0,
+    monto_total: '',
+    monto_capital: '',
+    monto_interes: '',
     cuenta_id: '',
     metodo_pago: 'transferencia',
     notas: ''
@@ -54,21 +54,6 @@ export function InversionDetalleView({ id }) {
         const inversionRes = await inversionesApi.getById(id);
         const data = inversionRes.data?.data;
         setInversion(data);
-        
-        // Cargar interés sugerido automáticamente
-        if (data?.calculos?.interes_sugerido) {
-          const interesFull = data.calculos.interes_sugerido;
-          const formatted = new Intl.NumberFormat('es-CO').format(interesFull);
-          setPaymentData(prev => {
-            const rawMc = prev.monto_capital ? parseFloat(String(prev.monto_capital).replace(/\./g, '')) : 0;
-            const total = interesFull + rawMc;
-            return {
-              ...prev,
-              monto_interes: formatted,
-              monto_total: new Intl.NumberFormat('es-CO').format(total)
-            };
-          });
-        }
 
         const cuentasRes = await api.get('/cuentas');
         setCuentas(cuentasRes.data?.data || []);
@@ -222,7 +207,18 @@ export function InversionDetalleView({ id }) {
           </button>
           {(inversion.estado === "activa" || inversion.estado === "activo") && (
             <button
-              onClick={() => setShowPaymentModal(true)}
+              onClick={() => {
+                const interesSugerido = inversion.calculos?.interes_sugerido || 0;
+                setPaymentData({
+                  monto_total: interesSugerido ? new Intl.NumberFormat('es-CO').format(interesSugerido) : '',
+                  monto_capital: '',
+                  monto_interes: interesSugerido ? new Intl.NumberFormat('es-CO').format(interesSugerido) : '',
+                  cuenta_id: '',
+                  metodo_pago: 'transferencia',
+                  notas: ''
+                });
+                setShowPaymentModal(true);
+              }}
               className={styles.btnPrimary}
             >
               💸 Realizar Pago
@@ -296,11 +292,14 @@ export function InversionDetalleView({ id }) {
                     <input 
                       type="text" value={paymentData.monto_interes}
                       onChange={e => {
-                        const mi = parseFloat(e.target.value) || 0;
+                        const rawVal = e.target.value.replace(/\D/g, '');
+                        const mi = parseFloat(rawVal) || 0;
+                        const rawMc = parseFloat(String(paymentData.monto_capital).replace(/\./g, '')) || 0;
+                        const total = mi + rawMc;
                         setPaymentData({
                           ...paymentData, 
-                          monto_interes: mi,
-                          monto_total: mi + paymentData.monto_capital
+                          monto_interes: rawVal ? new Intl.NumberFormat('es-CO').format(mi) : '',
+                          monto_total: new Intl.NumberFormat('es-CO').format(total)
                         });
                       }}
                       style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #cbd5e1', width: '100%' }}
@@ -316,11 +315,14 @@ export function InversionDetalleView({ id }) {
                     <input 
                       type="text" value={paymentData.monto_capital}
                       onChange={e => {
-                        const mc = parseFloat(e.target.value) || 0;
+                        const rawVal = e.target.value.replace(/\D/g, '');
+                        const mc = parseFloat(rawVal) || 0;
+                        const rawMi = parseFloat(String(paymentData.monto_interes).replace(/\./g, '')) || 0;
+                        const total = mc + rawMi;
                         setPaymentData({
                           ...paymentData, 
-                          monto_capital: mc,
-                          monto_total: mc + paymentData.monto_interes
+                          monto_capital: rawVal ? new Intl.NumberFormat('es-CO').format(mc) : '',
+                          monto_total: new Intl.NumberFormat('es-CO').format(total)
                         });
                       }}
                       style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #cbd5e1', width: '100%' }}
@@ -335,7 +337,7 @@ export function InversionDetalleView({ id }) {
                 <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px dashed #cbd5e1', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontWeight: 600, color: '#1e293b' }}>Total a Entregar:</span>
                   <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#2563eb' }}>
-                    {formatCurrency(parseFloat(String(paymentData.monto_total).replace(/\./g, '')) || 0)}
+                    {paymentData.monto_total || '$ 0'}
                   </span>
                 </div>
               </div>
