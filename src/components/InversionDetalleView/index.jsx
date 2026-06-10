@@ -226,20 +226,32 @@ export function InversionDetalleView({ id }) {
         </div>
       </div>
 
-      {/* Modal de Pago */}
+      {/* Modal de Pago Mejorado */}
       {showPaymentModal && (
         <div className={styles.modalOverlay}>
-          <div className={styles.modalContent}>
-            <h3>Registrar Pago a Inversionista</h3>
+          <div className={styles.modalContent} style={{ maxWidth: '500px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', borderBottom: '1px solid #e5e7eb', paddingBottom: '1rem' }}>
+              <div style={{ background: '#dbeafe', padding: '0.5rem', borderRadius: '0.5rem' }}>
+                <DollarSign size={24} color="#2563eb" />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#111827' }}>Registrar Pago a Inversionista</h3>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#6b7280' }}>
+                  Inversión: #{inversion.id?.slice(0, 8)}
+                </p>
+              </div>
+            </div>
+
             <form onSubmit={handlePayment}>
               <div className={styles.formGroup}>
-                <label>Cuenta de Salida</label>
+                <label style={{ fontWeight: 500, color: '#374151' }}>Cuenta de Salida de Dinero</label>
                 <select 
                   required
                   value={paymentData.cuenta_id}
                   onChange={e => setPaymentData({...paymentData, cuenta_id: e.target.value})}
+                  style={{ padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #d1d5db', width: '100%' }}
                 >
-                  <option value="">Selecciona una cuenta</option>
+                  <option value="">Selecciona la cuenta de origen...</option>
                   {cuentas.map(c => (
                     <option key={c.id} value={c.id}>{c.nombre} ({formatCurrency(c.saldo_actual)})</option>
                   ))}
@@ -247,76 +259,88 @@ export function InversionDetalleView({ id }) {
               </div>
 
               <div className={styles.formGroup}>
-                <label>Método de Pago</label>
+                <label style={{ fontWeight: 500, color: '#374151' }}>Método de Entrega</label>
                 <select 
                   value={paymentData.metodo_pago}
                   onChange={e => setPaymentData({...paymentData, metodo_pago: e.target.value})}
+                  style={{ padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #d1d5db', width: '100%' }}
                 >
-                  <option value="transferencia">Transferencia</option>
-                  <option value="efectivo">Efectivo</option>
+                  <option value="transferencia">Transferencia Bancaria</option>
+                  <option value="efectivo">Efectivo Físico</option>
                 </select>
               </div>
 
               {paymentData.metodo_pago === 'transferencia' && (
                 <div className={styles.formGroup}>
-                  <label>Comprobante de Transferencia (Opcional)</label>
+                  <label style={{ fontWeight: 500, color: '#374151' }}>Soporte de Transferencia (Opcional)</label>
                   <input 
                     type="file" 
                     accept=".jpg,.jpeg,.png,.pdf"
                     onChange={e => setArchivo(e.target.files[0])}
-                    style={{ padding: '0.5rem', border: '1px dashed #d1d5db', borderRadius: '0.375rem', width: '100%' }}
+                    style={{ padding: '0.5rem', border: '1px dashed #9ca3af', borderRadius: '0.5rem', width: '100%', background: '#f9fafb' }}
                   />
                 </div>
               )}
 
-              <div className={styles.row}>
-                <div className={styles.formGroup}>
-                  <label>Monto Interés</label>
-                  <input 
-                    type="number" 
-                    value={paymentData.monto_interes}
-                    onChange={e => {
-                      const mi = parseFloat(e.target.value) || 0;
-                      setPaymentData({
-                        ...paymentData, 
-                        monto_interes: mi,
-                        monto_total: mi + paymentData.monto_capital
-                      });
-                    }}
-                  />
-                  <p style={{ fontSize: '0.7rem', color: '#6b7280', marginTop: '4px' }}>
-                    Disponible en Billetera: {formatCurrency(inversion.calculos?.interes_sugerido || 0)}
-                  </p>
+              <div style={{ background: '#f8fafc', padding: '1.25rem', borderRadius: '0.75rem', marginBottom: '1.5rem', border: '1px solid #e2e8f0' }}>
+                <h4 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', color: '#334155' }}>Distribución del Pago</h4>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div className={styles.formGroup} style={{ margin: 0 }}>
+                    <label style={{ fontSize: '0.85rem', color: '#475569' }}>Pago de Intereses</label>
+                    <input 
+                      type="number" 
+                      value={paymentData.monto_interes}
+                      onChange={e => {
+                        const mi = parseFloat(e.target.value) || 0;
+                        setPaymentData({
+                          ...paymentData, 
+                          monto_interes: mi,
+                          monto_total: mi + paymentData.monto_capital
+                        });
+                      }}
+                      style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #cbd5e1', width: '100%' }}
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.25rem', fontSize: '0.75rem' }}>
+                      <span style={{ color: '#64748b' }}>Generado:</span>
+                      <span style={{ fontWeight: 600, color: '#059669' }}>{formatCurrency(inversion.calculos?.interes_sugerido || 0)}</span>
+                    </div>
+                  </div>
+
+                  <div className={styles.formGroup} style={{ margin: 0 }}>
+                    <label style={{ fontSize: '0.85rem', color: '#475569' }}>Devolución de Capital</label>
+                    <input 
+                      type="number" 
+                      max={inversion.calculos?.capital_pendiente}
+                      value={paymentData.monto_capital}
+                      onChange={e => {
+                        const mc = parseFloat(e.target.value) || 0;
+                        setPaymentData({
+                          ...paymentData, 
+                          monto_capital: mc,
+                          monto_total: mc + paymentData.monto_interes
+                        });
+                      }}
+                      style={{ padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #cbd5e1', width: '100%' }}
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.25rem', fontSize: '0.75rem' }}>
+                      <span style={{ color: '#64748b' }}>Máximo:</span>
+                      <span style={{ fontWeight: 600, color: '#dc2626' }}>{formatCurrency(inversion.calculos?.capital_pendiente || 0)}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className={styles.formGroup}>
-                  <label>Monto Capital</label>
-                  <input 
-                    type="number" 
-                    max={inversion.calculos?.capital_pendiente}
-                    value={paymentData.monto_capital}
-                    onChange={e => {
-                      const mc = parseFloat(e.target.value) || 0;
-                      setPaymentData({
-                        ...paymentData, 
-                        monto_capital: mc,
-                        monto_total: mc + paymentData.monto_interes
-                      });
-                    }}
-                  />
-                  <p style={{ fontSize: '0.7rem', color: '#6b7280', marginTop: '4px' }}>
-                    Máximo: {formatCurrency(inversion.calculos?.capital_pendiente || 0)}
-                  </p>
+
+                <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px dashed #cbd5e1', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontWeight: 600, color: '#1e293b' }}>Total a Entregar:</span>
+                  <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#2563eb' }}>
+                    {formatCurrency(paymentData.monto_total * 1000)}
+                  </span>
                 </div>
               </div>
 
-              <div className={styles.formGroup}>
-                <label>Total a Pagar</label>
-                <input type="text" readOnly value={formatCurrency(paymentData.monto_total * 1000)} />
-              </div>
-
-              <div className={styles.formActions}>
-                <button type="button" onClick={() => setShowPaymentModal(false)} className={styles.btnSecondary} disabled={isSubmitting}>Cancelar</button>
-                <button type="submit" className={styles.btnPrimary} disabled={isSubmitting}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '2rem' }}>
+                <button type="button" onClick={() => setShowPaymentModal(false)} className={styles.btnSecondary} disabled={isSubmitting} style={{ padding: '0.75rem 1.5rem' }}>Cancelar</button>
+                <button type="submit" className={styles.btnPrimary} disabled={isSubmitting} style={{ padding: '0.75rem 1.5rem' }}>
                   {isSubmitting ? 'Procesando...' : 'Confirmar Pago'}
                 </button>
               </div>
