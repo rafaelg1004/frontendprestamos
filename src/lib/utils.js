@@ -30,14 +30,20 @@ export function formatInputNumber(value) {
   return new Intl.NumberFormat('es-CO').format(cleanValue);
 }
 
-// Formatear fecha
+// Formatear fecha (trata la fecha como local, no UTC)
 export function formatDate(date) {
   if (!date) return '-'
+  // Si es string YYYY-MM-DD, parsear manualmente para evitar problemas de timezone
+  if (typeof date === 'string' && date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    const [year, month, day] = date.split('-')
+    return `${day}/${month}/${year}`
+  }
   const d = new Date(date)
   return d.toLocaleDateString('es-CO', {
     year: 'numeric',
     month: '2-digit',
-    day: '2-digit'
+    day: '2-digit',
+    timeZone: 'UTC'
   })
 }
 
