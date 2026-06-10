@@ -157,6 +157,38 @@ export function PrestamosView() {
         </Link>
       </div>
 
+      {/* Cards de Resumen */}
+      {(() => {
+        const activos = prestamos.filter(p => p.estado === 'activo')
+        const capitalActivo = activos.reduce((sum, p) => sum + parseFloat(p.monto_principal || 0), 0)
+        const capitalMora = prestamosEnMora.reduce((sum, p) => sum + parseFloat(p.monto_principal || 0), 0)
+        const interesMensualProyectado = activos.reduce((sum, p) => sum + (parseFloat(p.monto_principal || 0) * (parseFloat(p.tasa_interes_mensual || 0) / 100)), 0)
+        return (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div style={{ background: 'white', border: '1px solid #e5e7eb', borderLeft: '4px solid #16a34a', borderRadius: '0.5rem', padding: '1rem' }}>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Capital en la Calle</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#16a34a' }}>{formatCurrency(capitalActivo)}</div>
+              <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{activos.length} préstamos activos</div>
+            </div>
+            <div style={{ background: 'white', border: '1px solid #e5e7eb', borderLeft: '4px solid #7c3aed', borderRadius: '0.5rem', padding: '1rem' }}>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Interés Mensual Proyectado</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#7c3aed' }}>{formatCurrency(interesMensualProyectado)}</div>
+              <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Si todos pagan al día</div>
+            </div>
+            <div style={{ background: 'white', border: '1px solid #e5e7eb', borderLeft: '4px solid #dc2626', borderRadius: '0.5rem', padding: '1rem' }}>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Capital en Mora</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#dc2626' }}>{formatCurrency(capitalMora)}</div>
+              <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{prestamosEnMora.length} préstamos en mora</div>
+            </div>
+            <div style={{ background: 'white', border: '1px solid #e5e7eb', borderLeft: '4px solid #3b82f6', borderRadius: '0.5rem', padding: '1rem' }}>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Total Préstamos</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#3b82f6' }}>{prestamos.length}</div>
+              <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{prestamos.filter(p => p.estado === 'pagado').length} pagados</div>
+            </div>
+          </div>
+        )
+      })()}
+
       <div className={styles.card}>
         <div className={styles.toolbar}>
           {/* Fila Principal: Buscador y Estado */}
