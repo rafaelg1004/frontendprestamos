@@ -96,8 +96,8 @@ export function InversionesView() {
 
     // Sort investments within each group
     Object.values(groups).forEach(group => {
-      group.inversiones.sort((a, b) => (b.interes_disponible || 0) - (a.interes_disponible || 0));
-      group.has_intereses = group.inversiones.some(inv => (inv.interes_disponible || 0) > 0);
+      group.inversiones.sort((a, b) => (b.calculos?.interes_sugerido || 0) - (a.calculos?.interes_sugerido || 0));
+      group.has_intereses = group.inversiones.some(inv => (inv.calculos?.interes_sugerido || 0) > 0);
     });
 
     // Return array of groups, sorted by has_intereses first, then by inversionista name
@@ -203,8 +203,8 @@ export function InversionesView() {
                 {isExpanded && (
                   <div className={styles.grid}>
                 {group.inversiones.map((inv) => (
-                  <div key={inv.id} className={styles.card}>
-                    <div className={`${styles.cardMain} ${(inv.interes_disponible || 0) > 0 ? styles.cardMainActive : ''}`}>
+                  <div key={inv.id} className={`${styles.card} ${(inv.calculos?.interes_sugerido || 0) > 0 ? styles.cardActive : ''}`}>
+                    <div className={styles.cardMain}>
                       <div className={styles.cardTop}>
                         <div className={styles.cardTitleRow}>
                           <h3 className={styles.investmentId}>Contrato #{inv.id.slice(0, 8)}</h3>
