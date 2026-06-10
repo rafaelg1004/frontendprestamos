@@ -271,7 +271,15 @@ export function PrestamoDetalleView({ id, isModal = false }) {
 
 
         <div className={styles.infoBarItem}>
-          <span className={styles.infoBarLabel}>Inicio</span>
+          <span className={styles.infoBarLabel}>Fecha de Entrega Real</span>
+          <span className={styles.infoBarValue}>
+            {prestamo.created_at ? formatDate(prestamo.created_at) : formatDate(prestamo.fecha_inicio)}
+          </span>
+        </div>
+        <div className={styles.infoBarSeparator}></div>
+
+        <div className={styles.infoBarItem}>
+          <span className={styles.infoBarLabel}>Inicio (Corte)</span>
           <span className={styles.infoBarValue}>
             {formatDate(prestamo.fecha_inicio)}
           </span>
