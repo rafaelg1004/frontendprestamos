@@ -14,7 +14,10 @@ import {
   Upload,
   Trash2,
   ExternalLink,
-  Plus
+  Plus,
+  Edit3,
+  Save,
+  X
 } from "lucide-react";
 import toast from "react-hot-toast";
 import Link from "next/link";
@@ -50,6 +53,10 @@ export function PrestamoDetalleView({ id, isModal = false }) {
     setDocToDelete,
     deletingDoc
   } = usePrestamoDetalle(id);
+
+  const [editandoNotas, setEditandoNotas] = useState(false);
+  const [notasTexto, setNotasTexto] = useState('');
+  const [guardandoNotas, setGuardandoNotas] = useState(false);
 
 
 
@@ -222,16 +229,70 @@ export function PrestamoDetalleView({ id, isModal = false }) {
           </p>
         )}
 
-        {prestamo.notas && (
-          <div className={styles.observacionesSection}>
-            <h3 className={styles.observacionesTitle}>
-              Observaciones
+        <div className={styles.observacionesSection}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+            <h3 className={styles.observacionesTitle} style={{ margin: 0 }}>
+              Observaciones / Descripción
             </h3>
-            <p className={styles.observacionesText} style={{ whiteSpace: 'pre-wrap' }}>
-              {prestamo.notas}
-            </p>
+            {!editandoNotas ? (
+              <button
+                onClick={() => {
+                  setNotasTexto(prestamo.notas || '');
+                  setEditandoNotas(true);
+                }}
+                className={styles.btnSecondary}
+                style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+              >
+                <Edit3 size={14} /> Editar
+              </button>
+            ) : (
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  onClick={async () => {
+                    try {
+                      setGuardandoNotas(true);
+                      await prestamosApi.update(id, { notas: notasTexto });
+                      toast.success('Notas actualizadas');
+                      setEditandoNotas(false);
+                      // Recargar para ver cambios
+                      window.location.reload();
+                    } catch (e) {
+                      toast.error('Error al guardar');
+                    } finally {
+                      setGuardandoNotas(false);
+                    }
+                  }}
+                  disabled={guardandoNotas}
+                  className={styles.btnSecondary}
+                  style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                >
+                  <Save size={14} /> {guardandoNotas ? 'Guardando...' : 'Guardar'}
+                </button>
+                <button
+                  onClick={() => setEditandoNotas(false)}
+                  className={styles.btnSecondary}
+                  style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                >
+                  <X size={14} /> Cancelar
+                </button>
+              </div>
+            )}
           </div>
-        )}
+          {editandoNotas ? (
+            <textarea
+              value={notasTexto}
+              onChange={(e) => setNotasTexto(e.target.value)}
+              className={styles.textarea}
+              rows={4}
+              placeholder="Ej: Fecha de entrega real: 15/05/2026. Préstamo entregado en efectivo..."
+              style={{ width: '100%', padding: '0.75rem', borderRadius: '0.375rem', border: '1px solid #d1d5db', fontSize: '0.875rem' }}
+            />
+          ) : (
+            <p className={styles.observacionesText} style={{ whiteSpace: 'pre-wrap', color: prestamo.notas ? '#374151' : '#9ca3af' }}>
+              {prestamo.notas || 'Sin observaciones. Haz clic en Editar para agregar la fecha de entrega u otras notas.'}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Info del Préstamo - Fila compacta (después del cliente) */}
