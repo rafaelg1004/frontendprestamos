@@ -138,6 +138,44 @@ export function PersonaDetalleView({ id, isModal = false }) {
         </div>
       </div>
 
+      {/* Resumen Cliente (Préstamos) */}
+      {esCliente && resumen && (
+        <div className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2>
+              <CreditCard size={22} />
+              Resumen de Préstamos
+            </h2>
+          </div>
+          <div className={styles.infoGrid} style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+            <div className={styles.infoItem} style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
+              <label style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Capital Prestado</label>
+              <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a' }}>{formatCurrency(resumen.capital_inicial || 0)}</span>
+            </div>
+            <div className={styles.infoItem} style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
+              <label style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Capital Pagado</label>
+              <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#16a34a' }}>{formatCurrency(resumen.capital_pagado || 0)}</span>
+            </div>
+            <div className={styles.infoItem} style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
+              <label style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Capital Pendiente</label>
+              <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#ef4444' }}>{formatCurrency(resumen.capital_pendiente || 0)}</span>
+            </div>
+            <div className={styles.infoItem} style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
+              <label style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Intereses Pagados</label>
+              <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#16a34a' }}>{formatCurrency(resumen.intereses_pagados || 0)}</span>
+            </div>
+            <div className={styles.infoItem} style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
+              <label style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Intereses Pendientes</label>
+              <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f59e0b' }}>{formatCurrency(resumen.intereses_pendientes || 0)}</span>
+            </div>
+            <div className={styles.infoItem} style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
+              <label style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Tasa Promedio</label>
+              <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#3b82f6' }}>{resumen.tasa_promedio || 0}%</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Resumen Inversionista */}
       {!esCliente && resumen && (
         <div className={styles.section}>
