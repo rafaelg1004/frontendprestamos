@@ -306,8 +306,9 @@ export function PersonaDetalleView({ id, isModal = false, isOpen = true, onClose
     </div>
   )
 
-  // Si es modal, envolver en overlay
-  if (isModal) {
+  // Si es modal CON onClose (modal independiente), envolver en overlay propio
+  // Si es modal SIN onClose, ya está dentro de un Modal padre (ej: PersonasView), retornar contenido directo
+  if (isModal && onClose) {
     return (
       <div 
         onClick={onClose}

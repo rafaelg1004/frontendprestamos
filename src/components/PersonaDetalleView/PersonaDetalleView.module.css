@@ -277,7 +277,7 @@
 }
 
 .modalMode {
-  padding: 1rem !important;
+  padding: 0 !important;
 }
 
 .modalMode .card,
