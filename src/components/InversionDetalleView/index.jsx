@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import styles from "../PrestamoDetalleView/PrestamoDetalleView.module.css";
-import { PersonaDetalleView } from "../PersonaDetalleView";
+import { PersonaDetalleView } from "@/components/PersonaDetalleView";
 
 export function InversionDetalleView({ id, isModal = false, isOpen = false, onClose }) {
   const [inversion, setInversion] = useState(null);

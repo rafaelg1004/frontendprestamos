@@ -446,6 +446,34 @@ export function DashboardView() {
           <Link href="/inversiones" className={styles.link}>Ver todas →</Link>
         </div>
         
+        {/* TOTAL A PAGAR - ARRIBA DE LA TABLA */}
+        {investorAlerts.length > 0 && (
+          <div style={{ 
+            background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', 
+            padding: '1rem 1.5rem', 
+            borderRadius: '0.5rem', 
+            marginBottom: '1rem',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            border: '2px solid #16a34a'
+          }}>
+            <div>
+              <span style={{ fontSize: '0.875rem', color: '#166534', fontWeight: 600 }}>
+                TOTAL A PAGAR ({investorAlerts.length} inversiones)
+              </span>
+              <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                Intereses mensuales acumulados
+              </div>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#7c3aed' }}>
+                {formatCurrency(investorAlerts.reduce((sum, pay) => sum + (pay.monto_a_pagar || 0), 0))}
+              </span>
+            </div>
+          </div>
+        )}
+        
         <div className={styles.tableContainer}>
           <table className={styles.table}>
             <thead>
@@ -460,21 +488,6 @@ export function DashboardView() {
               </tr>
             </thead>
             <tbody>
-              {/* Fila de Totales - AL PRINCIPIO */}
-              {investorAlerts.length > 0 && (
-                <tr style={{ background: '#f0fdf4', borderBottom: '2px solid #16a34a' }}>
-                  <td colSpan="3" style={{ textAlign: 'right', padding: '0.75rem', fontWeight: 700, color: '#166534' }}>
-                    TOTAL A PAGAR ({investorAlerts.length} inversiones):
-                  </td>
-                  <td style={{ padding: '0.75rem', fontWeight: 700, color: '#7c3aed', fontSize: '1.1rem' }}>
-                    {formatCurrency(investorAlerts.reduce((sum, pay) => sum + (pay.monto_a_pagar || 0), 0))}
-                    <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 400 }}>
-                      Intereses mensuales
-                    </div>
-                  </td>
-                  <td colSpan="3"></td>
-                </tr>
-              )}
               {investorAlerts.length === 0 ? (
                 <tr>
                   <td colSpan="7" className={styles.emptyState}>No hay pagos de intereses pendientes</td>
