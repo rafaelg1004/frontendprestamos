@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { perfilesApi, prestamosApi } from '@/lib/api'
 import { formatCurrency, formatDate, calcularDiasMora, getEstadoBadge } from '@/lib/utils'
 import { Plus, Search, AlertTriangle, Eye, Filter, Calendar, TrendingUp, Users, ChevronDown, ChevronUp, RefreshCw, Trash2 } from 'lucide-react'
@@ -10,10 +11,13 @@ import { PrestamoDetalleView } from '../PrestamoDetalleView'
 import styles from './PrestamosView.module.css'
 
 export function PrestamosView() {
+  const searchParams = useSearchParams()
+  const estadoFromUrl = searchParams.get('estado')
+
   const [prestamos, setPrestamos] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [filtroEstado, setFiltroEstado] = useState('')
+  const [filtroEstado, setFiltroEstado] = useState(estadoFromUrl || '')
   const [filtroInversionista, setFiltroInversionista] = useState('')
   const [filtroTasa, setFiltroTasa] = useState('')
   const [fechaDesde, setFechaDesde] = useState('')
