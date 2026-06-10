@@ -257,6 +257,8 @@ export function InversionesView() {
                       </div>
                     </div>
                   </div>
+                ))}
+                  </div>
                 )}
               </div>
             );
