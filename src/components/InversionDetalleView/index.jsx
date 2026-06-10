@@ -46,9 +46,6 @@ export function InversionDetalleView({ id, isModal = false, isOpen = false, onCl
   const [historyMonto, setHistoryMonto] = useState("");
   const [historyNotas, setHistoryNotas] = useState("");
 
-  // Si es modal y no está abierto, no renderizar
-  if (isModal && !isOpen) return null;
-
   useEffect(() => {
     if (!id) return;
 
@@ -170,6 +167,14 @@ export function InversionDetalleView({ id, isModal = false, isOpen = false, onCl
         return styles.badgeWarning;
     }
   };
+
+  // Si es modal y no está abierto, no renderizar
+  if (isModal && !isOpen) return null;
+
+  // Si no hay ID o está cargando, mostrar loading o null
+  if (!id) return null;
+  if (loading) return <div style={{ padding: '2rem', textAlign: 'center' }}>Cargando...</div>;
+  if (!inversion) return <div style={{ padding: '2rem', textAlign: 'center', color: '#ef4444' }}>Error al cargar la inversión</div>;
 
   const content = (
     <div className={styles.container} style={isModal ? { maxHeight: '90vh', overflow: 'auto' } : {}}>
