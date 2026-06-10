@@ -29,26 +29,26 @@ export function usePrestamoDetalle(id) {
   const [docToDelete, setDocToDelete] = useState(null);
   const [deletingDoc, setDeletingDoc] = useState(false);
 
+  const fetchData = async () => {
+    try {
+      const prestamoRes = await prestamosApi.getById(id);
+      const prestamoData = prestamoRes.data?.data;
+      setPrestamo(prestamoData);
+
+      const clientId = prestamoData?.cliente_id || prestamoData?.cliente?.id;
+      if (clientId) {
+        const clienteRes = await perfilesApi.getById(clientId);
+        setCliente(clienteRes.data?.data);
+      }
+    } catch (error) {
+      console.error("Error fetching prestamo:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!id) return;
-
-    const fetchData = async () => {
-      try {
-        const prestamoRes = await prestamosApi.getById(id);
-        const prestamoData = prestamoRes.data?.data;
-        setPrestamo(prestamoData);
-
-        const clientId = prestamoData?.cliente_id || prestamoData?.cliente?.id;
-        if (clientId) {
-          const clienteRes = await perfilesApi.getById(clientId);
-          setCliente(clienteRes.data?.data);
-        }
-      } catch (error) {
-        console.error("Error fetching prestamo:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
 
     const fetchDocumentos = async () => {
       try {
@@ -210,6 +210,7 @@ export function usePrestamoDetalle(id) {
     handleDeleteDocumento,
     docToDelete,
     setDocToDelete,
-    deletingDoc
+    deletingDoc,
+    refreshPrestamo: fetchData
   };
 }

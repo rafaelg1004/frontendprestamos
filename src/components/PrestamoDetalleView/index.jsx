@@ -51,7 +51,8 @@ export function PrestamoDetalleView({ id, isModal = false }) {
     handleDeleteDocumento,
     docToDelete,
     setDocToDelete,
-    deletingDoc
+    deletingDoc,
+    refreshPrestamo
   } = usePrestamoDetalle(id);
 
   const [editandoNotas, setEditandoNotas] = useState(false);
@@ -254,8 +255,7 @@ export function PrestamoDetalleView({ id, isModal = false }) {
                       await prestamosApi.update(id, { notas: notasTexto });
                       toast.success('Notas actualizadas');
                       setEditandoNotas(false);
-                      // Recargar para ver cambios
-                      window.location.reload();
+                      await refreshPrestamo();
                     } catch (e) {
                       toast.error('Error al guardar');
                     } finally {
