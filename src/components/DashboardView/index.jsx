@@ -283,7 +283,7 @@ export function DashboardView() {
           </div>
         </div>
 
-        <div className={styles.statCard}>
+        <Link href="/prestamos?estado=mora" className={styles.statCard} style={{ textDecoration: 'none', color: 'inherit' }}>
           <div className={styles.statContent}>
             <div className={styles.statInfo}>
               <p className={styles.statLabel}>Mora</p>
@@ -298,7 +298,7 @@ export function DashboardView() {
               <AlertTriangle size={24} />
             </div>
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* Salud Financiera y Rentabilidad */}
@@ -524,6 +524,27 @@ export function DashboardView() {
                     </td>
                   </tr>
                 ))
+              )}
+              {/* Fila de Totales */}
+              {investorAlerts.length > 0 && (
+                <tfoot style={{ borderTop: '2px solid #e2e8f0', background: '#f8fafc' }}>
+                  <tr>
+                    <td colSpan="3" style={{ textAlign: 'right', padding: '1rem', fontWeight: 600 }}>
+                      TOTAL A PAGAR:
+                    </td>
+                    <td style={{ padding: '1rem', fontWeight: 700, color: '#7c3aed', fontSize: '1.1rem' }}>
+                      {formatCurrency(investorAlerts.reduce((sum, pay) => sum + (pay.monto_a_pagar || 0), 0))}
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 400 }}>
+                        Intereses mensuales
+                      </div>
+                    </td>
+                    <td colSpan="3" style={{ padding: '1rem' }}>
+                      <span style={{ fontSize: '0.875rem', color: '#64748b' }}>
+                        {investorAlerts.length} inversiones
+                      </span>
+                    </td>
+                  </tr>
+                </tfoot>
               )}
             </tbody>
           </table>
