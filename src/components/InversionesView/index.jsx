@@ -286,13 +286,10 @@ export function InversionesView() {
                             </span>
                           )}
                         </div>
-                        <button 
-                          onClick={() => openDetalle(inv.id)}
-                          className={styles.btnAction}
-                        >
+                        <Link href={`/inversiones/${inv.id}`} className={styles.btnAction}>
                           Gestionar
                           <ArrowRight size={16} />
-                        </button>
+                        </Link>
                       </div>
                     </div>
                   </div>

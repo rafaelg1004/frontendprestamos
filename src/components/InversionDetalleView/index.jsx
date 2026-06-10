@@ -24,10 +24,12 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import styles from "../PrestamoDetalleView/PrestamoDetalleView.module.css";
+import { PersonaDetalleView } from "../PersonaDetalleView";
 
 export function InversionDetalleView({ id, isModal = false, isOpen = false, onClose }) {
   const [inversion, setInversion] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showPerfilModal, setShowPerfilModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [cuentas, setCuentas] = useState([]);
@@ -434,9 +436,13 @@ export function InversionDetalleView({ id, isModal = false, isOpen = false, onCl
               <span style={{ color: '#6b7280' }}>Teléfono:</span>
               <span style={{ fontWeight: 500 }}>{inversion.inversionista?.telefono || 'N/A'}</span>
             </div>
-            <Link href={`/perfiles/${inversion.inversionista?.id}`} className={styles.link} style={{ display: 'block', marginTop: '0.5rem', fontSize: '0.8rem' }}>
+            <button 
+              onClick={() => setShowPerfilModal(true)}
+              className={styles.link} 
+              style={{ display: 'block', marginTop: '0.5rem', fontSize: '0.8rem', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0 }}
+            >
               Ver perfil completo →
-            </Link>
+            </button>
           </div>
         </div>
 
@@ -670,5 +676,16 @@ export function InversionDetalleView({ id, isModal = false, isOpen = false, onCl
     );
   }
 
-  return content;
+  return (
+    <>
+      {content}
+      {/* Modal del Perfil del Inversionista */}
+      <PersonaDetalleView 
+        id={inversion?.inversionista?.id}
+        isModal={true}
+        isOpen={showPerfilModal}
+        onClose={() => setShowPerfilModal(false)}
+      />
+    </>
+  );
 }

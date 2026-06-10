@@ -19,12 +19,15 @@ import {
 import toast from 'react-hot-toast'
 import styles from './PersonaDetalleView.module.css'
 
-export function PersonaDetalleView({ id, isModal = false }) {
+export function PersonaDetalleView({ id, isModal = false, isOpen = true, onClose }) {
   const router = useRouter()
   const [persona, setPersona] = useState(null)
   const [operaciones, setOperaciones] = useState([])
   const [resumen, setResumen] = useState(null)
   const [loading, setLoading] = useState(true)
+
+  // Si es modal controlado y no está abierto, no renderizar
+  if (isModal && !isOpen) return null
 
   useEffect(() => {
     if (!id) return
@@ -80,8 +83,8 @@ export function PersonaDetalleView({ id, isModal = false }) {
   const linkNuevo = esCliente ? `/prestamos/nuevo?cliente=${id}` : `/inversiones/nueva?inversionista=${id}`
   const IconoRol = esCliente ? User : TrendingUp
 
-  return (
-    <div className={`${styles.container} ${isModal ? styles.modalMode : ''}`}>
+  const content = (
+    <div className={`${styles.container} ${isModal ? styles.modalMode : ''}`} style={isModal ? { maxHeight: '90vh', overflow: 'auto' } : {}}>
       {/* Header - Solo mostrar si NO es modal */}
       {!isModal && (
         <div className={styles.header}>
@@ -89,6 +92,28 @@ export function PersonaDetalleView({ id, isModal = false }) {
             <ArrowLeft size={20} />
             Volver a Personas
           </Link>
+        </div>
+      )}
+      
+      {/* Botón cerrar cuando es modal */}
+      {isModal && onClose && (
+        <div style={{ position: 'absolute', top: '1rem', right: '1rem', zIndex: 10 }}>
+          <button 
+            onClick={onClose}
+            style={{ 
+              background: '#f1f5f9', 
+              border: 'none', 
+              borderRadius: '50%', 
+              width: '32px', 
+              height: '32px', 
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            ×
+          </button>
         </div>
       )}
 
@@ -280,4 +305,44 @@ export function PersonaDetalleView({ id, isModal = false }) {
       </div>
     </div>
   )
+
+  // Si es modal, envolver en overlay
+  if (isModal) {
+    return (
+      <div 
+        onClick={onClose}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '1rem'
+        }}
+      >
+        <div 
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            backgroundColor: 'white',
+            borderRadius: '0.75rem',
+            maxWidth: '900px',
+            width: '100%',
+            maxHeight: '90vh',
+            overflow: 'hidden',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            position: 'relative'
+          }}
+        >
+          {content}
+        </div>
+      </div>
+    );
+  }
+
+  return content
 }
