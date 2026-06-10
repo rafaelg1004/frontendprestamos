@@ -94,16 +94,20 @@ export function InversionesView() {
       groups[invId].inversiones.push(inv);
     });
 
-    // Sort investments within each group
+    // Sort investments within each group: ones with accumulated interest first
     Object.values(groups).forEach(group => {
       group.inversiones.sort((a, b) => (b.calculos?.interes_sugerido || 0) - (a.calculos?.interes_sugerido || 0));
       group.has_intereses = group.inversiones.some(inv => (inv.calculos?.interes_sugerido || 0) > 0);
+      group.total_intereses = group.inversiones.reduce((sum, inv) => sum + (inv.calculos?.interes_sugerido || 0), 0);
     });
 
     // Return array of groups, sorted by has_intereses first, then by inversionista name
     return Object.values(groups).sort((a, b) => {
       if (a.has_intereses && !b.has_intereses) return -1;
       if (!a.has_intereses && b.has_intereses) return 1;
+      if (a.has_intereses && b.has_intereses) {
+        return (b.total_intereses || 0) - (a.total_intereses || 0);
+      }
       const nameA = a.inversionista?.nombre_completo || '';
       const nameB = b.inversionista?.nombre_completo || '';
       return nameA.localeCompare(nameB);
@@ -196,6 +200,12 @@ export function InversionesView() {
                     </div>
                   </div>
                   <div className={styles.groupHeaderRight}>
+                    {group.has_intereses && (
+                      <div className={styles.groupInterestBadge}>
+                        <TrendingUp size={14} />
+                        <span>{formatCurrency(group.total_intereses)}</span>
+                      </div>
+                    )}
                     {isExpanded ? <ChevronDown size={20} color="#64748b" /> : <ChevronRight size={20} color="#64748b" />}
                   </div>
                 </div>

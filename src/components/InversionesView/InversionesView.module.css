@@ -366,16 +366,25 @@
   margin-left: auto;
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: transparent;
-  transition: background 0.2s;
+  gap: 0.75rem;
 }
 
-.groupHeader:hover .groupHeaderRight {
-  background: #f1f5f9;
+.groupInterestBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: 1px solid #fcd34d;
+  white-space: nowrap;
+}
+
+.groupInterestBadge svg {
+  color: #d97706;
 }
 
 .groupHeaderActive {
