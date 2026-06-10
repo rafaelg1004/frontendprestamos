@@ -57,12 +57,17 @@ export function InversionDetalleView({ id }) {
         
         // Cargar interés sugerido automáticamente
         if (data?.calculos?.interes_sugerido) {
-          const interesNormal = data.calculos.interes_sugerido / 1000;
-          setPaymentData(prev => ({
-            ...prev,
-            monto_interes: interesNormal,
-            monto_total: interesNormal + prev.monto_capital
-          }));
+          const interesFull = data.calculos.interes_sugerido;
+          const formatted = new Intl.NumberFormat('es-CO').format(interesFull);
+          setPaymentData(prev => {
+            const rawMc = prev.monto_capital ? parseFloat(String(prev.monto_capital).replace(/\./g, '')) : 0;
+            const total = interesFull + rawMc;
+            return {
+              ...prev,
+              monto_interes: formatted,
+              monto_total: new Intl.NumberFormat('es-CO').format(total)
+            };
+          });
         }
 
         const cuentasRes = await api.get('/cuentas');
@@ -86,9 +91,9 @@ export function InversionDetalleView({ id }) {
       
       const payload = {
         ...paymentData,
-        monto_capital: (parseFloat(paymentData.monto_capital) || 0) * 1000,
-        monto_interes: (parseFloat(paymentData.monto_interes) || 0) * 1000,
-        monto_total: (parseFloat(paymentData.monto_total) || 0) * 1000
+        monto_capital: parseFloat(String(paymentData.monto_capital).replace(/\./g, '')) || 0,
+        monto_interes: parseFloat(String(paymentData.monto_interes).replace(/\./g, '')) || 0,
+        monto_total: parseFloat(String(paymentData.monto_total).replace(/\./g, '')) || 0
       };
 
       let dataToSend = payload;
@@ -120,7 +125,7 @@ export function InversionDetalleView({ id }) {
     try {
       setIsSubmitting(true);
       await inversionesApi.registrarInteresHistorico(id, {
-        monto: parseFloat(historyMonto) * 1000,
+        monto: parseFloat(historyMonto.replace(/\./g, '')),
         notas: historyNotas
       });
       toast.success("Intereses históricos registrados");
@@ -289,8 +294,7 @@ export function InversionDetalleView({ id }) {
                   <div className={styles.formGroup} style={{ margin: 0 }}>
                     <label style={{ fontSize: '0.85rem', color: '#475569' }}>Pago de Intereses</label>
                     <input 
-                      type="number" 
-                      value={paymentData.monto_interes}
+                      type="text" value={paymentData.monto_interes}
                       onChange={e => {
                         const mi = parseFloat(e.target.value) || 0;
                         setPaymentData({
@@ -310,9 +314,7 @@ export function InversionDetalleView({ id }) {
                   <div className={styles.formGroup} style={{ margin: 0 }}>
                     <label style={{ fontSize: '0.85rem', color: '#475569' }}>Devolución de Capital</label>
                     <input 
-                      type="number" 
-                      max={inversion.calculos?.capital_pendiente}
-                      value={paymentData.monto_capital}
+                      type="text" value={paymentData.monto_capital}
                       onChange={e => {
                         const mc = parseFloat(e.target.value) || 0;
                         setPaymentData({
@@ -333,7 +335,7 @@ export function InversionDetalleView({ id }) {
                 <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px dashed #cbd5e1', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontWeight: 600, color: '#1e293b' }}>Total a Entregar:</span>
                   <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#2563eb' }}>
-                    {formatCurrency(paymentData.monto_total * 1000)}
+                    {formatCurrency(parseFloat(String(paymentData.monto_total).replace(/\./g, '')) || 0)}
                   </span>
                 </div>
               </div>
@@ -361,10 +363,11 @@ export function InversionDetalleView({ id }) {
               <div className={styles.formGroup}>
                 <label>Monto de Interés Ganado</label>
                 <input 
-                  type="number" 
-                  required
-                  value={historyMonto}
-                  onChange={e => setHistoryMonto(e.target.value)}
+                  type="text" required value={historyMonto}
+                  onChange={e => {
+  const val = e.target.value.replace(/\D/g, '');
+  setHistoryMonto(val ? new Intl.NumberFormat('es-CO').format(val) : '');
+}}
                   placeholder="Ej: 5000000"
                 />
               </div>

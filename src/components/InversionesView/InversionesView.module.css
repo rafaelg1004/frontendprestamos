@@ -377,3 +377,16 @@
 .groupHeader:hover .groupHeaderRight {
   background: #f1f5f9;
 }
+
+.groupHeaderActive {
+  background: #f0fdf4 !important;
+  border-color: #bbf7d0 !important;
+}
+.groupHeaderActive .groupAvatar {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+}
+
+.cardMainActive {
+  background: #f0fdf4 !important;
+  border-color: #bbf7d0 !important;
+}

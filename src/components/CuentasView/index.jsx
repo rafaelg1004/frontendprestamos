@@ -97,7 +97,7 @@ export function CuentasView() {
 
       <div className={styles.grid}>
         {cuentas.map((cuenta) => (
-          <div key={cuenta.id} className={`${styles.card} ${cuenta.saldo_actual < 0 ? styles.cardWarning : ''}`}>
+          <div key={cuenta.id} className={`${styles.card} ${cuenta.saldo_actual < 0 ? styles.cardWarning : ''} ${cuenta.tipo === 'billetera' ? styles.cardBilletera : ''}`}>
             <div className={styles.cardHeader}>
               <div className={styles.iconWrapper}>
                 {getAccountIcon(cuenta.tipo)}

@@ -266,3 +266,17 @@
   font-weight: 700;
   text-transform: uppercase;
 }
+
+.cardBilletera {
+  border-color: #a7f3d0;
+  background: #f0fdf4;
+}
+
+.cardBilletera .iconWrapper {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.cardBilletera .balance {
+  color: #16a34a;
+}

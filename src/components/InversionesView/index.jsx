@@ -94,8 +94,16 @@ export function InversionesView() {
       groups[invId].inversiones.push(inv);
     });
 
-    // Return array of groups, sorted by inversionista name
+    // Sort investments within each group
+    Object.values(groups).forEach(group => {
+      group.inversiones.sort((a, b) => (b.interes_disponible || 0) - (a.interes_disponible || 0));
+      group.has_intereses = group.inversiones.some(inv => (inv.interes_disponible || 0) > 0);
+    });
+
+    // Return array of groups, sorted by has_intereses first, then by inversionista name
     return Object.values(groups).sort((a, b) => {
+      if (a.has_intereses && !b.has_intereses) return -1;
+      if (!a.has_intereses && b.has_intereses) return 1;
       const nameA = a.inversionista?.nombre_completo || '';
       const nameB = b.inversionista?.nombre_completo || '';
       return nameA.localeCompare(nameB);
@@ -171,7 +179,7 @@ export function InversionesView() {
             return (
               <div key={groupId} className={styles.groupContainer}>
                 <div 
-                  className={styles.groupHeader} 
+                  className={`${styles.groupHeader} ${group.has_intereses ? styles.groupHeaderActive : ''}`} 
                   onClick={() => toggleGroup(groupId)}
                   style={{ cursor: "pointer" }}
                 >
@@ -196,7 +204,7 @@ export function InversionesView() {
                   <div className={styles.grid}>
                 {group.inversiones.map((inv) => (
                   <div key={inv.id} className={styles.card}>
-                    <div className={styles.cardMain}>
+                    <div className={`${styles.cardMain} ${(inv.interes_disponible || 0) > 0 ? styles.cardMainActive : ''}`}>
                       <div className={styles.cardTop}>
                         <div className={styles.cardTitleRow}>
                           <h3 className={styles.investmentId}>Contrato #{inv.id.slice(0, 8)}</h3>
