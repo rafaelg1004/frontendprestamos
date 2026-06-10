@@ -21,14 +21,22 @@ import Link from "next/link";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import styles from "./InversionesView.module.css";
 import { InversionForm } from "../InversionForm";
+import { InversionDetalleView } from "../InversionDetalleView";
 
 export function InversionesView() {
   const [inversiones, setInversiones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedInversionId, setSelectedInversionId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("activas");
   const [expandedGroups, setExpandedGroups] = useState({});
+
+  const openDetalle = (id) => {
+    setSelectedInversionId(id);
+    setShowDetailModal(true);
+  };
 
   const toggleGroup = (groupId) => {
     setExpandedGroups((prev) => ({
@@ -144,6 +152,16 @@ export function InversionesView() {
         isOpen={showModal} 
         onClose={() => setShowModal(false)}
         onSuccess={fetchInversiones}
+      />
+
+      <InversionDetalleView 
+        id={selectedInversionId}
+        isModal={true}
+        isOpen={showDetailModal}
+        onClose={() => {
+          setShowDetailModal(false);
+          setSelectedInversionId(null);
+        }}
       />
 
       <div className={styles.controlsSection}>
@@ -268,10 +286,13 @@ export function InversionesView() {
                             </span>
                           )}
                         </div>
-                        <Link href={`/inversiones/${inv.id}`} className={styles.btnAction}>
+                        <button 
+                          onClick={() => openDetalle(inv.id)}
+                          className={styles.btnAction}
+                        >
                           Gestionar
                           <ArrowRight size={16} />
-                        </Link>
+                        </button>
                       </div>
                     </div>
                   </div>

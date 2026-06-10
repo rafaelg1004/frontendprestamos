@@ -25,7 +25,7 @@ import {
 import Link from "next/link";
 import styles from "../PrestamoDetalleView/PrestamoDetalleView.module.css";
 
-export function InversionDetalleView({ id }) {
+export function InversionDetalleView({ id, isModal = false, isOpen = false, onClose }) {
   const [inversion, setInversion] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,6 +45,9 @@ export function InversionDetalleView({ id }) {
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [historyMonto, setHistoryMonto] = useState("");
   const [historyNotas, setHistoryNotas] = useState("");
+
+  // Si es modal y no está abierto, no renderizar
+  if (isModal && !isOpen) return null;
 
   useEffect(() => {
     if (!id) return;
@@ -168,8 +171,8 @@ export function InversionDetalleView({ id }) {
     }
   };
 
-  return (
-    <div className={styles.container}>
+  const content = (
+    <div className={styles.container} style={isModal ? { maxHeight: '90vh', overflow: 'auto' } : {}}>
       <div className={styles.header}>
         <div className={styles.titleSection}>
 
@@ -193,10 +196,17 @@ export function InversionDetalleView({ id }) {
           <p className={styles.subtitle}>Detalle de la inversión</p>
         </div>
         <div className={styles.actions}>
-          <Link href="/inversiones" className={styles.btnSecondary}>
-            <ArrowLeft size={18} />
-            Volver
-          </Link>
+          {isModal ? (
+            <button onClick={onClose} className={styles.btnSecondary}>
+              <ArrowLeft size={18} />
+              Cerrar
+            </button>
+          ) : (
+            <Link href="/inversiones" className={styles.btnSecondary}>
+              <ArrowLeft size={18} />
+              Volver
+            </Link>
+          )}
           <button
             onClick={() => setShowHistoryModal(true)}
             className={styles.btnSecondary}
@@ -616,4 +626,44 @@ export function InversionDetalleView({ id }) {
       )}
     </div>
   );
+
+  // Si es modal, envolver en overlay
+  if (isModal) {
+    return (
+      <div 
+        className={styles.modalOverlay} 
+        onClick={onClose}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '1rem'
+        }}
+      >
+        <div 
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            backgroundColor: 'white',
+            borderRadius: '0.75rem',
+            maxWidth: '900px',
+            width: '100%',
+            maxHeight: '90vh',
+            overflow: 'hidden',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+          }}
+        >
+          {content}
+        </div>
+      </div>
+    );
+  }
+
+  return content;
 }
