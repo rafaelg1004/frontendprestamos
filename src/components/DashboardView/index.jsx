@@ -502,7 +502,7 @@ export function DashboardView() {
                         background: pay.nivel_alerta === 'urgente' ? '#f5f3ff' : '#f8fafc',
                         color: pay.nivel_alerta === 'urgente' ? '#7c3aed' : '#64748b'
                       }}>
-                        {pay.nivel_alerta}
+                        {pay.nivel_alerta === 'urgente' ? 'urgente' : 'pendiente'}
                       </span>
                     </td>
                     <td>
