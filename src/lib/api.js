@@ -87,6 +87,7 @@ export const perfilesApi = {
 export const prestamosApi = {
   getAll: (params = {}) => api.get("/prestamos", { params }),
   getById: (id) => api.get(`/prestamos/${id}`),
+  getPublicByCedula: (cedula) => api.get(`/prestamos/publico/cedula/${cedula}`),
   create: (data) => api.post("/prestamos", data),
   update: (id, data) => api.put(`/prestamos/${id}`, data),
   delete: (id) => api.delete(`/prestamos/${id}`),
