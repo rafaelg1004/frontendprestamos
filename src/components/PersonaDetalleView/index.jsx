@@ -330,10 +330,10 @@ export function PersonaDetalleView({ id, isModal = false, isOpen = true, onClose
           style={{
             backgroundColor: 'white',
             borderRadius: '0.75rem',
-            maxWidth: '900px',
+            maxWidth: '1000px',
             width: '100%',
-            maxHeight: '90vh',
-            overflow: 'hidden',
+            maxHeight: '95vh',
+            overflow: 'auto',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
             position: 'relative'
           }}
