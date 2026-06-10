@@ -67,9 +67,17 @@ export function PrestamosView() {
     fetchPrestamos()
   }, [filtroEstado, filtroInversionista, filtroTasa, fechaDesde, fechaHasta])
 
-  const filteredPrestamos = prestamos.filter(p => 
-    p.cliente?.nombre_completo?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const [soloMora, setSoloMora] = useState(false)
+
+  const filteredPrestamos = prestamos.filter(p => {
+    const matchSearch = p.cliente?.nombre_completo?.toLowerCase().includes(searchTerm.toLowerCase())
+    if (!matchSearch) return false
+    if (soloMora) {
+      const diasMora = calcularDiasMora(p.fecha_vencimiento)
+      return diasMora > 0 && p.estado === 'activo'
+    }
+    return true
+  })
 
   const openDetalle = (id) => {
     setSelectedPrestamoId(id)
@@ -124,9 +132,22 @@ export function PrestamosView() {
           <h1>Préstamos</h1>
           <p className={styles.subtitle}>
             {prestamosEnMora.length > 0 && (
-              <span className={styles.moraText}>
-                {prestamosEnMora.length} en mora
-              </span>
+              <button
+                onClick={() => setSoloMora(!soloMora)}
+                className={styles.moraText}
+                style={{
+                  cursor: 'pointer',
+                  background: soloMora ? '#dc2626' : '#fee2e2',
+                  color: soloMora ? 'white' : '#dc2626',
+                  border: '1px solid #dc2626',
+                  borderRadius: '0.375rem',
+                  padding: '0.25rem 0.75rem',
+                  fontWeight: 600,
+                  fontSize: '0.875rem'
+                }}
+              >
+                {prestamosEnMora.length} en mora {soloMora ? '✕' : ''}
+              </button>
             )}
           </p>
         </div>
@@ -256,6 +277,7 @@ export function PrestamosView() {
                 <tr>
                   <th>Cliente</th>
                   <th>Monto</th>
+                  <th>Fecha Entrega</th>
                   <th>Próximo Corte</th>
                   <th>Estado</th>
                   <th style={{ textAlign: 'right' }}>Acciones</th>
@@ -264,7 +286,7 @@ export function PrestamosView() {
               <tbody>
                 {filteredPrestamos.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className={styles.emptyState}>
+                    <td colSpan={6} className={styles.emptyState}>
                       No se encontraron préstamos
                     </td>
                   </tr>
@@ -295,6 +317,9 @@ export function PrestamosView() {
                               {prestamo.tasa_interes_mensual}% mensual
                             </span>
                           </div>
+                        </td>
+                        <td>
+                          {formatDate(prestamo.fecha_inicio)}
                         </td>
                         <td>
                           <div className={styles.vencimientoCell}>
