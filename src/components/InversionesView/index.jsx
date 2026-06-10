@@ -13,7 +13,9 @@ import {
   Clock,
   DollarSign,
   Search,
-  Users
+  Users,
+  ChevronDown,
+  ChevronRight
 } from "lucide-react";
 import Link from "next/link";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -26,6 +28,14 @@ export function InversionesView() {
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("activas");
+  const [expandedGroups, setExpandedGroups] = useState({});
+
+  const toggleGroup = (groupId) => {
+    setExpandedGroups((prev) => ({
+      ...prev,
+      [groupId]: !prev[groupId],
+    }));
+  };
 
   const fetchInversiones = async () => {
     try {
@@ -154,22 +164,36 @@ export function InversionesView() {
 
       <div className={styles.groupedList}>
         {groupedInversiones.length > 0 ? (
-          groupedInversiones.map((group, groupIdx) => (
-            <div key={group.inversionista?.id || groupIdx} className={styles.groupContainer}>
-              <div className={styles.groupHeader}>
-                <div className={styles.groupAvatar}>
-                  {group.inversionista?.nombre_completo?.charAt(0).toUpperCase() || '?'}
+          groupedInversiones.map((group, groupIdx) => {
+            const groupId = group.inversionista?.id || groupIdx.toString();
+            const isExpanded = expandedGroups[groupId];
+            
+            return (
+              <div key={groupId} className={styles.groupContainer}>
+                <div 
+                  className={styles.groupHeader} 
+                  onClick={() => toggleGroup(groupId)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <div className={styles.groupHeaderLeft}>
+                    <div className={styles.groupAvatar}>
+                      {group.inversionista?.nombre_completo?.charAt(0).toUpperCase() || '?'}
+                    </div>
+                    <div className={styles.groupInfo}>
+                      <h2 className={styles.groupName}>{group.inversionista?.nombre_completo || 'Inversionista Desconocido'}</h2>
+                      <span className={styles.groupCount}>
+                        <Users size={14} />
+                        {group.inversiones.length} {group.inversiones.length === 1 ? 'contrato' : 'contratos'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className={styles.groupHeaderRight}>
+                    {isExpanded ? <ChevronDown size={20} color="#64748b" /> : <ChevronRight size={20} color="#64748b" />}
+                  </div>
                 </div>
-                <div className={styles.groupInfo}>
-                  <h2 className={styles.groupName}>{group.inversionista?.nombre_completo || 'Inversionista Desconocido'}</h2>
-                  <span className={styles.groupCount}>
-                    <Users size={14} />
-                    {group.inversiones.length} {group.inversiones.length === 1 ? 'contrato' : 'contratos'}
-                  </span>
-                </div>
-              </div>
 
-              <div className={styles.grid}>
+                {isExpanded && (
+                  <div className={styles.grid}>
                 {group.inversiones.map((inv) => (
                   <div key={inv.id} className={styles.card}>
                     <div className={styles.cardMain}>
@@ -233,10 +257,10 @@ export function InversionesView() {
                       </div>
                     </div>
                   </div>
-                ))}
+                )}
               </div>
-            </div>
-          ))
+            );
+          })
         ) : (
           <div className={styles.empty}>
             <CheckCircle2 size={48} color="#10b981" />

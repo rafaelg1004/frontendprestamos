@@ -355,3 +355,25 @@
   font-size: 0.85rem;
   color: #64748b;
 }
+
+.groupHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.groupHeaderRight {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: transparent;
+  transition: background 0.2s;
+}
+
+.groupHeader:hover .groupHeaderRight {
+  background: #f1f5f9;
+}
