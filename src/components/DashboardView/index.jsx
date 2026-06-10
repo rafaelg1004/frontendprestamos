@@ -442,7 +442,7 @@ export function DashboardView() {
       {/* Calendario de Pagos a Inversionistas */}
       <div className={styles.card} style={{ gridColumn: '1 / -1', marginBottom: '2rem', borderLeft: '4px solid #7c3aed' }}>
         <div className={styles.cardHeader}>
-          <h3 className={styles.cardTitle}>Próximos Pagos a Inversionistas (Intereses)</h3>
+          <h3 className={styles.cardTitle}>Pagos Pendientes a Inversionistas</h3>
           <Link href="/inversiones" className={styles.link}>Ver todas →</Link>
         </div>
         
@@ -451,7 +451,9 @@ export function DashboardView() {
             <thead>
               <tr>
                 <th>Inversionista</th>
-                <th>Monto a Entregar</th>
+                <th>Monto Inversión</th>
+                <th>Capital Pendiente</th>
+                <th>Interés a Pagar</th>
                 <th>Fecha Programada</th>
                 <th>Estado</th>
                 <th>Acciones</th>
@@ -460,7 +462,7 @@ export function DashboardView() {
             <tbody>
               {investorAlerts.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className={styles.emptyState}>No hay pagos pendientes para los próximos 15 días</td>
+                  <td colSpan="7" className={styles.emptyState}>No hay pagos de intereses pendientes</td>
                 </tr>
               ) : (
                 investorAlerts.map((pay) => (
@@ -469,6 +471,16 @@ export function DashboardView() {
                       <div className={styles.clientInfo}>
                         <span className={styles.clientName}>{pay.inversionista.nombre_completo}</span>
                         <span className={styles.clientPhone}>{pay.inversionista.telefono || 'Sin teléfono'}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div className={styles.amount}>
+                        {formatCurrency(pay.monto_invertido)}
+                      </div>
+                    </td>
+                    <td>
+                      <div className={styles.amount} style={{ color: '#059669' }}>
+                        {formatCurrency(pay.capital_pendiente)}
                       </div>
                     </td>
                     <td>
