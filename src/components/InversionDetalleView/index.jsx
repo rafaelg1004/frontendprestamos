@@ -79,9 +79,9 @@ export function InversionDetalleView({ id, isModal = false, isOpen = false, onCl
       
       const payload = {
         ...paymentData,
-        monto_capital: parseFloat(String(paymentData.monto_capital).replace(/\./g, '')) || 0,
-        monto_interes: parseFloat(String(paymentData.monto_interes).replace(/\./g, '')) || 0,
-        monto_total: parseFloat(String(paymentData.monto_total).replace(/\./g, '')) || 0
+        monto_capital: (parseFloat(String(paymentData.monto_capital).replace(/\./g, '')) || 0) * 1000,
+        monto_interes: (parseFloat(String(paymentData.monto_interes).replace(/\./g, '')) || 0) * 1000,
+        monto_total: (parseFloat(String(paymentData.monto_total).replace(/\./g, '')) || 0) * 1000
       };
 
       let dataToSend = payload;
