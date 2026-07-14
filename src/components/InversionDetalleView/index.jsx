@@ -64,6 +64,8 @@ export function InversionDetalleView({ id, isModal = false, isOpen = false, onCl
         const inversionRes = await inversionesApi.getById(id);
         console.log('=== DEBUG: Respuesta inversión ===', inversionRes.data);
         const data = inversionRes.data?.data;
+        console.log('=== DEBUG: capital_pendiente ===', data?.calculos?.capital_pendiente);
+        console.log('=== DEBUG: capital_pendiente formateado ===', formatCurrency(data?.calculos?.capital_pendiente));
         setInversion(data);
 
         const cuentasRes = await api.get('/cuentas');
