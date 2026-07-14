@@ -25,7 +25,7 @@ const nextConfig = {
       },
     ];
   },
-  // Configuración de imágenes (si usas next/image con dominios externos)
+  // Configuración de imágenesSS (si usas next/image con dominios externos)
   images: {
     unoptimized: true,
   },

@@ -50,18 +50,27 @@ export function InversionDetalleView({ id, isModal = false, isOpen = false, onCl
   const [historyNotas, setHistoryNotas] = useState("");
 
   useEffect(() => {
-    if (!id) return;
+    console.log('=== DEBUG: InversionDetalleView montado ===');
+    console.log('ID recibido:', id);
+    if (!id) {
+      console.log('=== DEBUG: No hay ID, retornando ===');
+      return;
+    }
 
     const fetchData = async () => {
       try {
+        console.log('=== DEBUG: Iniciando fetch ===');
+        setLoading(true);
         const inversionRes = await inversionesApi.getById(id);
+        console.log('=== DEBUG: Respuesta inversión ===', inversionRes.data);
         const data = inversionRes.data?.data;
         setInversion(data);
 
         const cuentasRes = await api.get('/cuentas');
+        console.log('=== DEBUG: Respuesta cuentas ===', cuentasRes.data);
         setCuentas(cuentasRes.data?.data || []);
       } catch (error) {
-        console.error("Error fetching inversion:", error);
+        console.error("=== DEBUG: Error fetching inversion ===", error);
       } finally {
         setLoading(false);
       }
