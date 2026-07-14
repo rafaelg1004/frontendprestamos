@@ -106,7 +106,7 @@ export function InversionForm({ isOpen, onClose, onSuccess }) {
     try {
       const dataToSend = {
         inversionista_id: formData.perfil_id,
-        monto_invertido: parseNumber(formData.monto) * 1000,
+        monto_invertido: parseNumber(formData.monto) / 1000,
         tasa_interes_pactada: parseFloat(formData.tasa_interes_mensual),
         cuenta_id: formData.cuenta_id,
         notas: formData.observaciones,
