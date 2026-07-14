@@ -93,6 +93,13 @@ export function InversionDetalleView({ id, isModal = false, isOpen = false, onCl
         monto_total: (parseFloat(String(paymentData.monto_total).replace(/\./g, '')) || 0) * 1000
       };
 
+      console.log('=== DEBUG: Enviando pago ===');
+      console.log('paymentData original:', paymentData);
+      console.log('payload:', payload);
+      console.log('monto_capital:', payload.monto_capital);
+      console.log('monto_interes:', payload.monto_interes);
+      console.log('monto_total:', payload.monto_total);
+
       let dataToSend = payload;
       if (archivo && paymentData.metodo_pago === 'transferencia') {
         const formData = new FormData();
